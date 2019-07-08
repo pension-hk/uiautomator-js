@@ -129,7 +129,7 @@ function updateScript(scriptName){
         if(scriptName == name && version != scriptVersion){
             toast("检测开始更新");
             var path = "/sdcard/脚本/"+scriptName+".js";
-            var scriptContent = http.get("https://raw.githubusercontent.com/maxwellyue/autojs_script/master/"+scriptName+".js").body.string();
+            var scriptContent = http.get("https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/"+scriptName+".js").body.string();
             files.write(path,scriptContent);
             storage.put(scriptName,version);
             toast("检测更新完成");
