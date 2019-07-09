@@ -4,17 +4,14 @@ var appName="东方头条";
 var appPackage=app.getPackageName(appName);
 if(!app.isAppInstalled(appPackage)){
    
-   toast("app 东方头条没有安装");
-   download("东方头条");
-   Login("东方头条");
+   toast(appName+"没有安装");
+   download(appName);
+   //Login(appName);
 } 
 else
 {
-   utils.launch("东方头条");
-   sleep(15000);
-   //setScreenMetrics(1080, 1920);
-
-
+   utils.launch(appName);
+  
    /**
     * 全局参数
    **/
@@ -30,49 +27,54 @@ else
   var newsItemId = "go";//"fu";//新闻条目ID
   var newsItemId1 = "pl";//"oq";//新闻条目ID
   var newsItemId2 = "ld";//"ki";//新闻条目ID
-  var indexFlagText="新闻";//首页特有的标志文字
+  var indexFlagText="扫一扫";//"新闻";//首页特有的标志文字
   var indexFlagText1="刷新";//首页特有的标志文字
   var indexCashOut="a_y";//提现到微信ID
   var timeAwardTip="立即领取";//时段奖励领取提醒
 
+  if(app.getPermission())
+  {
+    //开始刷新闻，主循环
+    jumpToIndex();
 
-  //开始刷新闻，主循环
-  jumpToIndex();
+	refferProccess(appName)
+  	  
+    jumpToIndex();
+  
+    //toast("开始刷新闻，主循环");
+    while(true){
+       //领取时段奖励
+       getAward();
+  
+	   if(app.compareVersion()>=0)
+	   { 
+         //点击进入新闻
+         getOneNews();
+         //阅读新闻60s
+         readNews(60);
+	   }
+	   else
+	   {
+          readNewsPush(); 
 
-  //toast("开始刷新闻，主循环");
-  while(true){
-      //领取时段奖励
-      getAward();
-      //点击进入新闻
-      getOneNews();
-      //阅读新闻60s
-      readNews(60);
-      //返回新闻列表
-      //utils.backToIndex(indexFlagText);
-      backToIndex(indexFlagText,indexFlagText1);
-   }//while
+	   }   
+       //返回新闻列表
+       backToIndex(indexFlagText,indexFlagText1);
+    }//while
+  }
 }
 
 //跳转到首页
 function jumpToIndex(){
-
     //循环关闭所有的弹出框
     var flag = text(indexFlagText).findOnce();
-    
     while(!flag){
-        
-        //关闭推荐
-        //var awardClose = id("ts").findOnce();
-        //if(awardClose){
-       //     awardClose.click();
-       // }
-	    //关闭推荐
        var adClose = id("aa3").findOnce();
        if(adClose){
-           back();
+          back();		   
        }
        
-	       adClose = id("ab0").findOnce();
+	   adClose = id("ab0").findOnce();
        if(adClose){
            back();
        }
@@ -82,7 +84,6 @@ function jumpToIndex(){
             newsPush.click();
        }
        else{
-           
           newsPush = id("xe").findOnce();
           if(newsPush){
             newsPush.click();
@@ -100,7 +101,7 @@ function jumpToIndex(){
             back();
        }
        //处理回退提示
-        var backTip = text("继续赚钱").findOnce();
+       var backTip = text("继续赚钱").findOnce();
        if(backTip){
             backTip.click();
        }
@@ -108,10 +109,131 @@ function jumpToIndex(){
         //点击左下角关闭提现提醒
         //click(1,1919);
 
-        sleep(1000);
-        flag = text(indexFlagText).findOnce();
-        if(!flag)flag=text(indexFlagText1).findOnce();
+       //sleep(1000);
+        
+	   var flagNews=text("新闻").findOnce();
+	   if(!flagNews)flagNews=text("刷新").findOnce();
+	   if(flagNews)
+	   {
+		   //toast("新闻或刷新标志找到");	
+		   var parentW=	flagNews.parent();
+		   if(parentW)parentW.click();
+	   }
+	   else{
+	        //全部找不到，回退
+		   toast("全部找不到，回退");	
+	       back();
+	   }
+	   sleep(1000);
+	   flag = text(indexFlagText).findOnce();
+	 
     }
+
+	toast("回到主页");
+	
+}
+
+function backToIndex(indexFlagText,indexFlagText1) {
+    var loop = 0;
+	var indexBtn = text(indexFlagText).findOnce();
+    while(!indexBtn){
+       
+	    //关闭要闻推送
+        var newsPush = text("忽略").findOnce();
+        if(newsPush){
+          newsPush.click();
+        }
+    	//back()后：
+		var fl=text("继续赚钱").findOnce();
+        if(fl){
+           fl.click();
+        }
+		
+		var newsItem=text("新闻").findOnce();
+        if(!newsItem)
+		{
+           newsItem=text("刷新").findOnce();
+  	    }
+		if(newsItem){
+		
+    	   var parentW=	newsItem.parent();
+		   if(parentW)parentW.click();
+  	    }
+		else
+		{
+		   back();
+           sleep(1000);
+        }
+		
+		indexBtn = text(indexFlagText).findOnce();
+    	
+        //超出退出时长的，做一些特殊处理
+        if(loop > 5){
+            //无限返回的页面
+            var isSucc = util.textClick("关闭");
+            if(!isSucc){
+                util.textBoundsClick("关闭");
+            }
+
+            //系统的安装页面
+            if(!isSucc){
+                util.UITextClick("取消");
+            }
+
+            //成功关闭
+            if(isSucc){
+                indexBtn = true;
+            }
+        }
+        loop++;
+    }
+}
+
+
+//
+function  refferProccess(appName){
+    if(!app.getWaitLogin(appName))return;
+    toast("有推广码需要处理");
+	var config = utils.getConfig();
+    //新闻类的列表
+    var newsList = config.newsAppList;
+    var refferCode=newsList[0].reffer_code;
+	toast("refferCode="+refferCode);
+	utils.UITextClick("我的");
+    sleep(1000);
+	var count = 5;
+	while(count--)
+	{
+	   var refferFillW= text("填邀请码").findOnce();
+	   if(refferFillW){
+	      sleep(100);
+		  refferFillW=refferFillW.parent();
+		  if(refferFillW)
+		  {
+			  refferFillW.click();
+	          //填邀请码：
+	          var fillText=ClasssName("EditText").findOnce();
+	          if(fillText){
+	             fillText.click();
+	             sleep(200);
+	             fillText.setText(refferCode);
+	             sleep(200);
+	             utils.UITextClick("提交邀请码");  
+	          }		  
+		      
+		  }
+		  break;
+	   }
+	   //关闭要闻推送
+       var newsPush = text("忽略").findOnce();
+       if(newsPush){
+            newsPush.click();
+       }
+
+	   sleep(1000); 
+	}
+    toast("推广码处理完成");
+
 }
 
 //领取时段奖励
@@ -296,70 +418,34 @@ function readNews(seconds){
     }
 }
 
-
-function backToIndex(indexFlagText,indexFlagText1) {
-    var indexBtn = false;
-    var loop = 0;
-    while(!indexBtn){
-        back();
-        sleep(1000);
-        indexBtn = text(indexFlagText).findOnce();
-        if(!indexBtn){
-           indexBtn = text(indexFlagText1).findOnce(); 
-           if(indexBtn){
-               indexBtn.click();
-               sleep(1000);
-           }
-        }
-        
-        var fl=text("继续赚钱").findOnce();
-        if(fl){
-            fl.click();
-            
-        }
-        
-         //关闭要闻推送
-       var newsPush = text("忽略").findOnce();
-       if(newsPush){
-            newsPush.click();
-       }
-        //超出退出时长的，做一些特殊处理
-        
-        if(loop > 5){
-            //无限返回的页面
-            var isSucc = util.textClick("关闭");
-            if(!isSucc){
-                util.textBoundsClick("关闭");
-            }
-
-            //系统的安装页面
-            if(!isSucc){
-                util.UITextClick("取消");
-            }
-
-            //成功关闭
-            if(isSucc){
-                indexBtn = true;
-            }
-        }
-        loop++;
+function readNewsPush()
+{
+    toast("阅读推送");
+ 	//关闭要闻推送
+    var newsPush = text("立即查看").findOnce();
+    if(newsPush){
+       newsPush.click();
+	   sleep(5000);
     }
+ 
 }
 
+
+
+
 function download(name){
+	
     var tencentDl="com.tencent.android.qqdownloader";
     var androidInstall="";
     var appPackage=app.getPackageName(name);
     if(app.isAppInstalled(appPackage)){
         toast(name+"已经安装");  
-        //goLogin(name); 
         return;
-         
     }
-    
     toast(name+"没有安装");
     yingyongbao(name);
-    toast("准备安装");
+    
+	toast("准备安装");
       
     //循环找安装
     var installFlag = false;
@@ -401,29 +487,26 @@ function download(name){
        sleep(2000);
     }
     //app 打开成功
-    //发送邮件提醒输用手机登录APP
-    
     var config = utils.getConfig();
     //新闻类的列表
     var newsList = config.newsAppList;
-         
     var refferCode=newsList[0].reffer_code;
+	toast("refferCode="+refferCode);
+	//发送邮件提醒输用手机登录APP
     var sendContent="东方头条安装完成，请用手机完成注册或登录，然后找到填推广(邀请)码处填好推广码："+refferCode;
     app.sendMail(app.getMyEmail(),app.getMyPassword(),app.getContactEmail(),sendContent);
     //等待注册登录成功，填写推广码
-        
-    /*
-     var currentP=currentPackage();
-     var tencentDl="com.tencent.android.qqdownloader(";
-     while(currentP != tencentDl){
-        currentP=currentPackage();
-        sleep(500);
-     }
-      */ 
-      
-      
+    app.setWaitLogin(name,true);
+ 	
         
 }
+
+function Login(appName){
+    var curImg=id("aa3").findOnce();
+    if(curImg)curImg.click();
+    sleep(1000); 
+}
+
 
 
 function yingyongbao(name){
@@ -480,9 +563,3 @@ function yingyongbao(name){
      
 }
 
-function Login(appName){
-    var curImg=id("aa3").findOnce();
-    if(curImg)curImg.click();
-    sleep(1000);
- 
-}
