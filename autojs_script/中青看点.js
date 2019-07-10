@@ -36,28 +36,36 @@ templates.run({
         commons.UITextClick("立即签到");
         sleep(1000);
         //删除弹出界面
-        //
+        
         
         //返回主页面
-        //back();
-        //back();
+        back();
+        back();
         sleep(1000);
         //回到新闻
+        //click(1,1919);
+        commons.UIClick("tv_home_tab");
         
-		commons.UIClick("tv_home_tab");
+        
     },
     //找出新闻的条目
     findNewsItem:function(){
         var newsItem = id("tv_read_count").findOnce(1);
+        //toast("read count="+newsItem.text());
+        
         //判断是否是广告
         if(newsItem){
-            toast("找到newsItem");
+            
             newsItem = newsItem.parent();
             var adFlag = newsItem.child(1);
             if(adFlag && adFlag.text() == "广告"){
                 newsItem = null;
             }
+            
+            
+            
         }
+   
         return newsItem;
     },
     //阅读页面是否应该返回

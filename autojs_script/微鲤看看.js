@@ -25,6 +25,7 @@ templates.run({
     },
     //找出新闻的条目
     findNewsItem:function(){
+        toast("找出新闻条目");
 
         //领取宝藏
         commons.UIClick("text_ok");

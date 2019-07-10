@@ -51,9 +51,10 @@ template.run = function(fun){
     
     if(fun.signIn != null){
         fun.signIn();
+        
     }
     
-    toast("签到ok");
+    toast("签到执行完成");
 
     /**
      * 新闻阅读流程
@@ -69,6 +70,7 @@ template.run = function(fun){
         //返回新闻列表
         utils.backToIndex(initParam.indexFlagText);
     }
+    
     
 }
 
@@ -186,7 +188,7 @@ template.getOneNews = function(findNewsItem){
     //阅读超过50条，刷新页面
     if(initParam.totalNewsReaded > initParam.totalNewsOneTime){
         initParam.totalNews = 0;
-        //click(1,1919);		
+        //click(1,1919);
         sleep(2000);
     }
 
@@ -206,20 +208,25 @@ template.getOneNews = function(findNewsItem){
         //新闻条目
         newsItem = findNewsItem();
         if(newsItem){
+           
             newsText = newsItem.child(0).text();
             isFindNews = true;
         }
+        
     }
 
     //找到新闻，点击阅读
     if(isFindNews){
+        toast("找到新闻，点击阅读");
         initParam.lastNewsText = newsText;
         initParam.totalNewsReaded++;
-		var bounds = item.bounds();
-        if(bounds)
-		   click(bounds.centerX(),bounds.centerY());
+        var bounds=newsItem.bounds();
+        //commons.boundsClick(newsItem);
+        if(bounds){
+           click(bounds.centerX(),bounds.centerY()); 
+        }
         else
-		newsItem.click();
+        newsItem.click();
     }else{
         toast("20次滑动没有找到新闻，请检查新闻ID");
         exit();

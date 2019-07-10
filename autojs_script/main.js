@@ -1,4 +1,10 @@
 /**
+ * 必备软件
+ * 1、虚拟定位：大牛助手
+ * 2、虚拟步数：大牛助手
+ * 2、虚拟IP：
+ */
+/**
  * 执行规则
  * 1、顺序执行
  * 2、0-7点不执行
@@ -62,6 +68,8 @@ function getConfigByMail()
    var recvStr=app.getTaskReffer(emailAddr,password);
    //解析json：
    var obj = JSON.parse(recvStr);
+   //var newsAppList=obj["newsAppList"];
+   //var videoAppList=obj["videoAppList"];
    toast("配置获取完成");
    return obj;
 }
