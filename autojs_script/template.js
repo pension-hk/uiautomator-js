@@ -58,10 +58,10 @@ template.run = function(fun){
     /**
      * 新闻阅读流程
      */
-     /*
+     
     while(true){
         //领取时段奖励
-        //template.getTimeAward(fun.doingAfterTimeAward);
+        template.getTimeAward(fun.doingAfterTimeAward);
         //找到一条新闻
         template.getOneNews(fun.findNewsItem);
         //阅读新闻60s
@@ -69,7 +69,7 @@ template.run = function(fun){
         //返回新闻列表
         utils.backToIndex(initParam.indexFlagText);
     }
-    */
+    
 }
 
 template.autoUpdate = function(fun){

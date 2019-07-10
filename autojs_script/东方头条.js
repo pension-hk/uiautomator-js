@@ -30,7 +30,7 @@ else
   var indexFlagText="扫一扫";//首页特有的标志文字
   var indexFlagText1="发布";//首页特有的标志文字
   var indexFlagText2="搜索你感兴趣的内容";//首页特有的标志文字
-  
+  var myFlag="我的";
   var indexCashOut="a_y";//提现到微信ID
   var timeAwardTip="立即领取";//时段奖励领取提醒
 
@@ -57,8 +57,11 @@ else
 	   }
 	   else
 	   {
-          readNewsPush(); 
-
+		  if(!readNewsPush()){ 
+              //没有推送,去签到:
+			  signIn(); 
+		  }
+            
 	   }   
        //返回新闻列表
        backToIndex(indexFlagText,indexFlagText1);
@@ -210,7 +213,7 @@ function  refferProccess(appName){
     var newsList = config.newsAppList;
     var refferCode=newsList[0].reffer_code;
 	toast("refferCode="+refferCode);
-	utils.UITextClick("我的");
+	utils.UITextClick(myFlag);
     sleep(1000);
 	var count = 5;
 	while(count--)
@@ -246,6 +249,15 @@ function  refferProccess(appName){
     toast("推广码处理完成");
 
 }
+
+function signIn()
+{  
+ 	var signinFlag = text("签到").findOnce();
+    if(!signinFlag)return;
+    signinFlag.click();
+    sleep(30000);		
+}
+
 
 //领取时段奖励
 function getAward(){
@@ -401,10 +413,8 @@ function getNewsText(obj){
 //阅读新闻
 function readNews(seconds){
     var times = seconds/10;
-    var newsItem=id(indexFlagText).findOnce();
-    if(newsItem)return;
     
-    newsItem=id("我的").findOnce();
+    newsItem=text(myFlag).findOnce();
     if(newsItem)return;
    
     //开始滑动
@@ -415,30 +425,25 @@ function readNews(seconds){
 
         swipe(device.width / 2, device.height * 0.8 ,
             device.width / 2, device.height * 0.5, 5000);
-
-        var fl=text("忽略").findOnce();
+  
+		var fl=text("忽略").findOnce();
         if(fl){
             fl.click();
         }
-        //关闭继续阅读
-        //var textOk = id("text_ok").findOnce();
-       // if(textOk){
-        //    textOk.click();
-        //}
-
+  
     }
 }
 
 function readNewsPush()
 {
-    toast("阅读推送");
+    //toast("阅读推送");
  	//关闭要闻推送
     var newsPush = text("立即查看").findOnce();
     if(newsPush){
        newsPush.click();
 	   sleep(5000);
     }
- 
+    return newsPush;
 }
 
 

@@ -3,7 +3,7 @@ const templates = require('template.js');
 
 
 templates.init({
-    appName:"微鲤看看",
+    appName:"微鲤",
     indexFlagText:"发布",
     timeAwardText:"领红包",
 });
