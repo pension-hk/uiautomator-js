@@ -186,7 +186,7 @@ template.getOneNews = function(findNewsItem){
     //阅读超过50条，刷新页面
     if(initParam.totalNewsReaded > initParam.totalNewsOneTime){
         initParam.totalNews = 0;
-        //click(1,1919);
+        //click(1,1919);		
         sleep(2000);
     }
 
@@ -215,7 +215,11 @@ template.getOneNews = function(findNewsItem){
     if(isFindNews){
         initParam.lastNewsText = newsText;
         initParam.totalNewsReaded++;
-        newsItem.click();
+		var bounds = item.bounds();
+        if(bounds)
+		   click(bounds.centerX(),bounds.centerY());
+        else
+		newsItem.click();
     }else{
         toast("20次滑动没有找到新闻，请检查新闻ID");
         exit();
