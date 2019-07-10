@@ -27,8 +27,10 @@ else
   var newsItemId = "go";//"fu";//新闻条目ID
   var newsItemId1 = "pl";//"oq";//新闻条目ID
   var newsItemId2 = "ld";//"ki";//新闻条目ID
-  var indexFlagText="扫一扫";//"新闻";//首页特有的标志文字
-  var indexFlagText1="刷新";//首页特有的标志文字
+  var indexFlagText="扫一扫";//首页特有的标志文字
+  var indexFlagText1="发布";//首页特有的标志文字
+  var indexFlagText2="搜索你感兴趣的内容";//首页特有的标志文字
+  
   var indexCashOut="a_y";//提现到微信ID
   var timeAwardTip="立即领取";//时段奖励领取提醒
 
@@ -66,10 +68,14 @@ else
 
 //跳转到首页
 function jumpToIndex(){
+	var indexCount=0;
     //循环关闭所有的弹出框
     var flag = text(indexFlagText).findOnce();
-    while(!flag){
-       var adClose = id("aa3").findOnce();
+	if(!flag)flag = text(indexFlagText1).findOnce();
+	//if(!flag)flag = text(indexFlagText2).findOnce();
+    while(!flag && indexCount < 3){
+       indexCount++;
+	   var adClose = id("aa3").findOnce();
        if(adClose){
           back();		   
        }
@@ -105,11 +111,6 @@ function jumpToIndex(){
        if(backTip){
             backTip.click();
        }
-       
-        //点击左下角关闭提现提醒
-        //click(1,1919);
-
-       //sleep(1000);
         
 	   var flagNews=text("新闻").findOnce();
 	   if(!flagNews)flagNews=text("刷新").findOnce();
@@ -126,12 +127,17 @@ function jumpToIndex(){
 	   }
 	   sleep(1000);
 	   flag = text(indexFlagText).findOnce();
-	 
+	   if(!flag)flag = text(indexFlagText1).findOnce();
+	   if(!flag)flag = text(indexFlagText2).findOnce();
+       
+		  
+	     
     }
-
+    if(!flag)exit();
 	toast("回到主页");
 	
 }
+
 
 function backToIndex(indexFlagText,indexFlagText1) {
     var loop = 0;
