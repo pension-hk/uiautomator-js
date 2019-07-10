@@ -72,7 +72,7 @@ function jumpToIndex(){
     //循环关闭所有的弹出框
     var flag = text(indexFlagText).findOnce();
 	if(!flag)flag = text(indexFlagText1).findOnce();
-	//if(!flag)flag = text(indexFlagText2).findOnce();
+	if(!flag)flag = text(indexFlagText2).findOnce();
     while(!flag && indexCount < 3){
        indexCount++;
 	   var adClose = id("aa3").findOnce();
@@ -141,9 +141,12 @@ function jumpToIndex(){
 
 function backToIndex(indexFlagText,indexFlagText1) {
     var loop = 0;
+	var loopCount=0;
 	var indexBtn = text(indexFlagText).findOnce();
-    while(!indexBtn){
-       
+	if(!indexBtn)indexBtn = text(indexFlagText1).findOnce();
+	if(!indexBtn)indexBtn = text(indexFlagText2).findOnce();
+    while(!indexBtn  && loopCount<  20){
+        loopCount++;
 	    //关闭要闻推送
         var newsPush = text("忽略").findOnce();
         if(newsPush){
@@ -172,7 +175,9 @@ function backToIndex(indexFlagText,indexFlagText1) {
         }
 		
 		indexBtn = text(indexFlagText).findOnce();
-    	
+	    if(!indexBtn)indexBtn = text(indexFlagText1).findOnce();
+	    if(!indexBtn)indexBtn = text(indexFlagText2).findOnce();
+	
         //超出退出时长的，做一些特殊处理
         if(loop > 5){
             //无限返回的页面
