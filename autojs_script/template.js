@@ -167,7 +167,7 @@ template.launch=function(getAppName)
  * 1、返回和首页标识一起判断
  */
 template.jumpToIndex = function(getIndexBtnItem){
-toast("jumpToIndex");
+
     var indexFlag = text(initParam.indexFlagText).findOnce();
 	//add for 东方头条：
 	if(!indexFlag)indexFlag = text(initParam.indexFlagText1).findOnce();
