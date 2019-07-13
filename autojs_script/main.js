@@ -48,19 +48,6 @@ function init(){
     }
 }
 
-/*
-//获取主配置
-function getConfig(){
-    toast("开始获取配置");
-    var url = "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
-    var str = http.get(url);
-	   
-    str = JSON.parse(str.body.string());
-    toast("配置获取完成");
-    return str;
-   
-}
-*/
 
 
 //执行脚本
@@ -114,7 +101,7 @@ function updateScript(scriptName){
     var storage = storages.create("version");
     var scriptVersion = storage.get(scriptName);
 
-    var config = getConfig();
+    var config = utils.getConfig();
     var newsAppList = config.newsAppList;
     for(var i = 0; i< newsAppList.length;i++){
         var thisScript = newsAppList[i];
