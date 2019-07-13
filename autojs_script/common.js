@@ -145,7 +145,7 @@ util.swapeToRead = function() {
 //获取主配置
 util.getConfig=function(){
     toast("开始获取配置");
-    var url = "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/config.json";
+    var url = "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
     var str = http.get(url);
 	   
     str = JSON.parse(str.body.string());

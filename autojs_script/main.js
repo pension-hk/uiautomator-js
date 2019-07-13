@@ -1,9 +1,5 @@
-/**
- * 必备软件
- * 1、虚拟定位：大牛助手
- * 2、虚拟步数：大牛助手
- * 2、虚拟IP：
- */
+const utils = require('common.js');
+
 /**
  * 执行规则
  * 1、顺序执行
@@ -11,13 +7,15 @@
  * 3、每次阅读10篇文章
  * 4、阅读时候，需要有一定的停顿
  */
+ 
+ 
 init();
 function init(){
     storages.remove("version");
     //每次阅读的时间
     var normalRumTime = 0.5*60*60;
     while(true){
-        var config = getConfig();
+        var config = utils.getConfig();
         //新闻类的列表
         var newsList = config.newsAppList;
        
@@ -50,11 +48,11 @@ function init(){
     }
 }
 
-
+/*
 //获取主配置
 function getConfig(){
     toast("开始获取配置");
-    var url = "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/config.json";
+    var url = "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
     var str = http.get(url);
 	   
     str = JSON.parse(str.body.string());
@@ -62,7 +60,7 @@ function getConfig(){
     return str;
    
 }
-
+*/
 
 
 //执行脚本
