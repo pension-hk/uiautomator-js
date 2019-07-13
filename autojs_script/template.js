@@ -45,7 +45,7 @@ template.run = function(fun){
 var b=app.launchApp(initParam.appName);
 if(!b) 
 {
-	  toast(appName+",启动不成功！");
+	  //toast(appName+",启动不成功！");
    if(!template.launch(fun.getAppName))exit();
 }
 //toast("成功启动:"+initParam.appName);  
@@ -72,7 +72,7 @@ if(!b)
         
     }
     
-    toast("签到执行完成");
+    //toast("签到执行完成");
 
     /**
      * 新闻阅读流程
@@ -224,14 +224,14 @@ toast("jumpToIndex");
         }else{
 	           		var indexPage =getIndexBtnItem();
 	           		if(indexPage){
-               flag = indexPage.click(); //东方头条弹出：id=J_article 出错
-            } 
+                      flag = indexPage.click(); //东方头条弹出：id=J_article 出错
+                    } 
 		}
         
         //执行返回
        
         if(!flag){
-           toast("没有发现首页");
+           //toast("没有发现首页");
            back();
         }
         

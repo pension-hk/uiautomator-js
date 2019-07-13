@@ -92,10 +92,10 @@ function stopCurrent(exectuion){
     sleep(2000);
     back();
     sleep(1000);
-    back();
-    sleep(1000);
-    home();
-    sleep(5000);
+    //back();
+    //sleep(1000);
+    //home();
+    //sleep(5000);
 }
 
 //更新脚本
