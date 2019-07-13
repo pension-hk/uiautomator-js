@@ -1,11 +1,23 @@
 {
     "newsAppList":[
-        {
+    	{
             "name":"东方头条",
-            "version":1
+	        "version":1
+        },
+	    {
+            "name":"中青看点",
+		     "version":1
+        },
+		{
+            "name":"微鲤",
+		    "version":1
         }
     ],
     "videoAppList":[
-
+	    {
+            "name":"刷宝",
+		    "version":1
+        }
     ]
+	
 }

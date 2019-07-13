@@ -54,5 +54,28 @@ templates.run({
         commons.UIClick("bt_ok");
 
         return false;
-    }
+    },
+	download:function(appName){
+		
+		var appPackage=app.getPackageName(appName);
+        if(!app.isAppInstalled(appPackage)){
+            toast(appName+"没有安装");
+            downloadProcess(appName);
+			return true;
+        }
+        else{
+           //toast("appName="+appName+"已经安装");
+		   return false;	
+        }		
+	}
 });
+
+function downloadProcess(appName)
+{  
+	
+	commons.yingyongbao(appName);	
+	commons.install(appName);
+    //app 打开成功
+	
+    
+}

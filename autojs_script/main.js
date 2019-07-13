@@ -30,14 +30,20 @@ function init(){
          */
         if(new Date().getHours() >= 7){
             var appNum = newsList.length;
-            /*
+            appNum = 1;
             for(var i = 0;i< appNum;i++){
                 exec(newsList[i].name,normalRumTime);
             }
-            */
-            var i=0;
-            exec(newsList[i].name,normalRumTime);
+			
         }else{
+			 //var appNum = videoList.length;
+            /*
+            for(var i = 0;i< appNum;i++){
+                exec(videoList[i].name,normalRumTime);
+            }
+            */
+            //var i=0;
+            //exec(videoList[i].name,normalRumTime);
             //TODO
             sleep(1000*60*30);//睡眠半个小时
         }
@@ -47,31 +53,14 @@ function init(){
 
 //获取主配置
 function getConfig(){
-    if(true){
-      return getConfigByMail();
-    }
-    else{
-       toast("开始获取配置");
-       var url = "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/config.json";
-       var str = http.get(url);
+    toast("开始获取配置");
+    var url = "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/config.json";
+    var str = http.get(url);
 	   
-       str = JSON.parse(str.body.string());
-       toast("配置获取完成");
-       return str;
-    }
-}
-function getConfigByMail()
-{
-   toast("开始获取配置");
-   var emailAddr=app.getMyEmail();
-   var password=app.getMyPassword(); //此为QQ SMTP/IMAP的登陆密码，不是QQ邮箱登陆密码
-   var recvStr=app.getTaskReffer(emailAddr,password);
-   //解析json：
-   var obj = JSON.parse(recvStr);
-   //var newsAppList=obj["newsAppList"];
-   //var videoAppList=obj["videoAppList"];
-   toast("配置获取完成");
-   return obj;
+    str = JSON.parse(str.body.string());
+    toast("配置获取完成");
+    return str;
+   
 }
 
 

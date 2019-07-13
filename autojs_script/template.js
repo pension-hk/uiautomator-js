@@ -14,8 +14,10 @@ var initParam = {
     loopTimeToFindNews : 20,//找了多少次新闻找不到会退出
 
     indexBtnText: "首页", //其他页面挑到首页的按钮文字，重要！
+	indexBtnText1: "刷新", //其他页面挑到首页的按钮文字，重要！	
     indexFlagText : "刷新",//首页特有的标志文字，重要！
-
+    indexFlagText1 : "扫一扫",//首页特有的标志文字，重要！
+    indexFlagText2 : "搜索你感兴趣的内容",//首页特有的标志文字，重要！
     timeAwardText : "领取",//时段奖励关键字
 }
 template.init = function(param){
@@ -33,7 +35,18 @@ template.run = function(fun){
      * 启动
      */
     utils.wakeUp(); 
-    utils.launch(initParam.appName);
+	
+	if(template.downloadApp(fun.download))
+	{
+		exit();
+		
+	}
+	
+    
+	if(!utils.launch(initParam.appName))
+	{
+	   template.launch(fun.getAppName);
+	}
 
     /**
      * 自动更新
@@ -44,7 +57,7 @@ template.run = function(fun){
      * 回归首页的位置
      */
     template.jumpToIndex(fun.getIndexBtnItem);
-
+  	
     /**
      * 签到
      */
@@ -68,7 +81,7 @@ template.run = function(fun){
         //阅读新闻60s
         template.readNews(60,fun.isShouldBack);
         //返回新闻列表
-        utils.backToIndex(initParam.indexFlagText);
+        utils.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2);
     }
     
     
@@ -130,6 +143,18 @@ template.autoUpdate = function(fun){
     template.run(fun);
 }
 
+
+template.launch=function(getAppName)
+{
+    if(getAppName == null){ 
+       return  false;
+    }else{
+      utils.launch(getAppName(initParam.appName));
+    }
+	
+}
+
+
 /**
  * 跳转到首页
  * 1、返回和首页标识一起判断
@@ -137,33 +162,76 @@ template.autoUpdate = function(fun){
 template.jumpToIndex = function(getIndexBtnItem){
 
     var indexFlag = text(initParam.indexFlagText).findOnce();
+	//add for 东方头条：
+	if(!indexFlag)indexFlag = text(initParam.indexFlagText1).findOnce();
+	if(!indexFlag)indexFlag = text(initParam.indexFlagText2).findOnce();
     while(!indexFlag){
         var adFlag=id("iv_activity").findOnce();
         if(adFlag){
             back();
             sleep(500);
         }
-        
+      
+        //add for 东方头条：
+		adFlag = id("aa3").findOnce();
+        if(adFlag){
+           back();
+           sleep(500);
+        }
+	    adFlag = id("ab0").findOnce();
+        if(adFlag){
+           back();
+		   sleep(500);
+        }
+		
+		//关闭微信提现提示窗
+        adFlag = id("a_y").findOnce();//"a_y";//提现到微信ID
+        if(adFlag){
+            back();
+			sleep(500);
+        }
+      
+        //关闭要闻推送
+        adFlag = text("忽略").findOnce();
+        if(adFlag){
+            adFlag.click();
+        }
+       
+        //处理时段奖励提醒
+        var timeAward = text("立即领取").findOnce(); //"立即领取";//时段奖励领取提醒
+        if(timeAward){
+            back();
+			sleep(500);
+         }
+        //处理回退提示
+        var backTip = text("继续赚钱").findOnce();
+        if(backTip){
+            backTip.click();
+        }
+	    //end for 东方头条
+	  
         //点击首页标识性文字
         var flag = false;
-        if(getIndexBtnItem == null){
+        if(getIndexBtnItem == null){ //首页或者新闻/刷新
             flag = utils.UITextBoundsClick(initParam.indexBtnText);
         }else{
-            flag = getIndexBtnItem().click();
+            flag = getIndexBtnItem().click(); //东方头条弹出：id=J_article 出错
         }
         
         //执行返回
        
         if(!flag){
-            //toast("没有发现首页");
-            var me=text().findOnce();
-            if(!me)
-              back();
+           //toast("没有发现首页");
+           back();
         }
         
         sleep(1000);
         //重新取flag
-        indexFlag = text(initParam.indexFlagText).findOnce();
+        indexFlag = text(initParam.indexFlagText).findOnce();  //发布
+		//add for 东方头条：
+		if(!indexFlag)indexFlag = text(initParam.indexFlagText1).findOnce(); //扫一扫
+	    if(!indexFlag)indexFlag = text(initParam.indexFlagText2).findOnce(); //"搜索你感兴趣的内容"
+      
     }
     
 }
@@ -172,7 +240,7 @@ template.jumpToIndex = function(getIndexBtnItem){
  * 获取时段奖励
  */
 template.getTimeAward = function(doingAfterTimeAward){
-    utils.UITextBoundsClick(initParam.timeAwardText);
+    if(!utils.UITextBoundsClick(initParam.timeAwardText))return;
     //判断是否有提示
     if(doingAfterTimeAward != null){
         doingAfterTimeAward();
@@ -184,11 +252,13 @@ template.getTimeAward = function(doingAfterTimeAward){
  */
 template.getOneNews = function(findNewsItem){
     
-    toast("开始获取新闻资源");
+    //toast("开始获取新闻资源");
     //阅读超过50条，刷新页面
     if(initParam.totalNewsReaded > initParam.totalNewsOneTime){
         initParam.totalNews = 0;
         //click(1,1919);
+		
+		
         sleep(2000);
     }
 
@@ -217,16 +287,16 @@ template.getOneNews = function(findNewsItem){
 
     //找到新闻，点击阅读
     if(isFindNews){
-        toast("找到新闻，点击阅读");
+        //toast("找到新闻，点击阅读");
         initParam.lastNewsText = newsText;
         initParam.totalNewsReaded++;
-        var bounds=newsItem.bounds();
-        //commons.boundsClick(newsItem);
-        if(bounds){
-           click(bounds.centerX(),bounds.centerY()); 
-        }
-        else
-        newsItem.click();
+        if(!newsItem.click())
+		{
+		  var bounds=newsItem.bounds();
+          if(bounds){
+             click(bounds.centerX(),bounds.centerY()); 
+          }
+		}
     }else{
         toast("20次滑动没有找到新闻，请检查新闻ID");
         exit();
@@ -248,7 +318,17 @@ template.readNews = function(seconds,isShouldBack){
         if(shouldBack){
             return;
         }
+	
+ 		
     }
 }
+
+template.downloadApp=function(download){
+	
+	if(download==null)return false;
+	return download(initParam.appName);	
+    
+}
+
 
 module.exports = template;
