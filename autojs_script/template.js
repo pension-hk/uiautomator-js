@@ -45,7 +45,7 @@ template.run = function(fun){
     
 	if(!utils.launch(initParam.appName))
 	{
-	   template.launch(fun.getAppName);
+	   if(!template.launch(fun.getAppName))exit();
 	}
 
     /**
@@ -149,7 +149,7 @@ template.launch=function(getAppName)
     if(getAppName == null){ 
        return  false;
     }else{
-      utils.launch(getAppName(initParam.appName));
+      return utils.launch(getAppName(initParam.appName));
     }
 	
 }
@@ -215,8 +215,11 @@ template.jumpToIndex = function(getIndexBtnItem){
         if(getIndexBtnItem == null){ //首页或者新闻/刷新
             flag = utils.UITextBoundsClick(initParam.indexBtnText);
         }else{
-            flag = getIndexBtnItem().click(); //东方头条弹出：id=J_article 出错
-        }
+			var indexPage =getIndexBtnItem();
+			if(indexPage){
+               flag = getIndexBtnItem().click(); //东方头条弹出：id=J_article 出错
+            } 
+		}
         
         //执行返回
        
