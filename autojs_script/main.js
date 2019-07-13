@@ -28,11 +28,14 @@ function init(){
          */
         if(new Date().getHours() >= 7){
             var appNum = newsList.length;
-            appNum = 1;
+            //appNum = 1;
             for(var i = 0;i< appNum;i++){
                 exec(newsList[i].name,normalRumTime);
             }
-			
+			appNum = videoList.length;
+            for(var i = 0;i< appNum;i++){
+                exec(videoList[i].name,normalRumTime);
+            }
         }else{
 			 //var appNum = videoList.length;
             /*
