@@ -41,12 +41,17 @@ template.run = function(fun){
 		exit();
 		
 	}
-	
-    
-	if(!utils.launch(initParam.appName))
-	{
-	   if(!template.launch(fun.getAppName))exit();
-	}
+//toast("启动:"+initParam.appName);
+var b=app.launchApp(initParam.appName);
+if(!b) 
+{
+	  toast(appName+",启动不成功！");
+   if(!template.launch(fun.getAppName))exit();
+}
+//toast("成功启动:"+initParam.appName);  
+	sleep(15000);
+
+
 
     /**
      * 自动更新
@@ -149,7 +154,9 @@ template.launch=function(getAppName)
     if(getAppName == null){ 
        return  false;
     }else{
-      return utils.launch(getAppName(initParam.appName));
+      
+      return app.launchApp(getAppName(initParam.appName));
+    
     }
 	
 }
@@ -160,7 +167,7 @@ template.launch=function(getAppName)
  * 1、返回和首页标识一起判断
  */
 template.jumpToIndex = function(getIndexBtnItem){
-
+toast("jumpToIndex");
     var indexFlag = text(initParam.indexFlagText).findOnce();
 	//add for 东方头条：
 	if(!indexFlag)indexFlag = text(initParam.indexFlagText1).findOnce();
@@ -215,16 +222,16 @@ template.jumpToIndex = function(getIndexBtnItem){
         if(getIndexBtnItem == null){ //首页或者新闻/刷新
             flag = utils.UITextBoundsClick(initParam.indexBtnText);
         }else{
-			var indexPage =getIndexBtnItem();
-			if(indexPage){
-               flag = getIndexBtnItem().click(); //东方头条弹出：id=J_article 出错
+	           		var indexPage =getIndexBtnItem();
+	           		if(indexPage){
+               flag = indexPage.click(); //东方头条弹出：id=J_article 出错
             } 
 		}
         
         //执行返回
        
         if(!flag){
-           //toast("没有发现首页");
+           toast("没有发现首页");
            back();
         }
         
