@@ -90,8 +90,13 @@ function stopCurrent(exectuion){
     toast("执行停止");
     exectuion.getEngine().forceStop();
     sleep(2000);
-    back();
-    sleep(1000);
+    var mainPack = app.getPackageName("倍薪");
+    while(currentPackage()!= mainPack){
+	   back();
+       sleep(1000);
+	}
+	toast("停止成功！");
+    
     //back();
     //sleep(1000);
     //home();

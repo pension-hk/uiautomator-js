@@ -17,10 +17,10 @@ templates.run({
     //签到
     signIn:function(){
         //进入我的
-        //click(1079,1919);
         var myFlag=id("tv_user_tab").findOnce();
         if(myFlag)myFlag=myFlag.parent();
-        if(myFlag)myFlag.click();
+        if(!myFlag)return;
+		myFlag.click();
         sleep(2000);
         //去掉广告
         var animationView=id("animationView").findOnce();
@@ -29,22 +29,25 @@ templates.run({
         sleep(500);
         //进入任务中心
         var taskCenter = text("任务中心").findOnce();
-        if(taskCenter){
-            commons.boundsClick(taskCenter);
-            sleep(5000);
-        }
+        if(taskCenter)taskCenter=taskCenter.parent();
+        if(taskCenter)taskCenter.click();
+        sleep(5000);
+        
         //点击签到领红包
-        commons.UITextClick("立即签到");
-        sleep(1000);
-        //删除弹出界面
+		toast("点击签到领红包");
+        if(commons.textClick("立即签到")){
+           
+		   sleep(1000);
+           //删除弹出界面
+           commons.UIClick("iv_close");  
         
-        
-        //返回主页面
+        }
+		//返回主页面
         back();
         back();
         sleep(1000);
-        //回到新闻
-        //click(1,1919);
+	   
+		//回到新闻
         commons.UIClick("tv_home_tab");
         
         
@@ -71,6 +74,7 @@ templates.run({
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
+		return false;
         //不存在奖励，直接退出
         if(!id("news_income_container").findOnce()){
             return true;
