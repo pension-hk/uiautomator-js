@@ -37,16 +37,11 @@ function init(){
                 exec(videoList[i].name,normalRumTime);
             }
         }else{
-			 //var appNum = videoList.length;
-            /*
+			var appNum = videoList.length;
             for(var i = 0;i< appNum;i++){
                 exec(videoList[i].name,normalRumTime);
             }
-            */
-            //var i=0;
-            //exec(videoList[i].name,normalRumTime);
-            //TODO
-            sleep(1000*60*30);//睡眠半个小时
+	        //sleep(1000*60*30);//睡眠半个小时
         }
     }
 }
@@ -90,17 +85,17 @@ function stopCurrent(exectuion){
     toast("执行停止");
     exectuion.getEngine().forceStop();
     sleep(2000);
-    var mainPack = app.getPackageName("倍薪");
-    while(currentPackage()!= mainPack){
-	   back();
-       sleep(1000);
-	}
-	toast("停止成功！");
+    back();
+    sleep(1000);
+    back();
+    sleep(1000);
+    home();
+    sleep(3000);
+	utils.launch("倍薪");
     
-    //back();
-    //sleep(1000);
-    //home();
-    //sleep(5000);
+
+	
+
 }
 
 //更新脚本

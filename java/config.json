@@ -4,6 +4,11 @@
             "name":"东方头条",
 	        "version":1
         },
+		{
+            "name":"趣头条",
+		    "version":1
+        },
+	
 	    {
             "name":"中青看点",
 		     "version":1

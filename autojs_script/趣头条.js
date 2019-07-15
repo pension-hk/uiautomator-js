@@ -3,40 +3,30 @@ const templates = require('template.js');
 
 
 templates.init({
-    appName:"微鲤",
-    indexFlagText:"发布",
-    timeAwardText:"领红包",
+    appName:"趣头条"
 });
 
 templates.run({
-    //获取首页按钮
-    getIndexBtnItem:function(){
-        return id("rl_bottom_1").findOnce();
-    },
     //签到
     signIn:function(){
-        commons.UIClick("rl_bottom_4");
-        sleep(1000);
-        commons.UIClick("ll_not_sign");
-        sleep(1000);
-		commons.UITextClick("立即签到");
-        sleep(1000);
-		back();
-        sleep(1000);
-        commons.UIClick("rl_bottom_1");
+		var  textTask=text("任务").findOnce();
+		if(!textTask){
+		  var textToSign=text("去签到").findOnce();
+  	      if(textToSign).click();
+          sleep(2000);
+		  var  textSignTip=text("开启提醒").findOnce();
+		  if(textSignTip)textSignTip.click();
+		  sleep(2000);
+		  var textAllAllow=text("始终允许").findOnce();
+		  if(textAllAllowtextAllAllow.click();
+		}
+		
     },
     //找出新闻的条目
     findNewsItem:function(){
-        toast("找出新闻条目");
-
-        //领取宝藏
-        commons.UIClick("text_ok");
-        commons.UIClick("bt_ok");
-
-        var newsItem = id("tv_title").findOnce(1);
+        var newsItem = className("android.support.v4.view.ViewPager").className("LinearLayout").findOnce();
         //判断是否是广告
-        if(newsItem){
-            newsItem = newsItem.parent();
+        if(newsItem && newsItem.childCount() > 0){
             var adFlag = newsItem.child(1);
             if(adFlag && adFlag.text() == "广告"){
                 newsItem = null;
@@ -44,17 +34,16 @@ templates.run({
         }
         return newsItem;
     },
-    //时段奖励之后执行
-    doingAfterTimeAward:function(){
-        back();
-    },
     //阅读页面是否应该返回
     isShouldBack:function(){
-
-        //领取宝藏
-        commons.UIClick("text_ok");
-        commons.UIClick("bt_ok");
-
+        //图集直接返回
+        var imgItem = className("android.support.v4.view.ViewPager").className("ImageView").findOnce();
+        if(imgItem){
+            return true;
+        }
+		var idTg = id("tg").findOnce
+		if(idTg)idTg.click();
+		
         return false;
     },
 	download:function(appName){
@@ -70,14 +59,13 @@ templates.run({
 		   return false;	
         }		
 	}
+	
 });
 
 function downloadProcess(appName)
 {  
-	
-	commons.yingyongbao(appName);	
-	commons.install(appName);
+	commons.yingyongbao(appName);
+    commons.install(appName);
     //app 打开成功
-	
     
 }

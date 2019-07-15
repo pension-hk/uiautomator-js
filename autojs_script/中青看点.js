@@ -44,6 +44,7 @@ templates.run({
         }
 		//返回主页面
         back();
+		sleep(1000);
         back();
         sleep(1000);
 	   

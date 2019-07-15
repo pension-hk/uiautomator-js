@@ -63,9 +63,6 @@ templates.run({
 				//}
                 newsItem=LinaearLayout;
 				break;
-				
-				//else
-				//   toast("count="+j+" 发现类："+ LinaearLayout.className()+" text="+textString);			
 			
           
 			}
