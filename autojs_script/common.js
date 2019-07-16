@@ -99,17 +99,24 @@ util.textBoundsClick = function(textContent) {
 
 //通过UI点击
 util.backToIndex = function(indexFlagText,indexFlagText1,indexFlagText2) {
-    var indexBtn = false;
+    
+	var indexBtn = false;
     var loop = 0;
     while(!indexBtn){
         back();
         sleep(1000);
         indexBtn = text(indexFlagText).findOnce();
-		if(!indexBtn)text(indexFlagText1).findOnce();
-		if(!indexBtn)text(indexFlagText2).findOnce();
-
+		if(!indexBtn)indexBtn=text(indexFlagText1).findOnce();
+		if(!indexBtn)indexBtn=text(indexFlagText2).findOnce();
+        //uc浏览器处理:
+		if(indexBtn)continue;
+		
+		var  exitText =  text("退出").findOnce();
+        if(exitText)exitText.click();
+             
+		
+		
         //超出退出时长的，做一些特殊处理
-        
         if(loop > 5){
             //无限返回的页面
             var isSucc = util.textClick("关闭");

@@ -1,9 +1,9 @@
 const commons = require('common.js');
 const templates = require('template.js');
-
+const runAppName = "趣头条";
 
 templates.init({
-    appName:"趣头条"
+    appName:runAppName
 });
 
 templates.run({
@@ -12,19 +12,19 @@ templates.run({
 		var  textTask=text("任务").findOnce();
 		if(!textTask){
 		  var textToSign=text("去签到").findOnce();
-  	      if(textToSign).click();
+  	      if(textToSign)textToSign.click();
           sleep(2000);
 		  var  textSignTip=text("开启提醒").findOnce();
 		  if(textSignTip)textSignTip.click();
 		  sleep(2000);
 		  var textAllAllow=text("始终允许").findOnce();
-		  if(textAllAllowtextAllAllow.click();
+		  if(textAllAllow)textAllAllow.click();
 		}
 		
     },
     //找出新闻的条目
     findNewsItem:function(){
-        var newsItem = className("android.support.v4.view.ViewPager").className("LinearLayout").findOnce();
+    	var newsItem = className("android.support.v4.view.ViewPager").className("LinearLayout").findOnce();
         //判断是否是广告
         if(newsItem && newsItem.childCount() > 0){
             var adFlag = newsItem.child(1);
@@ -32,19 +32,26 @@ templates.run({
                 newsItem = null;
             }
         }
-        return newsItem;
+	    if(newsItem){
+           var idAllow = id("permission_allow_button").findOnce(); //始终允许
+		   if(idAllow){
+			   idAllow.click();
+		   }
+		}		
+	    return newsItem;
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
-        //图集直接返回
+	    //图集直接返回
         var imgItem = className("android.support.v4.view.ViewPager").className("ImageView").findOnce();
         if(imgItem){
             return true;
         }
-		var idTg = id("tg").findOnce
+		var idTg = id("tg").findOnce();
 		if(idTg)idTg.click();
+
 		
-        return false;
+		return false;
     },
 	download:function(appName){
 		

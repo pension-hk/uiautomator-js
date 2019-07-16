@@ -22,6 +22,7 @@ var initParam = {
 }
 template.init = function(param){
     Object.assign(initParam, param);
+	
 }
 
 /**
@@ -79,6 +80,7 @@ if(!b)
      */
      
     while(true){
+	    
         //领取时段奖励
         template.getTimeAward(fun.doingAfterTimeAward);
         //找到一条新闻
@@ -168,6 +170,7 @@ template.launch=function(getAppName)
  */
 template.jumpToIndex = function(getIndexBtnItem){
 
+    toast("jumpToIndex......");  
     var indexFlag = text(initParam.indexFlagText).findOnce();
 	//add for 东方头条：
 	if(!indexFlag)indexFlag = text(initParam.indexFlagText1).findOnce();
@@ -231,11 +234,12 @@ template.jumpToIndex = function(getIndexBtnItem){
         //执行返回
        
         if(!flag){
-           //toast("没有发现首页");
+           toast("找首页时，没有发现首页,back()");
            back();
         }
         
         sleep(1000);
+		
         //重新取flag
         indexFlag = text(initParam.indexFlagText).findOnce();  //发布
 		//add for 东方头条：
@@ -262,12 +266,18 @@ template.getTimeAward = function(doingAfterTimeAward){
  */
 template.getOneNews = function(findNewsItem){
     
-    //toast("开始获取新闻资源");
+    toast("开始获取新闻资源");
     //阅读超过50条，刷新页面
     if(initParam.totalNewsReaded > initParam.totalNewsOneTime){
         initParam.totalNews = 0;
         //click(1,1919);
-		
+		toast("阅读超过50条，刷新页面");
+		var indexPage =getIndexBtnItem();
+	    if(indexPage)
+		{
+		  toast("刷新页面");	
+          flag = indexPage.click(); 
+        }
 		
         sleep(2000);
     }
@@ -292,7 +302,22 @@ template.getOneNews = function(findNewsItem){
             newsText = newsItem.child(0).text();
             isFindNews = true;
         }
-        
+		else
+		{
+			var currentPkgName=currentPackage();
+			toast("查找新闻发现打开了："+currentPkgName);
+            if(currentPkgName=="com.UCMobile")
+	        {
+			   toast("处理打开的："+currentPkgName);
+               var  exitText =  text("退出").findOnce();
+               if(exitText)exitText.click();
+               else
+		       {
+			     back();
+                 sleep(1000);
+		       }		   
+	        }
+		}
     }
 
     //找到新闻，点击阅读
@@ -328,7 +353,11 @@ template.readNews = function(seconds,isShouldBack){
         if(shouldBack){
             return;
         }
-	
+		/*
+	    var shouldPkgName = getPackageName(initParam.appName);
+		var currPkgName = currentPackage();
+	    toast("阅读新闻：当前包名="+currPkgName+" 应该的包名："+shouldPkgName);
+	    */
  		
     }
 }
@@ -339,6 +368,9 @@ template.downloadApp=function(download){
 	return download(initParam.appName);	
     
 }
+
+
+
 
 
 module.exports = template;

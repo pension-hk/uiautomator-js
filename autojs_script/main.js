@@ -84,16 +84,34 @@ function exec(scriptName,seconds){
 function stopCurrent(exectuion){
     toast("执行停止");
     exectuion.getEngine().forceStop();
-    sleep(2000);
-    back();
-    sleep(1000);
-    back();
-    sleep(1000);
-    home();
-    sleep(3000);
-	utils.launch("倍薪");
-    
-
+    sleep(2000);	
+	
+	var currentPkgName=currentPackage();
+	var myPkgName  = getPackageName("倍薪"); 
+	toast("当前的包名为："+currentPkgName);
+	while(currentPkgName != myPkgName)
+	{
+	   if(currentPkgName=="com.UCMobile")
+	   {
+	       var  exitText =  text("退出").findOnce();
+           if(exitText)exitText.click();
+           else
+		   {
+              back();
+              sleep(1000);
+		   }		   
+	   }
+       else{ 
+	       back();
+           sleep(1000);
+	   }
+	   currentPkgName=currentPackage();
+	}
+      
+    if(currentPkgName != myPkgName)
+	{
+        utils.launch("倍薪");
+	}
 	
 
 }
