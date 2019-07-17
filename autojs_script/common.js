@@ -149,6 +149,15 @@ util.swapeToRead = function() {
         device.width / 2, device.height * 0.5, 5000);
 }
 
+
+//找到有TextView的上一级，返回
+util.findParentOfTextWiew=function(node)
+{   
+	return app.findParentNode(node);
+}
+
+
+
 //获取主配置
 util.getConfig=function(){
     toast("开始获取配置");

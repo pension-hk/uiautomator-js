@@ -24,7 +24,8 @@ templates.run({
     },
     //找出新闻的条目
     findNewsItem:function(){
-    	var newsItem = className("android.support.v4.view.ViewPager").className("LinearLayout").findOnce();
+    	/*
+		var newsItem = className("android.support.v4.view.ViewPager").className("LinearLayout").findOnce();
         //判断是否是广告
         if(newsItem && newsItem.childCount() > 0){
             var adFlag = newsItem.child(1);
@@ -32,6 +33,19 @@ templates.run({
                 newsItem = null;
             }
         }
+		*/
+	    var newsItem=null;
+		var recyclerView = className("android.support.v7.widget.RecyclerView").findOnce();//fu,go
+        if(!recyclerView)return null;
+    	var recyChildCount = recyclerView.childCount();
+        for(var  i=0;i<recyChildCount;i++){  //找出所有子条目
+     		var childLayout  = recyclerView.child(i);   
+			if(!childLayout)continue;
+			var newsItem = commons.findParentOfTextWiew(childLayout);
+			if(newsItem)break;
+        }
+		
+		
 	    if(newsItem){
            var idAllow = id("permission_allow_button").findOnce(); //始终允许
 		   if(idAllow){
@@ -71,8 +85,8 @@ templates.run({
 
 function downloadProcess(appName)
 {  
-	commons.yingyongbao(appName);
-    commons.install(appName);
+	//commons.yingyongbao(appName);
+    //commons.install(appName);
     //app 打开成功
     
 }

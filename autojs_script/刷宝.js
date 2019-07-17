@@ -87,8 +87,8 @@ templates.run({
 function downloadProcess(appName)
 {  
    
-	commons.yingyongbao(appName);
-    commons.install(appName);
+	//commons.yingyongbao(appName);
+    //commons.install(appName);
    
     
 }

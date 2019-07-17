@@ -41,7 +41,14 @@ templates.run({
 		var recyclerView = className("android.support.v7.widget.RecyclerView").findOnce();//fu,go
         if(!recyclerView)return null;
     	var recyChildCount = recyclerView.childCount();
-
+        for(var  i=0;i<recyChildCount;i++){  //找出所有子条目
+     		var childLayout  = recyclerView.child(i);   
+			if(!childLayout)continue;
+			var newsItem = commons.findParentOfTextWiew(childLayout);
+			if(newsItem)break;
+        }
+		return newsItem;
+		/*
         for(var  i=0;i<recyChildCount;i++){  //找出所有子条目
             var LinaearLayout  = recyclerView.child(i);    //LinaearLayout
 			if(!LinaearLayout)continue;
@@ -73,8 +80,11 @@ templates.run({
            if(findFilt(newsItem,"置顶"))newsItem=null;
            else if(findContainFilt(newsItem,"广告"))newsItem=null;
 			   
-		}	
+		}
+        		
 	    return newsItem;
+		*/
+		
 		
     },
 	//时段奖励之后执行
@@ -136,10 +146,8 @@ function findContainFilt(obj,flag)
 
 function downloadProcess(appName)
 {  
-	
-	
-	commons.yingyongbao(appName);
-	commons.install(appName);
+	//commons.yingyongbao(appName);
+	//commons.install(appName);
     //app 打开成功
 	
     

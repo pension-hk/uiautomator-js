@@ -89,6 +89,9 @@ if(!b)
         template.readNews(60,fun.isShouldBack);
         //返回新闻列表
         utils.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2);
+         
+		sleep(10000);
+		
     }
     
     
@@ -305,7 +308,7 @@ template.getOneNews = function(findNewsItem){
 		else
 		{
 			var currentPkgName=currentPackage();
-			toast("查找新闻发现打开了："+currentPkgName);
+			//toast("查找新闻发现打开了："+currentPkgName);
             if(currentPkgName=="com.UCMobile")
 	        {
 			   toast("处理打开的："+currentPkgName);
@@ -317,6 +320,8 @@ template.getOneNews = function(findNewsItem){
                  sleep(1000);
 		       }		   
 	        }
+			
+			
 		}
     }
 

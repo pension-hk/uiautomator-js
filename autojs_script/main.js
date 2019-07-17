@@ -13,7 +13,7 @@ init();
 function init(){
     storages.remove("version");
     //每次阅读的时间
-    var normalRumTime = 0.5*60*60;
+    var normalRumTime = 0.1*60*60;
     while(true){
         var config = utils.getConfig();
         //新闻类的列表

@@ -55,6 +55,29 @@ templates.run({
     },
     //找出新闻的条目
     findNewsItem:function(){
+		var newsItem=null;
+		var recyclerView = className("android.support.v7.widget.RecyclerView").findOnce();
+        if(!recyclerView) return null;
+    	var recyChildCount = recyclerView.childCount();
+        for(var  i=0;i<recyChildCount;i++){  //找出所有子条目
+     		var childLayout  = recyclerView.child(i);   
+			if(!childLayout)continue;
+			var newsItem = commons.findParentOfTextWiew(childLayout);
+			if(newsItem)break;
+        }
+	    
+		if(!newsItem){
+           
+    	    //检查是否有弹窗：
+            var awardPop= text("青豆奖励").findOnce();
+            if(awardPop){
+				back();
+			}			
+ 		}	
+		
+	    return newsItem;
+		
+		/* ver 1.5.1:
         var newsItem = id("tv_read_count").findOnce(1);
         //toast("read count="+newsItem.text());
         
@@ -66,12 +89,33 @@ templates.run({
             if(adFlag && adFlag.text() == "广告"){
                 newsItem = null;
             }
-            
-            
-            
         }
-   
+		else
+		{  
+     	//检查是否有弹窗：
+            var awardPop= text("青豆奖励").findOnce();
+            if(awardPop){
+				back();
+			}			
+  
+
+
+		}		
         return newsItem;
+		*/
+		
+    },	
+	//时段奖励之后执行
+    doingAfterTimeAward:function(){
+        back();
+		sleep(100);
+		//检查是否有弹窗：
+        var awardPop= text("青豆奖励").findOnce();
+        if(awardPop){
+		   commons.UIClick("jp");  //x
+		}
+					
+  	
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
@@ -107,8 +151,8 @@ templates.run({
 
 function downloadProcess(appName)
 {  
-	commons.yingyongbao(appName);
-    commons.install(appName);
+	//commons.yingyongbao(appName);
+    //commons.install(appName);
     //app 打开成功
     
 }

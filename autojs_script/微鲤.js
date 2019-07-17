@@ -28,11 +28,11 @@ templates.run({
     //找出新闻的条目
     findNewsItem:function(){
         toast("找出新闻条目");
-
         //领取宝藏
         commons.UIClick("text_ok");
         commons.UIClick("bt_ok");
 
+		/*
         var newsItem = id("tv_title").findOnce(1);
         //判断是否是广告
         if(newsItem){
@@ -43,6 +43,19 @@ templates.run({
             }
         }
         return newsItem;
+		*/
+		var newsItem=null;
+		var recyclerView = className("android.support.v7.widget.RecyclerView").findOnce();
+        if(!recyclerView)return null;
+    	var recyChildCount = recyclerView.childCount();
+        for(var  i=0;i<recyChildCount;i++){  //找出所有子条目
+     		var childLayout  = recyclerView.child(i);   
+			if(!childLayout)continue;
+			var newsItem = commons.findParentOfTextWiew(childLayout);
+			if(newsItem)break;
+        }
+		return newsItem;
+		
     },
     //时段奖励之后执行
     doingAfterTimeAward:function(){
@@ -75,8 +88,8 @@ templates.run({
 function downloadProcess(appName)
 {  
 	
-	commons.yingyongbao(appName);	
-	commons.install(appName);
+	//commons.yingyongbao(appName);	
+	//commons.install(appName);
     //app 打开成功
 	
     
