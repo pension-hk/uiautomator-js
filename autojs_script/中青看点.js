@@ -74,7 +74,6 @@ templates.run({
 				back();
 			}			
  		}	
-		
 	    return newsItem;
 		
 		/* ver 1.5.1:
@@ -133,6 +132,35 @@ templates.run({
 
         return false;
     },
+	
+	popWindow:function(){
+	    var adFlag=id("iv_activity").findOnce();
+        if(adFlag){
+           back();
+           sleep(500);
+        }
+	    adFlag= text("青豆奖励").findOnce();
+        if(adFlag){
+		   commons.UIClick("jp");  //x
+		}
+		
+		adFlag= text("查看详情").findOnce();
+        if(adFlag){
+		   adFlag.click();  
+		   sleep(5000);
+		   back();
+           sleep(1000); 		   
+		}
+		adFlag= desc("off").findOnce();
+        if(adFlag){
+		   adFlag.click();  
+		   sleep(1000);
+		   
+		}
+		
+	
+    },
+	
 	download:function(appName){
 		
 		var appPackage=app.getPackageName(appName);

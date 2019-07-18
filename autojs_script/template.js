@@ -62,7 +62,7 @@ if(!b)
     /**
      * 回归首页的位置
      */
-    template.jumpToIndex(fun.getIndexBtnItem);
+    template.jumpToIndex(fun.getIndexBtnItem,fun.popWindow);
   	
     /**
      * 签到
@@ -171,19 +171,26 @@ template.launch=function(getAppName)
  * 跳转到首页
  * 1、返回和首页标识一起判断
  */
-template.jumpToIndex = function(getIndexBtnItem){
+template.jumpToIndex = function(getIndexBtnItem,popWindow){
 
-    toast("jumpToIndex......");  
+    //toast("jumpToIndex......");  
     var indexFlag = text(initParam.indexFlagText).findOnce();
 	//add for 东方头条：
 	if(!indexFlag)indexFlag = text(initParam.indexFlagText1).findOnce();
 	if(!indexFlag)indexFlag = text(initParam.indexFlagText2).findOnce();
     while(!indexFlag){
-        var adFlag=id("iv_activity").findOnce();
+        if(popWindow  != null  )
+		{
+		   popWindow();
+		}
+		
+		/*
+		var adFlag=id("iv_activity").findOnce();
         if(adFlag){
             back();
             sleep(500);
         }
+		
       
         //add for 东方头条：
 		adFlag = id("aa3").findOnce();
@@ -221,7 +228,14 @@ template.jumpToIndex = function(getIndexBtnItem){
         if(backTip){
             backTip.click();
         }
+		
+		var videoAd = id("tt_video_ad_close").findOnce();
+        if(videoAd){
+            videoAd.click();
+        }
+		
 	    //end for 东方头条
+	    */   
 	  
         //点击首页标识性文字
         var flag = false;
@@ -358,11 +372,7 @@ template.readNews = function(seconds,isShouldBack){
         if(shouldBack){
             return;
         }
-		/*
-	    var shouldPkgName = getPackageName(initParam.appName);
-		var currPkgName = currentPackage();
-	    toast("阅读新闻：当前包名="+currPkgName+" 应该的包名："+shouldPkgName);
-	    */
+	
  		
     }
 }

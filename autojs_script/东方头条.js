@@ -101,6 +101,52 @@ templates.run({
 	 
         return false;
     },
+	popWindow:function(){
+	 
+        //add for 东方头条：
+		adFlag = id("aa3").findOnce();
+        if(adFlag){
+           back();
+           sleep(500);
+        }
+	    adFlag = id("ab0").findOnce();
+        if(adFlag){
+           back();
+		   sleep(500);
+        }
+		
+		//关闭微信提现提示窗
+        adFlag = id("a_y").findOnce();//"a_y";//提现到微信ID
+        if(adFlag){
+            back();
+			sleep(500);
+        }
+      
+        //关闭要闻推送
+        adFlag = text("忽略").findOnce();
+        if(adFlag){
+            adFlag.click();
+        }
+       
+        //处理时段奖励提醒
+        var timeAward = text("立即领取").findOnce(); //"立即领取";//时段奖励领取提醒
+        if(timeAward){
+            back();
+			sleep(500);
+         }
+        //处理回退提示
+        var backTip = text("继续赚钱").findOnce();
+        if(backTip){
+            backTip.click();
+        }
+		
+		var videoAd = id("tt_video_ad_close").findOnce();
+        if(videoAd){
+            videoAd.click();
+        }
+	
+	
+    },
 	download:function(appName){
 		
 		var appPackage=app.getPackageName(appName);

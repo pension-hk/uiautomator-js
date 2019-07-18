@@ -238,7 +238,7 @@ template.viewVideo = function(seconds,isShouldBack){
           var idAttention= id("attention").findOnce();
           if(idAttention)
 	      {
-	         idAttention.click();
+	         //idAttention.click();
 	      }
 		  utils.UIClick("praise"); //点赞
       

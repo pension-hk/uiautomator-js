@@ -70,6 +70,14 @@ templates.run({
 
         return false;
     },
+	popWindow:function(){
+	    var adFlag=id("iv_activity").findOnce();
+        if(adFlag){
+           back();
+           sleep(500);
+        }
+	  
+    },
 	download:function(appName){
 		
 		var appPackage=app.getPackageName(appName);
