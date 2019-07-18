@@ -302,6 +302,8 @@ template.getOneNews = function(findNewsItem){
 		}
     }else{
         toast("20次滑动没有找到新闻，请检查新闻ID");
+		findNewsItem();//再给一次机会
+		
         exit();
     }
 }

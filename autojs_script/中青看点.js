@@ -67,12 +67,11 @@ templates.run({
         }
 	    
 		if(!newsItem){
-           
-    	    //检查是否有弹窗：
+           //检查是否有弹窗：
             var awardPop= text("青豆奖励").findOnce();
             if(awardPop){
-				back();
-			}			
+		      commons.UIClick("jp");  //x
+		    }			
  		}	
 	    return newsItem;
 		
@@ -106,8 +105,9 @@ templates.run({
     },	
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
+		toast("时段奖励之后执行:back()");
         back();
-		sleep(100);
+		sleep(1000);
 		//检查是否有弹窗：
         var awardPop= text("青豆奖励").findOnce();
         if(awardPop){

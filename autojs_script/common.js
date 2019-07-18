@@ -103,14 +103,15 @@ util.backToIndex = function(indexFlagText,indexFlagText1,indexFlagText2) {
 	var indexBtn = false;
     var loop = 0;
     while(!indexBtn && loop<20 ){
+		toast("backToIndex:back()");
         back();
         sleep(1000);
         indexBtn = text(indexFlagText).findOnce();
 		if(!indexBtn)indexBtn=text(indexFlagText1).findOnce();
 		if(!indexBtn)indexBtn=text(indexFlagText2).findOnce();
-        //uc浏览器处理:
-		if(indexBtn)continue;
+        if(indexBtn)continue;
 		
+		//uc浏览器处理:		
 		var  exitText =  text("退出").findOnce();
         if(exitText)exitText.click();
              
@@ -144,7 +145,6 @@ util.swapeToRead = function() {
     //滑动阅读新闻
     swipe(device.width / 2, device.height * 0.8 ,
         device.width / 2, device.height * 0.5, 5000);
-
     swipe(device.width / 2, device.height * 0.8 ,
         device.width / 2, device.height * 0.5, 5000);
 }
