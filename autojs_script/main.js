@@ -12,6 +12,7 @@ const utils = require('common.js');
 init();
 function init(){
     storages.remove("version");
+    var path=files.getSdcardPath()+"/脚本/";
     //每次阅读的时间
     var normalRumTime = 0.1*60*60;
     while(true){
@@ -22,6 +23,8 @@ function init(){
         //视频类的列表
         var videoList = config.videoAppList;
 
+		var scriptName=null;
+               
         /**
          * 0-7点阅读视频
          * 其他时间阅读新闻
@@ -30,16 +33,25 @@ function init(){
             var appNum = newsList.length;
             //appNum = 1;
             for(var i = 0;i< appNum;i++){
-                exec(newsList[i].name,normalRumTime);
+                scriptName=newsList[i].name;
+                var currPath=path+scriptName+".js";
+                if(!files.exists(currPath))continue;
+                exec(scriptName,normalRumTime);
             }
 			appNum = videoList.length;
             for(var i = 0;i< appNum;i++){
+                scriptName=newsList[i].name;
+                var currPath=path+scriptName+".js";
+                if(!files.exists(currPath))continue;
                 exec(videoList[i].name,normalRumTime);
             }
         }else{
 			var appNum = videoList.length;
             for(var i = 0;i< appNum;i++){
-                exec(videoList[i].name,normalRumTime);
+                scriptName=newsList[i].name;
+                var currPath=path+scriptName+".js";
+                if(!files.exists(currPath))continue;
+             	exec(videoList[i].name,normalRumTime);
             }
 	        //sleep(1000*60*30);//睡眠半个小时
         }

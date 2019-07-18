@@ -178,64 +178,12 @@ template.jumpToIndex = function(getIndexBtnItem,popWindow){
 	//add for 东方头条：
 	if(!indexFlag)indexFlag = text(initParam.indexFlagText1).findOnce();
 	if(!indexFlag)indexFlag = text(initParam.indexFlagText2).findOnce();
-    while(!indexFlag){
+    
+	while(!indexFlag){
         if(popWindow  != null  )
 		{
 		   popWindow();
 		}
-		
-		/*
-		var adFlag=id("iv_activity").findOnce();
-        if(adFlag){
-            back();
-            sleep(500);
-        }
-		
-      
-        //add for 东方头条：
-		adFlag = id("aa3").findOnce();
-        if(adFlag){
-           back();
-           sleep(500);
-        }
-	    adFlag = id("ab0").findOnce();
-        if(adFlag){
-           back();
-		   sleep(500);
-        }
-		
-		//关闭微信提现提示窗
-        adFlag = id("a_y").findOnce();//"a_y";//提现到微信ID
-        if(adFlag){
-            back();
-			sleep(500);
-        }
-      
-        //关闭要闻推送
-        adFlag = text("忽略").findOnce();
-        if(adFlag){
-            adFlag.click();
-        }
-       
-        //处理时段奖励提醒
-        var timeAward = text("立即领取").findOnce(); //"立即领取";//时段奖励领取提醒
-        if(timeAward){
-            back();
-			sleep(500);
-         }
-        //处理回退提示
-        var backTip = text("继续赚钱").findOnce();
-        if(backTip){
-            backTip.click();
-        }
-		
-		var videoAd = id("tt_video_ad_close").findOnce();
-        if(videoAd){
-            videoAd.click();
-        }
-		
-	    //end for 东方头条
-	    */   
 	  
         //点击首页标识性文字
         var flag = false;
@@ -348,7 +296,8 @@ template.getOneNews = function(findNewsItem){
 		{
 		  var bounds=newsItem.bounds();
           if(bounds){
-             click(bounds.centerX(),bounds.centerY()); 
+             if( (bounds.left>=0 && bounds.right>bounds.left)&&(bounds.top>=0&&bounds.bottom>bounds.top))
+		         click(bounds.centerX(),bounds.centerY()); 
           }
 		}
     }else{
