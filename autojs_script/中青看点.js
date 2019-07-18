@@ -68,10 +68,16 @@ templates.run({
 	    
 		if(!newsItem){
            //检查是否有弹窗：
-            var awardPop= text("青豆奖励").findOnce();
-            if(awardPop){
-		      commons.UIClick("jp");  //x
-		    }			
+            var adFlag= text("青豆奖励").findOnce();
+            if(adFlag){
+		       adFlag=adFlag.parent();
+		       adFlag=findParentOfImagView(adFlag);
+		       if(adFlag){
+		         adFlag.click();
+		       }
+		   
+		    }
+       			
  		}	
 	    return newsItem;
 		
@@ -105,15 +111,16 @@ templates.run({
     },	
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
-		toast("时段奖励之后执行:back()");
-        back();
-		sleep(1000);
 		//检查是否有弹窗：
-        var awardPop= text("青豆奖励").findOnce();
-        if(awardPop){
-		   commons.UIClick("jp");  //x
-		}
-					
+         var adFlag= text("青豆奖励").findOnce();
+         if(adFlag){
+		    adFlag=adFlag.parent();
+		    adFlag=findParentOfImagView(adFlag);
+		    if(adFlag){
+		         adFlag.click();
+		    }
+		   
+		 }
   	
     },
     //阅读页面是否应该返回
@@ -139,10 +146,33 @@ templates.run({
            back();
            sleep(500);
         }
+	    /*
 	    adFlag= text("青豆奖励").findOnce();
         if(adFlag){
 		   commons.UIClick("jp");  //x
 		}
+		*/
+		adFlag= text("青豆奖励").findOnce();
+        if(adFlag){
+		   adFlag=adFlag.parent();
+		   //var count = adFlag.childCount();
+		   //toast("青豆奖励:"+" child count="+count);
+		   //for(var i=0;i<count;i++)
+		   //{
+		 	//  var classN= adFlag.child(i);
+            //  toast("className="+classN+" i="+i);  			  
+			   
+		   //}
+		   
+		   
+		   
+		   adFlag=findParentOfImagView(adFlag);
+		   if(adFlag){
+		     adFlag.click();
+		   }
+		   
+		}
+     	
 		
 		adFlag= text("查看详情").findOnce();
         if(adFlag){
@@ -184,4 +214,11 @@ function downloadProcess(appName)
     //app 打开成功
     
 }
+
+function findParentOfImagView(node)
+{
+    return node.child(4);	
+ 	
+}
+
 
