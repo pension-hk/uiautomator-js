@@ -102,7 +102,7 @@ util.backToIndex = function(indexFlagText,indexFlagText1,indexFlagText2) {
     
 	var indexBtn = false;
     var loop = 0;
-    while(!indexBtn){
+    while(!indexBtn && loop<20 ){
         back();
         sleep(1000);
         indexBtn = text(indexFlagText).findOnce();
