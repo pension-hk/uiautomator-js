@@ -63,8 +63,13 @@ templates.run({
         }
 		var idTg = id("tg").findOnce();
 		if(idTg)idTg.click();
-
-		
+        //请完成验证，。。。
+		//向右滑动滑块填充拼图
+		if(desc("向右滑动滑块填充拼图").findOnce())
+		{
+		   toast("趣头条阅读新闻需滑块验证"); 
+		  
+		}
 		return false;
     },
 	popWindow:function(){
