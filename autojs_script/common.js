@@ -97,7 +97,8 @@ util.textBoundsClick = function(textContent) {
     return flag;
 }
 
-//通过UI点击
+
+
 util.backToIndex = function(indexFlagText,indexFlagText1,indexFlagText2) {
     
 	var indexBtn = false;
@@ -119,6 +120,8 @@ util.backToIndex = function(indexFlagText,indexFlagText1,indexFlagText2) {
 		
         //超出退出时长的，做一些特殊处理
         if(loop > 5){
+			
+			
             //无限返回的页面
             var isSucc = util.textClick("关闭");
             if(!isSucc){

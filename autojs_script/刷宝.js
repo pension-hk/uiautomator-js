@@ -60,7 +60,7 @@ templates.run({
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
-     
+      
         return false;
     },
 	getAppName:function(appName){

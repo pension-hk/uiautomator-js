@@ -88,7 +88,7 @@ if(!b)
         //阅读新闻60s
         template.readNews(60,fun.isShouldBack);
         //返回新闻列表
-        utils.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2);
+        template.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2);
          
 		sleep(10000);
 		
@@ -160,7 +160,7 @@ template.launch=function(getAppName)
        return  false;
     }else{
       
-      return app.launchApp(getAppName(initParam.appName));
+      return app.launchApp(getAppName(initParam.appName)); //获取app的另外名称
     
     }
 	
@@ -214,6 +214,60 @@ template.jumpToIndex = function(getIndexBtnItem,popWindow){
     }
     
 }
+
+
+template.backToIndex = function(indexFlagText,indexFlagText1,indexFlagText2) {
+    
+	var runPkgName  = getPackageName(initParam.appName);	
+	var indexBtn = false;
+    var loop = 0;
+    while(!indexBtn && loop<20 ){
+		toast("backToIndex:back()");
+        back();
+        sleep(2000);
+		var currentPkgName=currentPackage();
+		if(currentPkgName!=runPkgName)
+		{
+		   toast("当前包不是运行包:"+currentPkgName+"，重启它");
+		   utils.launch(initParam.appName);	
+		   break;
+		}
+		
+        indexBtn = text(indexFlagText).findOnce();
+		if(!indexBtn)indexBtn=text(indexFlagText1).findOnce();
+		if(!indexBtn)indexBtn=text(indexFlagText2).findOnce();
+        if(indexBtn)continue;
+		
+		//uc浏览器处理:		
+		var  exitText =  text("退出").findOnce();
+        if(exitText)exitText.click();
+  	
+        //超出退出时长的，做一些特殊处理
+        if(loop > 5){
+			
+			
+            //无限返回的页面
+            var isSucc = util.textClick("关闭");
+            if(!isSucc){
+                util.textBoundsClick("关闭");
+            }
+
+            //系统的安装页面
+            if(!isSucc){
+                util.UITextClick("取消");
+            }
+
+            //成功关闭
+            if(isSucc){
+                indexBtn = true;
+            }
+        }
+        loop++;
+    }
+}
+
+
+
 
 /**
  * 获取时段奖励

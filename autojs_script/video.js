@@ -76,7 +76,7 @@ template.run = function(fun){
      
     while(true){
         //领取时段奖励
-        //template.getTimeAward(fun.doingAfterTimeAward);
+        template.getTimeAward(fun.doingAfterTimeAward);
         //找到一段视频
         template.getOneVideo(fun.findVideoItem);
         //看视频30s
@@ -174,8 +174,20 @@ template.jumpToIndex = function(getIndexBtnItem){
  * 获取时段奖励
  */
 template.getTimeAward = function(doingAfterTimeAward){
-    if(!utils.UITextBoundsClick(initParam.timeAwardText))return;
-    //判断是否有提示
+       //看看是否有奖励可领：
+    var  awardFlag= id("iv_box_open_new").findOnce();
+	if(!awardFlag)return;
+    awardFlag.clcik();  	
+	sleep(1000); 
+    if(text("领取你的元宝福利").findOnce()) {
+       uitls.UIClick("idBtn");
+	   sleep(2000);
+	}
+    if(text("额外福利").findOnce()){
+      uitls.UIClick("imgClose");
+	}
+	
+	//判断是否有提示
     if(doingAfterTimeAward != null){
         doingAfterTimeAward();
     }
@@ -243,6 +255,7 @@ template.viewVideo = function(seconds,isShouldBack){
 		  utils.UIClick("praise"); //点赞
       
 		}
+		
     }
    
   	
