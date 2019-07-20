@@ -188,16 +188,19 @@ template.jumpToIndex = function(getIndexBtnItem,popWindow){
         //点击首页标识性文字
         var flag = false;
         if(getIndexBtnItem == null){ //首页或者新闻/刷新
+		    //toast("getIndexBtnItem == null");  
             flag = utils.UITextBoundsClick(initParam.indexBtnText);
-        }else{
-	           		var indexPage =getIndexBtnItem();
-	           		if(indexPage){
-                      flag = indexPage.click(); //东方头条弹出：id=J_article 出错
-                    } 
+        }
+		else
+		{
+		   //toast("getIndexBtnItem ！= null");  
+            var indexPage =getIndexBtnItem();
+	        if(indexPage){
+                flag = indexPage.click(); //东方头条弹出：id=J_article 出错
+            } 
 		}
         
         //执行返回
-       
         if(!flag){
            toast("找首页时，没有发现首页,back()");
            back();

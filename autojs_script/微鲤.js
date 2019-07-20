@@ -51,7 +51,7 @@ templates.run({
         for(var  i=0;i<recyChildCount;i++){  //找出所有子条目
      		var childLayout  = recyclerView.child(i);   
 			if(!childLayout)continue;
-			var newsItem = commons.findParentOfTextWiew(childLayout);
+			newsItem = commons.findParentOfTextWiew(childLayout);
 			if(newsItem)break;
         }
 		return newsItem;
