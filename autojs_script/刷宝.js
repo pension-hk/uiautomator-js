@@ -60,8 +60,11 @@ templates.run({
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
-      
-        return false;
+       var closeFlag= id("imgClose").findOnce();
+       if(closeFlag){
+          closeFlag.click();
+	   }
+	   return false;
     },
 	getAppName:function(appName){
        return appName+"短视频";

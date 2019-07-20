@@ -179,13 +179,19 @@ template.getTimeAward = function(doingAfterTimeAward){
 	if(!awardFlag)return;
     awardFlag.click();  	
 	sleep(1000); 
-    if(text("领取你的元宝福利").findOnce()) {
-       uitls.UIClick("idBtn");
-	   sleep(2000);
+    awardFlag= id("idBtn").findOnce();
+	if(awardFlag){
+       //toast("领取你的元宝福利");
+	   awardFlag.click();
+	   sleep(1000);
+	   awardFlag= id("imgClose").findOnce();
+       if(awardFlag){
+          //toast("额外福利");
+	      awardFlag.click();
+	   }
 	}
-    if(text("额外福利").findOnce()){
-      uitls.UIClick("imgClose");
-	}
+	
+	
 	
 	//判断是否有提示
     if(doingAfterTimeAward != null){
@@ -194,12 +200,10 @@ template.getTimeAward = function(doingAfterTimeAward){
 }
 
 /**
- * 获取一条新闻
+ * 获取一个视频：
  */
 template.getOneVideo = function(findVideoItem){
     toast("开始获取视频资源");
- 
-   
     var isFindVideo = false;//是否找到视频
     var videoItem;         
     initParam.loopTimeToFindNews = 0;//循环次数
