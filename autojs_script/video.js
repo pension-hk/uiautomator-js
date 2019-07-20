@@ -177,7 +177,7 @@ template.getTimeAward = function(doingAfterTimeAward){
        //看看是否有奖励可领：
     var  awardFlag= id("iv_box_open_new").findOnce();
 	if(!awardFlag)return;
-    awardFlag.clck();  	
+    awardFlag.click();  	
 	sleep(1000); 
     if(text("领取你的元宝福利").findOnce()) {
        uitls.UIClick("idBtn");
