@@ -1,9 +1,11 @@
-const commons = require('common.js');
-const templates = require('video.js');
+const commons    = require('common.js');
+const templates  = require('video.js');
+const runAppName = "刷宝"; 
+const runAppName1 = "刷宝短视频"; 
 
 
 templates.init({
-    appName:"刷宝",
+    appName:runAppName,
     indexFlagText:"首页",
 });
 
@@ -40,6 +42,14 @@ templates.run({
            if(animationView)animationView.click();
            sleep(500);
 		}
+		
+		
+		
+		//com.jm.video:id/tt_video_reward_container
+		//com.jm.video:id/tt_video_ad_close
+		
+		
+		
 		//开箱领元宝
 		//commons.UITextClick("开箱领元宝");
 	    //sleep(1000);	
@@ -58,6 +68,16 @@ templates.run({
      	var videoItem = text("空空如也").findOnce();
 	    return videoItem;
     },
+	
+	//时段奖励之后执行
+    doingAfterTimeAward:function(){
+       var btnView  =  id("btn_view").findOnce();
+	   if(btnView)btnView.click();
+	   
+    },
+
+
+	
     //阅读页面是否应该返回
     isShouldBack:function(){
        var closeFlag= id("imgClose").findOnce();

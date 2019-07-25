@@ -1,9 +1,10 @@
 const commons = require('common.js');
 const templates = require('template.js');
+const runAppName ="中青看点"; 
 
 
 templates.init({
-    appName:"中青看点",
+    appName:runAppName,
     indexFlagText:"美文",
 });
 
@@ -13,6 +14,86 @@ templates.run({
     getIndexBtnItem:function(){
         return id("tv_home_tab").findOnce();
     },
+	//获取首页标志
+    findIndexPage:function(){
+      return findIndex();
+    },
+
+	//登陆：
+    login:function(){
+      toast("登陆......");       	  
+      var inviteCode  =  commons.getNewsReffer(runAppName); 
+      //reffer_code  =  commons.getVideoReffer("刷宝"); 
+
+	  var waitCount=0;
+	  toast("登陆:等待启动......");
+	  var waitCount=0;
+	  var waitFlag=true;
+	  while(waitFlag  && waitCount<20){
+		 waitCount++;
+	     if(findIndex())
+	     {
+			waitFlag=false;
+			break;
+			
+	     }
+		 var uiele = text("允许").findOnce();
+         if(uiele){
+            uiele.click();
+            sleep(2000);
+         }
+         uiele = text("始终允许").findOnce();
+         if(uiele){
+            uiele.click();
+            sleep(2000);
+         }
+		 //再次检查是否到首页
+		 if(findIndex())
+	     {
+			waitFlag=false;
+	     }
+		 else
+		 {
+	        back();
+			sleep(1000);
+		 
+		 }
+	  }
+      toast("登陆：app 启动成功");
+	
+
+       	
+	  var myBtn = id("a4a").findOnce();//未登录
+	  if(myBtn){
+		 myBtn=myBtn.parent(); 
+		 if(myBtn)
+			 myBtn.click();
+	     sleep(2000);
+	  }
+
+	  
+	  toast("登陆领红包");       	  
+	  var loginBtn=id("a46").findOnce();//登陆领红包
+	  if(!loginBtn)loginBtn=id("a37").findOnce();//("立即赚钱").findOnce();
+	  if(loginBtn){
+		 loginBtn.click();
+		 sleep(1000);
+		 
+		 //微信一键登陆：
+		 var wechatLogin = id("z7").findOnce();//text("微信一键登陆").findOnce();
+		 if(wechatLogin){
+			 var txt=wechatLogin.child(0);
+			 if(txt)txt=txt.text();
+			 toast("一键："+txt);
+			 wechatLogin.click();
+		 }
+		 sleep(2000);  
+		 toast("登陆完成");
+	  }
+	  
+	  
+	},
+  
 	
     //签到
     signIn:function(){
@@ -55,6 +136,7 @@ templates.run({
     },
     //找出新闻的条目
     findNewsItem:function(){
+		/*
 		var newsItem=null;
 		var recyclerView = className("android.support.v7.widget.RecyclerView").findOnce();
         if(!recyclerView) return null;
@@ -65,6 +147,9 @@ templates.run({
 			newsItem = commons.findParentOfTextWiew(childLayout);
 			if(newsItem)break;
         }
+		*/
+		var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
+	    var newsItem = commons.findParentOfTextWiew(rootNode);
 	    
 		if(!newsItem){
            //检查是否有弹窗：
@@ -206,12 +291,13 @@ templates.run({
 	}
 });
 
+function findIndex(){
+   return text("美文").findOnce(); 
+}
 
 function downloadProcess(appName)
 {  
-	//commons.yingyongbao(appName);
-    //commons.install(appName);
-    //app 打开成功
+	commons.yingyongbao(appName);
     
 }
 

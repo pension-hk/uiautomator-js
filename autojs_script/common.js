@@ -173,70 +173,179 @@ util.getConfig=function(){
     
 }
 
+util.getNewsReffer=function(name){
+    var reffer_code=null;
+	var path=files.getSdcardPath()+"/脚本/reffer.json";
+    if(files.exists(path)){
+	  var reffer = files.read(path);
+	  reffer   = JSON.parse(reffer);
+	    		
+	
+      var newsList = reffer.newsAppList;
+      var appNum = newsList.length;
+      for(var i = 0;i< appNum;i++){
+          var scriptName=newsList[i].name;
+		  if(scriptName==name)
+	      {
+             reffer_code   = newsList[i].reffer_code;
+             break;
+		  }	  
+ 	  }   
+	}
+    return reffer_code;
+		
+}
+
+util.getVideoReffer=function(name){
+    var reffer_code=null;
+	var path=files.getSdcardPath()+"/脚本/reffer.json";
+    if(files.exists(path)){
+	  var reffer = files.read(path);
+	  reffer   = JSON.parse(reffer);
+	  var videoList = reffer.videoAppList;
+      var appNum = videoList.length;
+      for(var i = 0;i< appNum;i++){
+          var scriptName=videoList[i].name;
+		  if(scriptName==name)
+	      {
+             reffer_code   = videoList[i].reffer_code;
+             break;
+		  }	  
+ 	  }   
+	}
+    return reffer_code;
+
+		
+}
+
+
 util.yingyongbao=function(name){
-    if(!app.isAppInstalled(app.getPackageName("应用宝")))
+    
+	var installPkg="com.android.packageinstaller";
+	var tencentDownPkg = "com.tencent.android.qqdownloader";
+	if(!app.isAppInstalled(app.getPackageName("应用宝")))
     {
         toast("请安装应用宝");
         return;
     }
     toast("启动应用宝");
     util.launch("应用宝");
-    var curPackage=currentPackage();
-    while(curPackage!="com.tencent.android.qqdownloader"){
-       curPackage=currentPackage();
+	var currentPkg=currentPackage();
+	var waitCount=0;
+    while(currentPkg != tencentDownPkg && waitCount<20){
+          waitCount++;
+		  currentPkg=currentPackage();
+	      if(currentPkg==installPkg)break;
+		  sleep(1000);
+    }
+	if(waitCount>=20)return;
+    toast("应用宝启动成功，waitCount="+waitCount);
+    if(currentPkg != installPkg)
+	{ 
+       //先清理应用宝：
+       waitCount=0;
+	   var idBtn = id("ax5").findOnce();  //下载管理按钮
+	   while(!idBtn && waitCount<20)
+	   {
+		   waitCount++;
+		   idBtn = id("ax5").findOnce();  //下载管理按钮
+	   }
+	   if(idBtn){
+		  idBtn.click(); 
+		  sleep(1000);
+		  
+		  //下载管理界面：
+		  var delBtn=text("删除").findOnce();
+          if(delBtn){
+			 delBtn.click();
+             sleep(1000);
+           
+		  }
+	      back();
+	      sleep(2000);
+     	  currentPkg=currentPackage();
+	      toast("应用宝清理完成，当前界面："+currentPkg);
+       }
+	   
+	   //sleep(5000);
+       util.UIClick("awt");  //搜索框
        sleep(1000);
-    }
+       var searchId=id("yv").findOnce();
+       if(!searchId)return;
+       searchId.setText(name);
+       sleep(1000);
+	
+	
+       util.UITextClick("搜索");
+       sleep(10000);
+       var searchCount = 3;
+	   var targetApp=text(name).findOnce(1);
+       while(!targetApp && searchCount--){
+	      toast("找不到目标APP："+name+"再次搜索......");
+          util.UITextClick("搜索");
+          sleep(10000);
+          targetApp=text(name).findOnce(1);
+	   }
+	   if(!searchCount){
+	      toast("找不到目标APP："+name);
+          return;    
+	   }
+	
+       toast("找到目标APP："+name);
+       var downloadBtn=text("下载").findOnce();
+       if(!downloadBtn){
+           toast("找不到下载按钮");
+           return;
+       }
     
-    //sleep(5000);
-    util.UIClick("awt");
-    sleep(1000);
-    var searchId=id("yv").findOnce();
-    if(!searchId)return;
-    searchId.setText(name);
-    sleep(1000);
-    util.UITextClick("搜索");
-    sleep(5000);
-    var targetApp=text(name).findOnce(1);
-    if(!targetApp){
-        toast("找不到目标APP："+name);
-        return;
-    }
-    toast("找到目标APP："+name);
-    var download=text("下载").findOnce();
-    if(!download){
+       toast("准备下载......");
+       downloadBtn.parent().click();
+       waitCount =  0;
+	   while(currentPkg==tencentDownPkg && waitCount<20){//等待离开下载界面
+          waitCount++;
+		  currentPkg=currentPackage();
+          sleep(5000);
+       }
+       if(waitCount>=20)return;
+	   toast("下载完成！waitCount="+waitCount);
         
-        toast("找不到下载按钮");
-        return;
-     }
-    
-    //toast("找到下载按钮，准备下载");
-    download.parent().click();
-    var currentP=currentPackage();
-    var tencentDl="com.tencent.android.qqdownloader";
-    while(currentP==tencentDl){//等待离开下载界面
-       currentP=currentPackage();
-       sleep(500);
-    }
-    
-    var del=text("删除").findOnce();
-    if(del){
-        
-        del.click();
-        
-    }
+	   //	删除：
+	   var delBtn=text("删除").findOnce();
+ 	   waitCount =  0;
+	   while(!delBtn && waitCount<20){//等待删除20秒
+          waitCount++;
+		  delBtn=text("删除").findOnce();
+          sleep(1000);
+       }
+       if(delBtn){
+           delBtn.click();
+       }
+	   currentPkg=currentPackage();
+	   toast("已退出下载，当前处于："+currentPkg+",如果界面超过10秒不动，请手动配合一次。");
+
+	}
+  
+    if(currentPkg != installPkg)
+	{
+       return;
+	}
+    util.install(name);
+	
+   
      
 }
 
 util.install=function(appName)
 { 
-	  
+    var waitCount=0;
+	var installPkg="com.android.packageinstaller";
+	
 	toast("准备安装");
-  
-    var installCount = 0;  
-    //循环找安装
+    
+	//循环找安装
     var installFlag = false;
-    while(!installFlag && installCount <= 10){
-	   installCount++;	
+    while(!installFlag && waitCount <= 20){
+	   waitCount++;	
        var uiele = text("安装").findOnce();
        if(uiele){
           uiele.click();
@@ -246,26 +355,35 @@ util.install=function(appName)
 	   {
           util.UIClick("ok_button"); //点下一步
 	   } 
-
+	   
 	   
     }
+    
+	toast("安装中......");
+	sleep(2000);
         
     //安装完成
+	waitCount=0;
     var installFinishFlag = false;
-    while(!installFinishFlag){
-      //var uiele = text("完成").findOnce();
+    while(!installFinishFlag && waitCount<=20){
       var uiele = text("打开").findOnce();
       if(uiele){
-          uiele.click();
+          if(!uiele.click())click("打开");
           installFinishFlag = true;
       }
-	 
+	  waitCount++;
       sleep(2000);
     }
-    //等待打开APP
-    var curApp=currentPackage();
-    var targetApp=app.getPackageName(appName);
-    while(curApp != targetApp){
+    
+	var targetPkg=app.getPackageName(appName);
+  
+	//等待打开APP
+    toast("install:等待打开APP");
+    waitCount=0;
+    var currentPkg=currentPackage();
+    while(currentPkg != targetPkg && waitCount<=30){
+	   waitCount++;
+    	
        var uiele = text("允许").findOnce();
        if(uiele){
           uiele.click();
@@ -276,11 +394,26 @@ util.install=function(appName)
           uiele.click();
           sleep(2000);
        }
-            
-       curApp=currentPackage();
+       
+	   uiele = text("打开").findOnce();
+       if(uiele){
+          uiele.click();
+          sleep(2000);
+       }
+       uiele = text("删除").findOnce();
+       if(uiele){
+          uiele.click();
+          sleep(2000);
+       }
+    
+	
+	   currentPkg=currentPackage();
+	   //toast("当前界面："+currentPkg+" 目标界面："+targetPkg);
        sleep(2000);
     }
-    //app 打开成功
+	
+    toast("install:打开APP退出,waitCount="+waitCount);
+    
 
 }
 

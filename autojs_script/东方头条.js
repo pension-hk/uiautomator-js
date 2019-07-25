@@ -1,23 +1,42 @@
-const commons = require('common.js');
-const templates = require('template.js');
-
+const commons    = require('common.js');
+const templates  = require('template.js');
+const runAppName ="东方头条"; 
 
 templates.init({
-    appName:"东方头条",
+    appName:runAppName,
 	indexBtnText:"新闻",
     indexFlagText:"发布",	
 });
 
-
+//pop："您有新的时段奖励可以领取，请及时领取" ==》立即领取 x:id=hi,点立即领取==>时段奖励领取成功 x:id=hi 和【立即查看】
+//news：恭喜你获得 & 浏览广告赢更多金币,其父类才可以点，点进去=》是视频广告，等30秒后检查：com.songheng.eastnews:id/tt_video_ad_close
+//要文推送：“忽略” 和“立即查看”，点“立即查看”==》class：android.webkit.WebView
+//视频按钮=》
+//   找文本TextView类：android.widget.TextView，其父类是可以点击的，点击后进入播放，可查类：android.support.v4.widget.SlidingPaneLayout。只能back（）；
+//   还有跳入类：android.webkit.WebView，只能立即back。          
 templates.run({
     
     //获取首页按钮
     getIndexBtnItem:function(){
-		var textW=text("新闻").findOnce(); 
-		if(!textW)textW=text("刷新").findOnce();
-        if(textW)return textW.parent(); 
+	    return findIndex();		
     },
-	
+		//获取首页标志
+    findIndexPage:function(){
+      return findIndex();
+    },
+
+	//登陆：
+    login:function(){
+      toast("登陆......");       	  
+      var inviteCode  =  commons.getNewsReffer(runAppName); 
+      //reffer_code  =  commons.getVideoReffer("刷宝"); 
+      waitAppSuccess();
+	  loginDone();
+	  fillInviteCode(inviteCode);
+	  toast("登陆完成");
+	  
+	},
+  
     //签到
     signIn:function(){
    	    //签到
@@ -37,68 +56,96 @@ templates.run({
     },
     //找出新闻的条目
     findNewsItem:function(){
-		var newsItem=null;
-		var recyclerView = className("android.support.v7.widget.RecyclerView").findOnce();//fu,go
-        if(!recyclerView)return null;
-    	var recyChildCount = recyclerView.childCount();
-        for(var  i=0;i<recyChildCount;i++){  //找出所有子条目
-     		var childLayout  = recyclerView.child(i);   
-			if(!childLayout)continue;
-			newsItem = commons.findParentOfTextWiew(childLayout);
-			if(newsItem)break;
-        }
-		return newsItem;
-		/*
-        for(var  i=0;i<recyChildCount;i++){  //找出所有子条目
-            var LinaearLayout  = recyclerView.child(i);    //LinaearLayout
-			if(!LinaearLayout)continue;
-		    var childCount=LinaearLayout.childCount();
-			//toast("发现类："+ LinaearLayout.className()+"有子条目："+childCount);			
-			for(var j=0;j<childCount;j++)
-			{
-			    var textChild = LinaearLayout.child(j);    //TextView
-                if(!textChild)continue;
-				//判断是否有新闻：
-				var textString = textChild.text();
-				if(!textString){
-					continue;
-				}
-					
-				//if(textString.indexOf("阅读")>=0 || textString.indexOf("播放")>=0){
-				//   newsItem=LinaearLayout;
-				//   break;
-				//}
-                newsItem=LinaearLayout;
-				break;
+		var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();//fu,go
+	    var newsItem = commons.findParentOfTextWiew(rootNode);
+		/* 这里OK！
+		if(newsItem){
+		   var textW  = newsItem.child(0);
+           if(textW)toast("textW="+textW.text());		   
 			
-          
-			}
-		    if(newsItem)break; 
-		}	
-        if(newsItem)
-        {
-           if(findFilt(newsItem,"置顶"))newsItem=null;
-           else if(findContainFilt(newsItem,"广告"))newsItem=null;
-			   
 		}
-        		
-	    return newsItem;
 		*/
-		
+		return newsItem;
 		
     },
+	
+	findVideoItem:function(){
+		
+		var videoItem=null;
+		/*
+		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
+        videoItem  = app.findParentNode(rootNode);//app.findNodeByClass(rootNode,"android.widget.TextView"); 
+        return videoItem;
+		*/
+		videoItem=className("android.support.v4.view.ViewPager")
+            .className("android.support.v7.widget.RecyclerView")
+            .className("LinearLayout").findOnce();
+		if(videoItem){
+           var child=videoItem.child(0);
+		   if(child)txt=child.text();
+		   toast("txt="+txt);
+		   
+		}
+        else
+           toast("videoItem=null");			
+			
+	    return videoItem;   		
+    },
+	
+	
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
-        back();
+    	
+		back();
     },
-
+    //跳到视频页面：
+	jumpToVideo:function(){
+	   /*
+	   var videoId  = text("视频").findOnce();
+	   if(!videoId)return false;
+	   videoId=videoId.parent();
+	   if(!videoId)return false;
+	   //toast("找到视频父类："+videoId.className());
+	   if(!videoId.click()  && !click("视频"))return false;
+       var tuijieW=text("推荐").findOnce();  	 
+       if(!tuijieW)return false;
+       if(!tuijieW.click() && !click("推荐"))return false;	   
+	   return true;
+	   */
+	   var videoId  = text("视频").findOnce();
+	   if(!videoId)return false;
+	   if(!click("视频")) return false;
+	   sleep(1000);
+	   var tuijieW=text("推荐").findOnce();  	 
+       if(!tuijieW){
+		  toast("没找到推荐");
+		  return false;
+	   }
+                
+	   if(!click("推荐")){
+          toast("点击推荐失败");
+		  return false;
+	   }
+       toast("点击推荐成功");
+       return true;
+	   
+	 	   
+    },
     //阅读页面是否应该返回
     isShouldBack:function(){
     	var fl=text("忽略").findOnce();
         if(fl){
             fl.click();
         }
-	 
+		fl=text("禁止").findOnce();
+	    if(fl){
+            fl.click();
+			return  true;
+        }
+	    fl=text("立即下载").findOnce();
+	    if(fl){
+       	   return  true;
+        }
         return false;
     },
 	popWindow:function(){
@@ -162,40 +209,189 @@ templates.run({
 	}
 });
 
-function findFilt(obj,flag){
-         //toast("input class="+obj.className());
-         for(var i=0;i<obj.childCount();i++){
-            var child=obj.child(i);
-            if(child===null)continue;
-            var tx=child.text();
-            //toast("text="+tx);
-            if(tx===flag)return true;
-            if(findFilt(child,flag))return true;
-         } 
-         return false;
+function findIndex(){
+
+    var textW=text("新闻").findOnce(); 
+	if(!textW)textW=text("刷新").findOnce();
+    if(textW)textW=textW.parent();
+    return textW;	
 }
-function findContainFilt(obj,flag)
-{  
-         for(var i=0;i<obj.childCount();i++){
-             var child=obj.child(i);
-             if(child===null)continue;
-             var tx=child.text();
-             //toast("findContainFilt:text="+tx);
-             if(tx.indexOf(flag)>=0)return true;
-              //if(findContainFilt(child,flag))return true;
-             if(findContainFilt(child,flag))return true;
-   
-         } 
-         return false;
+
+
+function waitIndex()
+{
+	var waitCount=0;
+	var waitFlag=true;
+	while(waitFlag  && waitCount<20){
+		 waitCount++;
+		 if(findIndex())
+		 {
+			waitFlag=false;
+			break;
+		 }
+		 else
+		 {
+			var curPkg= currentPackage();
+			toast("curPkg="+curPkg);
+			back();   
+			sleep(1000);
+		 }
+	}	 
+  
+    toast("退出waitIndex()，waitCount="+waitCount+"  waitFlag="+waitFlag);
+	if(waitFlag||waitCount>=20)
+		return   false;
+	else
+		return true;
+	
 }
+
+function  waitAppSuccess()
+{
+	  toast("登陆:等待启动......");
+	  var waitCount=0;
+	  var waitFlag=true;
+	  while(waitFlag  && waitCount<20){
+	     waitCount++;
+  		 if(findIndex())
+	     {
+			waitFlag=false;
+			break;
+			
+	     }
+		 var uiele = text("允许").findOnce();
+         if(uiele){
+            uiele.click();
+            sleep(2000);
+         }
+         uiele = text("始终允许").findOnce();
+         if(uiele){
+            uiele.click();
+            sleep(2000);
+         }
+		 //再次检查是否到首页
+		 if(findIndex())
+	     {
+			waitFlag=false;
+	     }
+		 else
+		 {
+	        back();   //条件是当前运行的是自己
+			sleep(1000);
+		 
+		 }
+	  }	
+	  toast("登陆：app 启动成功");
+}
+function loginDone()
+{
+	  /*
+	  var myBtn = text("我的").findOnce();
+	  if(myBtn){
+		myBtn.click();
+        sleep(1000);
+		if(!text("我的").findOnce())
+		{
+			back(); //前提是当前运行的是自己
+			sleep(1000);
+		}
+		
+	  }
+	  */
+	  var waitCount=0;
+	  var myBtn = text("我的").findOnce();
+	  while(!myBtn  && waitCount<20){
+		 waitCount++;
+		 myBtn = text("我的").findOnce();
+		 if(!myBtn)
+		 {
+			var curPkg= currentPackage();
+			toast("curPkg="+curPkg);
+			back();   
+			sleep(1000);
+		 }
+		 
+	  }	 
+      if(myBtn)
+		myBtn.click();
+      sleep(2000);  
+	  
+	  
+	  toast("点击登陆"); 
+      if(!commons.idClick("a80")){
+		toast("点击登陆失败");  
+	  }
+	  
+	  sleep(1000);
+	  
+	  wechatLoginByhand();
+	  
+}
+
+function wechatLoginByhand(){ //手动登陆
+	 //微信一键登陆：
+	  var currentClass=className("android.webkit.WebView").findOnce();
+	  var waitCount = 0;
+	  while(!currentClass  && waitCount<20)
+	  {
+		 waitCount++; 
+		 currentClass=className("android.webkit.WebView").findOnce(); 
+		 sleep(1000);
+	  }
+	  waitCount = 0;		
+	  while(currentClass && waitCount<30)
+	  {
+		 waitCount++; 
+		 currentClass=className("android.webkit.WebView").findOnce(); 
+		 sleep(5000);
+		 toast("请手动点击手机图标登陆,然后填手机号与验证码，或者点微信登陆");
+	  }
+	  toast("登陆退出,waitCount="+waitCount);
+	  sleep(2000);
+	
+	
+}
+
+
+
+function  fillInviteCode(inviteCode)
+{
+		 
+	  //填邀请码：
+	  toast("填邀请码，先到我的");
+      waitIndex();
+		 
+		 var inviteBtn = text("填邀请码").findOnce();
+		 if(!inviteBtn)return;
+		 if(!inviteBtn.click())
+		 {
+            click("填邀请码");
+		 }
+         sleep(2000);
+		 //android.webkit.WebView
+		 currentClass=className("android.webkit.WebView").findOnce();
+		 var waitCount = 0;
+		 while(!currentClass  && waitCount<20)
+		 {
+			waitCount++; 
+			currentClass=className("android.webkit.WebView").findOnce(); 
+			sleep(5000);
+		 }
+	     waitCount = 0;		
+		 while(currentClass)
+		 {
+			waitCount++; 
+			currentClass=className("android.webkit.WebView").findOnce(); 
+			sleep(5000);
+			toast("请手动填入邀请码：【 "+inviteCode+" 】，然后点提交");
+		 }
+	
+
+}	
 
 
 function downloadProcess(appName)
 {  
-	//commons.yingyongbao(appName);
-	//commons.install(appName);
-    //app 打开成功
-	
-    
+	commons.yingyongbao(appName);
 }
 

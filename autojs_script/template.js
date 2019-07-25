@@ -7,7 +7,7 @@ var template = {};
  */
 var initParam = {
     appName:"",//应用名称
-    lastNewsText:"",//上一次新闻标题
+ 	lastNewsText:"",//上一次新闻标题
 
     totalNewsReaded : 0,//已经阅读的新闻条数
     totalNewsOneTime : 50,//一次性阅读多少条新闻
@@ -37,23 +37,30 @@ template.run = function(fun){
      */
     utils.wakeUp(); 
 	
-	if(template.downloadApp(fun.download))
+	if(template.downloadApp(fun.download)){
+	   template.login(fun.login);
+	   exit();
+    }
+    var launched=app.launchApp(initParam.appName);
+    if(!launched) launched=template.launch(fun.getAppName);
+    if(!launched)
 	{
-		exit();
-		
+      exit();
+    }
+    toast("等待app 启动......");
+	var waitCount=0;
+	var waitFlag=true;
+	while(waitFlag  && waitCount<15){
+		waitCount++;
+		if(fun.findIndexPage != null && fun.findIndexPage())
+		{
+			waitFlag=false;
+		}
+		else
+	        sleep(1000);
 	}
-//toast("启动:"+initParam.appName);
-var b=app.launchApp(initParam.appName);
-if(!b) 
-{
-	  //toast(appName+",启动不成功！");
-   if(!template.launch(fun.getAppName))exit();
-}
-//toast("成功启动:"+initParam.appName);  
-	sleep(15000);
-
-
-
+    toast("app 启动成功");
+	
     /**
      * 自动更新
      */
@@ -83,14 +90,26 @@ if(!b)
 	    
         //领取时段奖励
         template.getTimeAward(fun.doingAfterTimeAward);
-        //找到一条新闻
-        template.getOneNews(fun.findNewsItem);
+        
+		//找到一条新闻
+        template.getOneNews(fun.findNewsItem,fun.getIndexBtnItem);
         //阅读新闻60s
         template.readNews(60,fun.isShouldBack);
         //返回新闻列表
         template.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2);
-         
-		sleep(10000);
+		
+		/*
+		//
+		if(template.jumpToVideoIndex(fun.jumpToVideo)){
+			sleep(1000);
+		   //找到一条视频：
+           template.getOneVideo(fun.findVideoItem,fun.getIndexBtnItem);
+           //看视频60s
+           //template.viewVideo(60,fun.isShouldBack);
+           //template.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2);
+	       sleep(10000);  
+		}
+		*/
 		
     }
     
@@ -166,6 +185,19 @@ template.launch=function(getAppName)
 	
 }
 
+template.login=function(login)
+{
+    if(login == null){ 
+       return  false;
+    }else{
+      
+       return login(initParam.appName);
+    
+    }
+
+
+}
+
 
 /**
  * 跳转到首页
@@ -226,15 +258,16 @@ template.backToIndex = function(indexFlagText,indexFlagText1,indexFlagText2) {
     var loop = 0;
     while(!indexBtn && loop<20 ){
 		toast("backToIndex:back()");
-        back();
-        sleep(2000);
-		var currentPkgName=currentPackage();
-		if(currentPkgName!=runPkgName)
+        var currentPkgName=currentPackage();
+		if(runPkgName  != null  && currentPkgName !=  runPkgName)
 		{
 		   toast("当前包不是运行包:"+currentPkgName+"，重启它");
 		   utils.launch(initParam.appName);	
 		   break;
 		}
+		
+		back();
+        sleep(2000);
 		
         indexBtn = text(indexFlagText).findOnce();
 		if(!indexBtn)indexBtn=text(indexFlagText1).findOnce();
@@ -270,13 +303,27 @@ template.backToIndex = function(indexFlagText,indexFlagText1,indexFlagText2) {
 }
 
 
+template.jumpToVideoIndex=function(jumpToVideo)
+{
+	toast("jumpToVideoIndex");
+    if(jumpToVideo != null){
+        return jumpToVideo();
+    }
+	return  false;
+
+}
+		
+
 
 
 /**
  * 获取时段奖励
  */
 template.getTimeAward = function(doingAfterTimeAward){
-    if(!utils.UITextBoundsClick(initParam.timeAwardText))return;
+    
+	if(!utils.UITextBoundsClick(initParam.timeAwardText)){
+		return;
+	}
     //判断是否有提示
     if(doingAfterTimeAward != null){
         doingAfterTimeAward();
@@ -286,12 +333,14 @@ template.getTimeAward = function(doingAfterTimeAward){
 /**
  * 获取一条新闻
  */
-template.getOneNews = function(findNewsItem){
+template.getOneNews = function(findNewsItem,getIndexBtnItem){
     
-    toast("开始获取新闻资源");
+    if(app.compareVersion<0) return;//6.0 无法看新闻
+    
+	toast("开始获取新闻资源");
     //阅读超过50条，刷新页面
     if(initParam.totalNewsReaded > initParam.totalNewsOneTime){
-        initParam.totalNews = 0;
+        initParam.totalNewsReaded = 0;
         //click(1,1919);
 		toast("阅读超过50条，刷新页面");
 		var indexPage =getIndexBtnItem();
@@ -312,17 +361,18 @@ template.getOneNews = function(findNewsItem){
     while((!isFindNews || initParam.lastNewsText === newsText)  && initParam.loopTimeToFindNews < 20){
         //找新闻次数+1
         initParam.loopTimeToFindNews++;
-
         //进行下翻
         swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
-        sleep(1000);
+    	sleep(1000);
 
         //新闻条目
         newsItem = findNewsItem();
         if(newsItem){
-           
             newsText = newsItem.child(0).text();
-            isFindNews = true;
+	     	var tmpNewsItem=app.findNodeByText(newsItem,"置顶");
+			if(!tmpNewsItem)tmpNewsItem=app.findNodeByText(newsItem,"广告");
+			if(!tmpNewsItem)isFindNews = true;
+		
         }
 		else
 		{
@@ -349,7 +399,7 @@ template.getOneNews = function(findNewsItem){
         //toast("找到新闻，点击阅读");
         initParam.lastNewsText = newsText;
         initParam.totalNewsReaded++;
-        if(!newsItem.click())
+	    if(!newsItem.click())
 		{
 		  var bounds=newsItem.bounds();
           if(bounds){
@@ -360,17 +410,20 @@ template.getOneNews = function(findNewsItem){
     }else{
         toast("20次滑动没有找到新闻，请检查新闻ID");
 		findNewsItem();//再给一次机会
-		
-        exit();
+	    exit();
     }
 }
+
+
 
 //阅读新闻
 template.readNews = function(seconds,isShouldBack){
 
-    //滑动阅读新闻
+    if(app.compareVersion<0)return; //6.0不看新闻
+    
+	//滑动阅读新闻
     for(var i = 0 ;i < seconds/10 ;i++){
-        utils.swapeToRead();
+     	  utils.swapeToRead();
 
         //判断是否直接返回
         var shouldBack = false;
@@ -384,6 +437,86 @@ template.readNews = function(seconds,isShouldBack){
  		
     }
 }
+
+/**
+ * 获取一个视频
+ */
+template.getOneVideo = function(findVideoItem,getIndexBtnItem){
+    
+    toast("开始获取视频资源");
+    //上滑找新闻
+    var isFindNews = false;//是否找到新闻
+	var videoText = "";//视频标题
+    var videoItem;//视频条目
+    initParam.loopTimeToFindNews = 0;//循环次数
+    while((!isFindNews || initParam.lastNewsText === videoText)  && initParam.loopTimeToFindNews < 20){
+        //找新闻次数+1
+        initParam.loopTimeToFindNews++;
+        //进行下翻
+        swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
+ 		sleep(1000);
+       //视频条目
+        videoItem = findVideoItem();
+        if(videoItem){
+	        videoText = videoItem.child(0).text
+	        isFindNews = true;
+        }
+		else
+		{
+			
+			var currentPkgName=currentPackage();
+            if(currentPkgName=="com.UCMobile")
+	        {
+			   toast("处理打开的："+currentPkgName);
+               var  exitText =  text("退出").findOnce();
+               if(exitText)exitText.click();
+               else
+		       {
+			     back();
+                 sleep(1000);
+		       }		   
+	        }
+			
+			
+		}
+    }
+
+    //找到视频，点击阅读
+    if(isFindNews){
+        initParam.lastNewsText = videoText;
+        toast("找到视频，点击阅读:"+videoText);
+     	initParam.totalNewsReaded++;
+	    if(!videoItem.click())
+		{
+		  var bounds=videoItem.bounds();
+          if(bounds){
+             if( (bounds.left>=0 && bounds.right>bounds.left)&&(bounds.top>=0&&bounds.bottom>bounds.top))
+		         click(bounds.centerX(),bounds.centerY()); 
+          }
+		}
+    }else{
+        toast("20次滑动没有找到视频，请检查视频ID");
+	    exit();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 template.downloadApp=function(download){
 	

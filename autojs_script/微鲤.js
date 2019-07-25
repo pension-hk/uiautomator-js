@@ -1,9 +1,10 @@
 const commons = require('common.js');
 const templates = require('template.js');
+const runAppName ="微鲤"; 
 
 
 templates.init({
-    appName:"微鲤",
+    appName:runAppName,
     indexFlagText:"发布",
     timeAwardText:"领红包",
 });
@@ -13,6 +14,24 @@ templates.run({
     getIndexBtnItem:function(){
         return id("rl_bottom_1").findOnce();
     },
+	//获取首页标志
+    findIndexPage:function(){
+      return findIndex();
+    },
+
+	//登陆：
+    login:function(){
+      toast("登陆......");       	  
+      var inviteCode  =  commons.getNewsReffer(runAppName); 
+      //reffer_code  =  commons.getVideoReffer("刷宝"); 
+	  waitAppSuccess();
+	  loginDone();
+	  fillInviteCode(inviteCode);
+	  toast("登陆完成");
+	  
+	},
+  
+	
     //签到
     signIn:function(){
         commons.UIClick("rl_bottom_4");
@@ -31,29 +50,8 @@ templates.run({
         //领取宝藏
         commons.UIClick("text_ok");
         commons.UIClick("bt_ok");
-
-		/*
-        var newsItem = id("tv_title").findOnce(1);
-        //判断是否是广告
-        if(newsItem){
-            newsItem = newsItem.parent();
-            var adFlag = newsItem.child(1);
-            if(adFlag && adFlag.text() == "广告"){
-                newsItem = null;
-            }
-        }
-        return newsItem;
-		*/
-		var newsItem=null;
-		var recyclerView = className("android.support.v7.widget.RecyclerView").findOnce();
-        if(!recyclerView)return null;
-    	var recyChildCount = recyclerView.childCount();
-        for(var  i=0;i<recyChildCount;i++){  //找出所有子条目
-     		var childLayout  = recyclerView.child(i);   
-			if(!childLayout)continue;
-			newsItem = commons.findParentOfTextWiew(childLayout);
-			if(newsItem)break;
-        }
+		var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();//fu,go
+	    var newsItem = commons.findParentOfTextWiew(rootNode);
 		return newsItem;
 		
     },
@@ -66,7 +64,7 @@ templates.run({
 
         //领取宝藏
         commons.UIClick("text_ok");
-        commons.UIClick("bt_ok");
+        commons.UIClick("bt_ok");      //如阅读奖励提醒，点知道了
 
         return false;
     },
@@ -93,12 +91,120 @@ templates.run({
 	}
 });
 
+function findIndex(){
+   return text("美食").findOnce(); 
+}
+
+function  waitAppSuccess()
+{
+	  toast("登陆:等待启动......");
+	  var waitCount=0;
+	  var waitFlag=true;
+	  while(waitFlag  && waitCount<20){
+	     waitCount++;
+  		 if(findIndex())
+	     {
+			waitFlag=false;
+			break;
+			
+	     }
+		 var uiele = text("允许").findOnce();
+         if(uiele){
+            uiele.click();
+            sleep(2000);
+         }
+         uiele = text("始终允许").findOnce();
+         if(uiele){
+            uiele.click();
+            sleep(2000);
+         }
+		 //再次检查是否到首页
+		 if(findIndex())
+	     {
+			waitFlag=false;
+	     }
+		 else
+		 {
+	        back();   //条件是当前运行的是自己
+			sleep(1000);
+		 
+		 }
+	  }	
+	  toast("登陆：app 启动成功");
+}
+
+function loginDone(){
+	 var myBtn = id("rl_bottom_4").findOnce();//我的
+	  if(myBtn){
+		 myBtn.click();
+	     sleep(2000);
+	  }
+     
+	  toast("登陆领红包");       	  
+	  var loginBtn=loginBtn=id("et_login").findOnce();//("立即赚钱").findOnce();
+	  if(loginBtn)
+	  {
+		 loginBtn.click();
+		 sleep(2000);
+	  } 	 
+      wechatLogin();
+	  
+	
+}
+
+function wechatLogin(){
+	 //微信一键登陆：
+	 var wechatLogin = id("login_0").findOnce();//text("微信一键登陆").findOnce();
+	 if(!wechatLogin)return;
+	 wechatLogin.click();
+	 sleep(2000); 
+	 var currentClass=className("android.widget.ScrollView").findOnce();
+	 var waitCount = 0;
+	 while(!currentClass  && waitCount<20)
+	 {
+		waitCount++; 
+		currentClass=className("android.widget.ScrollView").findOnce(); 
+		sleep(1000);
+	 }
+		 
+	 var agreeBtn  =  text("同意").findOnce();
+	 if(!agreeBtn)agreeBtn=id("eb8").findOnce();
+	 if(agreeBtn)agreeBtn.click();
+		 
+	 waitCount = 0;		
+     while(currentClass && waitCount<30)
+	 {
+		 waitCount++; 
+		 currentClass=className("android.widget.ScrollView").findOnce(); 
+		 sleep(1000);
+	 }
+	 toast("登陆退出,waitCount="+waitCount);
+}
+
+
+function  fillInviteCode(inviteCode)
+{
+	  //填邀请码：
+	  var inviteBtn = id("et_input").findOnce();//输入邀请码
+	  if(inviteBtn){
+	     if(inviteBtn.click())
+		 {
+			sleep(1000);
+			inviteBtn.setText(inviteCode);
+			sleep(1000);
+			commons.UIClick("iv_done");//领取
+			sleep(2000);
+		 }
+	  }
+      var btOk = id("bt_ok").findOnce();//确定 	
+	  if(btOk)btOk.click();
+	
+
+}	
+	  
+
+
 function downloadProcess(appName)
 {  
-	
-	//commons.yingyongbao(appName);	
-	//commons.install(appName);
-    //app 打开成功
-	
-    
+	commons.yingyongbao(appName);	
 }
