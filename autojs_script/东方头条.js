@@ -58,13 +58,9 @@ templates.run({
     findNewsItem:function(){
 		var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();//fu,go
 	    var newsItem = commons.findParentOfTextWiew(rootNode);
-		/* 这里OK！
-		if(newsItem){
-		   var textW  = newsItem.child(0);
-           if(textW)toast("textW="+textW.text());		   
-			
+		if(!newsItem){
+		   popWindow();
 		}
-		*/
 		return newsItem;
 		
     },
@@ -155,7 +151,11 @@ templates.run({
 		   waitPlayAd();
 		   
 		}
-		
+	    var videoAd = id("tt_video_ad_close").findOnce();
+        if(videoAd){
+            videoAd.click();
+        }
+	
         return false;
     },
 	popWindow:function(){

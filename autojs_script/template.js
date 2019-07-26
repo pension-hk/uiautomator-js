@@ -277,7 +277,9 @@ template.backToIndex = function(indexFlagText,indexFlagText1,indexFlagText2) {
 		//uc浏览器处理:		
 		var  exitText =  text("退出").findOnce();
         if(exitText)exitText.click();
-  	
+  	    
+	   
+	
         //超出退出时长的，做一些特殊处理
         if(loop > 5){
 			

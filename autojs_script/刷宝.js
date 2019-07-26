@@ -26,29 +26,44 @@ templates.run({
         click("任务");
         sleep(2000);
         //去掉广告
-        var animationView=id("imgClose").findOnce();
+		var waitCunt=0;
+		var animationView=id("imgClose").findOnce();
+        while(!animationView && waitCunt<10){
+              waitCunt++;
+			  animationView=id("imgClose").findOnce();
+			  sleep(1000);
+        }
         if(animationView)animationView.click();
-        
-        sleep(500);
+		sleep(1000);
         //点击签到领红包
-        if(!text("继续赚元宝").findOnce()){ //是否已经签到
-		   commons.UITextClick("立即签到")
-           sleep(1000);
-		
-           //删除弹出界面
-           //寻找“恭喜您获得”
-		   //var findWelcome=text("恭喜您获得").findOnce();
-		   animationView=id("imgClose").findOnce();
-           if(animationView)animationView.click();
-           sleep(500);
+    	var waitCunt=0;
+	    var signAtonce=text("立即签到").findOnce();
+		while(!signAtonce && waitCunt<10)
+		{
+			waitCunt++;
+			signAtonce=text("立即签到").findOnce();
+			if(!signAtonce)//commons.UITextClick("立即签到");
+			{
+			  var continueEarn=text("继续赚元宝").findOnce();
+	          if(continueEarn)break;
+			}
+			else
+			{
+			  commons.UITextClick("立即签到");
+              break;			  
+			}
+			sleep(1000); 
+			
 		}
-		
-		
+	    //删除弹出界面
+        //寻找“恭喜您获得”
+		//var findWelcome=text("恭喜您获得").findOnce();
+		animationView=id("imgClose").findOnce();
+        if(animationView)animationView.click();
+        sleep(500);
 		
 		//com.jm.video:id/tt_video_reward_container
 		//com.jm.video:id/tt_video_ad_close
-		
-		
 		
 		//开箱领元宝
 		//commons.UITextClick("开箱领元宝");
