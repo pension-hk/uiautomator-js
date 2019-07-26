@@ -37,23 +37,22 @@ function init(){
                 scriptName=newsList[i].name;
                 var currPath=path+scriptName+".js";
                 if(!files.exists(currPath))continue;
-				//if(app.compareVersion<0)break;
-                exec(scriptName,normalRumTime);
+			    exec(scriptName,normalRumTime);
             }
 			
 			appNum = videoList.length;
             for(var i = 0;i< appNum;i++){
-                scriptName=newsList[i].name;
+                scriptName=videoList[i].name;
                 var currPath=path+scriptName+".js";
-                //if(!files.exists(currPath))continue;
+                if(!files.exists(currPath))continue;
                 exec(scriptName,normalRumTime);
             }
         }else{
 			var appNum = videoList.length;
             for(var i = 0;i< appNum;i++){
-                scriptName=newsList[i].name;
+                scriptName=videoList[i].name;
                 var currPath=path+scriptName+".js";
-                //if(!files.exists(currPath))continue;
+                if(!files.exists(currPath))continue;
              	exec(scriptName,normalRumTime);
             }
 	        //sleep(1000*60*30);//睡眠半个小时

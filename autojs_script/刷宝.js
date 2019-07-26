@@ -93,7 +93,7 @@ templates.run({
     //找出视频
     findVideoItem:function(){  
         //检查首页是否注焦：
-		if(!text("首页").findOnce()){  //比如，东方头条推送弹窗
+		if(!text("首页").findOnce()){  
 		   back();
 		   sleep(200);
 		}
@@ -217,29 +217,70 @@ function  waitAppSuccess()
 
 function loginDone()
 {
-	  var waitCount=0;
-	  var myBtn = text("我的").findOnce();
-	  while(!myBtn  && waitCount<20){
-		 waitCount++;
-		 myBtn = text("我的").findOnce();
-		 if(!myBtn)
-		 {
-			var curPkg= currentPackage();
-			toast("curPkg="+curPkg);
-			back();   
-			sleep(1000);
-		 }
-		 
-	  }	 
-      if(myBtn)
-		myBtn.click();
-      sleep(2000);  
+	  var indexBrn = text("我").findOnce();
+	  if(indexBrn)
+	  {
+	  	click("我");
+	  }
+	  sleep(1000);
 	  
-	  toast("填手机号登陆"); 
-	  mobileLoginByhand();
+	  var loginTip=text("请输入手机号").findOnce();
+	  var waitCount = 0;
+	  while(!loginTip  && waitCount<20)
+	  {
+		 waitCount++; 
+		 loginTip=text("请输入手机号").findOnce(); 
+		 sleep(1000);
+	  }
+	 
+	  
+	  wechatLogin();
 	  
 }
 
+function wechatLogin(){
+	 //微信一键登陆：
+	 var loginWechat=id("login_weixin").findOnce();
+	 if(!loginWechat)return;
+	 loginWechat.click();
+	 
+	 sleep(2000); 
+	 var currentClass=className("android.widget.ScrollView").findOnce();
+	 var waitCount = 0;
+	 while(!currentClass  && waitCount<20)
+	 {
+		waitCount++; 
+		currentClass=className("android.widget.ScrollView").findOnce(); 
+		sleep(1000);
+	 }
+		 
+	 var agreeBtn  =  text("同意").findOnce();
+	 if(!agreeBtn)
+	 {
+		 toast("未找到同意");
+		 agreeBtn=id("eb8").findOnce();
+	     if(!agreeBtn)
+	     {
+	 	    toast("未找到eb8");
+      	    
+	     }
+	 }
+	 if(!agreeBtn.click()){
+		 
+		 toast("点同意失败");
+	 }
+
+	 waitCount = 0;		
+	 while(currentClass && waitCount<30)
+	 {
+		 waitCount++; 
+		 currentClass=className("android.widget.ScrollView").findOnce(); 
+		 sleep(1000);
+	 }
+	 toast("登陆退出,waitCount="+waitCount);
+}
+
+	  
 function mobileLoginByhand(){ //手动登陆
 	  var loginTip=text("请输入手机号").findOnce();
 	  var waitCount = 0;
