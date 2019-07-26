@@ -1,8 +1,8 @@
 const commons    = require('common.js');
 const templates  = require('video.js');
 const runAppName = "刷宝"; 
-const runAppName1 = "刷宝短视频"; 
-
+const runAppName1= "刷宝短视频"; 
+const runPk      ="com.jm.video";
 
 templates.init({
     appName:runAppName,
@@ -16,6 +16,23 @@ templates.run({
 		
         return text("首页").findOnce();
     },
+	
+	//获取首页标志
+    findIndexPage:function(){
+      return findIndex();
+    },
+	
+	//登陆：
+    login:function(){
+      toast("登陆......");       	  
+      var inviteCode  =  commons.getVideoReffer("刷宝"); 
+      waitAppSuccess();
+	  loginDone();
+	  //fillInviteCode(inviteCode);
+	  toast("登陆完成");
+	  
+	},
+
 	
     //签到
     signIn:function(){
@@ -110,24 +127,194 @@ templates.run({
 		var appPackage=app.getPackageName(appName);
 		if(!appPackage)appPackage=app.getPackageName(appName+"短视频");			
         if(!app.isAppInstalled(appPackage)){
-            //toast(appName+"没有安装");
             downloadProcess(appName);
 			return true;
         }
         else{
-           //toast("appName="+appName+"已经安装");
-		   return false;	
+     	   return false;	
         }		
 	}
 });
 
+function findIndex(){
+
+    return text("首页").findOnce();	
+}
+
+
+function waitIndex()
+{
+	var waitCount=0;
+	var waitFlag=true;
+	while(waitFlag  && waitCount<20){
+		 waitCount++;
+		 if(findIndex())
+		 {
+			waitFlag=false;
+			break;
+		 }
+		 else
+		 {
+			var curPkg= currentPackage();
+			toast("curPkg="+curPkg);
+			back();   
+			sleep(1000);
+		 }
+	}	 
+  
+    toast("退出waitIndex()，waitCount="+waitCount+"  waitFlag="+waitFlag);
+	if(waitFlag||waitCount>=20)
+		return   false;
+	else
+		return true;
+	
+}
+
+function  waitAppSuccess()
+{
+	  toast("登陆:等待启动......");
+	  var waitCount=0;
+	  var waitFlag=true;
+	  while(waitFlag  && waitCount<20){
+	     waitCount++;
+  		 if(findIndex())
+	     {
+			waitFlag=false;
+			break;
+			
+	     }
+		 var uiele = text("允许").findOnce();
+         if(uiele){
+            uiele.click();
+            sleep(2000);
+         }
+         uiele = text("始终允许").findOnce();
+         if(uiele){
+            uiele.click();
+            sleep(2000);
+         }
+		 
+		 uiele = text("去授权").findOnce();
+         if(uiele){
+            uiele.click();
+            sleep(2000);
+         }
+		 
+		 //再次检查是否到首页
+		 if(findIndex())
+	     {
+			waitFlag=false;
+	     }
+		 else
+		 {
+	        back();   //条件是当前运行的是自己
+			sleep(1000);
+		 
+		 }
+	  }	
+	  toast("登陆：app 启动成功");
+}
+
+function loginDone()
+{
+	  var waitCount=0;
+	  var myBtn = text("我的").findOnce();
+	  while(!myBtn  && waitCount<20){
+		 waitCount++;
+		 myBtn = text("我的").findOnce();
+		 if(!myBtn)
+		 {
+			var curPkg= currentPackage();
+			toast("curPkg="+curPkg);
+			back();   
+			sleep(1000);
+		 }
+		 
+	  }	 
+      if(myBtn)
+		myBtn.click();
+      sleep(2000);  
+	  
+	  toast("填手机号登陆"); 
+	  mobileLoginByhand();
+	  
+}
+
+function mobileLoginByhand(){ //手动登陆
+	  var loginTip=text("请输入手机号").findOnce();
+	  var waitCount = 0;
+	  while(!loginTip  && waitCount<20)
+	  {
+		 waitCount++; 
+		 loginTip=text("请输入手机号").findOnce(); 
+		 sleep(1000);
+	  }
+	  waitCount = 0;		
+	  while(loginTip && waitCount<30)
+	  {
+		 waitCount++; 
+		 loginTip=text("请输入手机号").findOnce(); 
+		 sleep(5000);
+		 toast("请手动输入手机号");
+	  }
+	  waitCount = 0;
+	  loginTip=text("请输入验证码").findOnce(); 
+	  while(loginTip && waitCount<30)
+	  {
+		 waitCount++; 
+		 loginTip=text("请输入验证码").findOnce(); 
+		 sleep(5000);
+		 toast("请手动输入验证码");
+	  }
+	  
+	  
+	  toast("登陆退出,waitCount="+waitCount);
+	  sleep(2000);
+	
+	
+}
+
+
+
+function  fillInviteCode(inviteCode)
+{
+		 
+	  //填邀请码：
+	  toast("填邀请码，先到我的");
+      waitIndex();
+		 
+		 var inviteBtn = text("填邀请码").findOnce();
+		 if(!inviteBtn)return;
+		 if(!inviteBtn.click())
+		 {
+            click("填邀请码");
+		 }
+         sleep(2000);
+		 //android.webkit.WebView
+		 currentClass=className("android.webkit.WebView").findOnce();
+		 var waitCount = 0;
+		 while(!currentClass  && waitCount<20)
+		 {
+			waitCount++; 
+			currentClass=className("android.webkit.WebView").findOnce(); 
+			sleep(5000);
+		 }
+	     waitCount = 0;		
+		 while(currentClass && waitCount<20)
+		 {
+			waitCount++; 
+			currentClass=className("android.webkit.WebView").findOnce(); 
+			sleep(5000);
+			toast("请手动填入邀请码：【 "+inviteCode+" 】，然后点提交");
+		 }
+	
+
+}	
+
 
 function downloadProcess(appName)
 {  
-   
-	//commons.yingyongbao(appName);
-    //commons.install(appName);
-   
+ 	commons.yingyongbao(appName);
     
 }
 

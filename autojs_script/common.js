@@ -261,6 +261,13 @@ util.yingyongbao=function(name){
              sleep(1000);
            
 		  }
+		  delBtn=text("清理历史").findOnce();
+          if(delBtn){
+			 delBtn.click();
+             sleep(1000);
+     	  }
+		  
+		  
 	      back();
 	      sleep(2000);
      	  currentPkg=currentPackage();
@@ -321,7 +328,7 @@ util.yingyongbao=function(name){
            delBtn.click();
        }
 	   currentPkg=currentPackage();
-	   toast("已退出下载，当前处于："+currentPkg+",如果界面超过10秒不动，请手动配合一次。");
+	   toast("已退出下载，如果界面超过10秒不动，请手动配合一次。");
 
 	}
   
@@ -339,8 +346,10 @@ util.install=function(appName)
 { 
     var waitCount=0;
 	var installPkg="com.android.packageinstaller";
-	
-	toast("准备安装");
+	var tencentDownPkg="com.tencent.android.qqdownloader";
+	var targetPkg=app.getPackageName(appName);
+  
+	toast("准备安装；"+appName);
     
 	//循环找安装
     var installFlag = false;
@@ -364,23 +373,25 @@ util.install=function(appName)
         
     //安装完成
 	waitCount=0;
+	
+	var currentPkg=currentPackage();
     var installFinishFlag = false;
-    while(!installFinishFlag && waitCount<=20){
+    while(currentPkg===installPkg && !installFinishFlag && waitCount<=200){
       var uiele = text("打开").findOnce();
       if(uiele){
           if(!uiele.click())click("打开");
           installFinishFlag = true;
       }
 	  waitCount++;
-      sleep(2000);
+      sleep(1000);
     }
     
-	var targetPkg=app.getPackageName(appName);
-  
+	
 	//等待打开APP
     toast("install:等待打开APP");
     waitCount=0;
-    var currentPkg=currentPackage();
+	var targetAppName=null;
+    currentPkg=currentPackage();
     while(currentPkg != targetPkg && waitCount<=30){
 	   waitCount++;
     	
@@ -408,11 +419,21 @@ util.install=function(appName)
     
 	
 	   currentPkg=currentPackage();
-	   //toast("当前界面："+currentPkg+" 目标界面："+targetPkg);
-       sleep(2000);
+	   var currentAppName=app.getAppName(currentPkg); 
+       toast("当前界面："+currentPkg+" 目标界面："+targetPkg+" 当前app："+currentAppName);
+       if(currentAppName.indexOf(appName)>=0)
+	   {
+		   targetPkg=currentPkg;
+		   targetAppName=currentAppName;
+	       //toast("targetPkg="+targetPkg+" targetAppName="+targetAppName);
+     	   
+       }
+	   
+	   sleep(2000);
     }
-	
-    toast("install:打开APP退出,waitCount="+waitCount);
+	if(targetAppName && targetAppName.indexOf(appName)>=0)util.launch(targetAppName); 
+	else util.launch(appName);
+    toast("install:打开APP退出,准备登陆");
     
 
 }

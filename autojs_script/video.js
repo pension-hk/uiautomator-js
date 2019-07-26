@@ -38,15 +38,32 @@ template.run = function(fun){
 	
 	if(template.downloadApp(fun.download))
 	{
-		exit();
+	   template.login(fun.login);
+	   exit();
+   
 		
 	}
 	
     
-	if(!utils.launch(initParam.appName))
+    var launched=app.launchApp(initParam.appName);
+    if(!launched) launched=template.launch(fun.getAppName);
+    if(!launched)
 	{
-	   template.launch(fun.getAppName);
+      exit();
+    }
+    toast("等待app 启动......");
+	var waitCount=0;
+	var waitFlag=true;
+	while(waitFlag  && waitCount<15){
+		waitCount++;
+		if(fun.findIndexPage != null && fun.findIndexPage())
+		{
+			waitFlag=false;
+		}
+		else
+	        sleep(1000);
 	}
+    toast("app 启动成功");
 
     /**
      * 自动更新
@@ -152,10 +169,24 @@ template.launch=function(getAppName)
     if(getAppName == null){ 
        return  false;
     }else{
-      return utils.launch(getAppName(initParam.appName));
+      return app.launchApp(getAppName(initParam.appName)); 
     }
 	
 }
+
+template.login=function(login)
+{
+    if(login == null){ 
+       return  false;
+    }else{
+      
+       return login(initParam.appName);
+    
+    }
+
+
+}
+
 
 
 /**

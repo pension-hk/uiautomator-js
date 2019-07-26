@@ -265,6 +265,11 @@ function popWindowProcess()
         }
 	    var coinTip = id("ax3").findOnce(); //立即领取
 		if(coinTip)coinTip.click();
+		/*
+		//升级处理：
+		var upgradeP = id("xk").findOnce(); //立即安装
+		if(upgradeP)upgradeP.click();
+		*/
 }
 
 function findIndex(){
