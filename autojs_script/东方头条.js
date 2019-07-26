@@ -146,6 +146,16 @@ templates.run({
 	    if(fl){
        	   return  true;
         }
+		var coinDouble=id("ax2").findOnce();//金币翻倍奖励
+		if(coinDouble){
+		   coinDouble.click();
+		   //com.songheng.eastnews:id/tt_video_reward_container
+		   //com.songheng.eastnews:id/tt_video_ad_close
+		   sleep(1000);
+		   waitPlayAd();
+		   
+		}
+		
         return false;
     },
 	popWindow:function(){
@@ -191,7 +201,8 @@ templates.run({
         if(videoAd){
             videoAd.click();
         }
-	
+	    var coinTip = id("ax3").findOnce(); //立即领取
+		if(coinTip)coinTip.click();
 	
     },
 	download:function(appName){
@@ -378,7 +389,7 @@ function  fillInviteCode(inviteCode)
 			sleep(5000);
 		 }
 	     waitCount = 0;		
-		 while(currentClass)
+		 while(currentClass && waitCount<20)
 		 {
 			waitCount++; 
 			currentClass=className("android.webkit.WebView").findOnce(); 
@@ -388,7 +399,34 @@ function  fillInviteCode(inviteCode)
 	
 
 }	
-
+function waitPlayAd()
+{         //com.songheng.eastnews:id/tt_video_reward_container
+		   //com.songheng.eastnews:id/tt_video_ad_close
+		 var  currentClass=className("android.webkit.WebView").findOnce();
+		 var waitCount = 0;
+		 while(!currentClass  && waitCount<30)
+		 {
+			waitCount++; 
+			currentClass=className("android.webkit.WebView").findOnce(); 
+			sleep(1000);
+		 }
+		 waitCount = 0;
+		 while(currentClass  && waitCount<30)
+		 {
+			waitCount++; 
+			var adClose = id("tt_video_ad_close").findOnce();
+			if(adClose)
+			{
+			   adClose.click();
+			   break;
+			}
+			currentClass=className("android.webkit.WebView").findOnce(); 
+			sleep(1000);
+		
+		 }
+	
+	
+}
 
 function downloadProcess(appName)
 {  

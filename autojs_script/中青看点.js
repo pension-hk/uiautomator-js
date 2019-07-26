@@ -25,7 +25,6 @@ templates.run({
       var inviteCode  =  commons.getNewsReffer(runAppName); 
       //reffer_code  =  commons.getVideoReffer("刷宝"); 
 
-	  var waitCount=0;
 	  toast("登陆:等待启动......");
 	  var waitCount=0;
 	  var waitFlag=true;
