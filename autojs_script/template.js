@@ -7,6 +7,7 @@ var template = {};
  */
 var initParam = {
     appName:"",//应用名称
+	runMode:"新闻", //运行模式，新闻，视频，小视频。。。。。。
  	lastNewsText:"",//上一次新闻标题
 
     totalNewsReaded : 0,//已经阅读的新闻条数
@@ -36,27 +37,30 @@ template.run = function(fun){
      */
     utils.wakeUp(); 
 	
-	if(template.downloadApp(fun.download)){
-	   template.login(fun.login);
+	if(template.downloadApp(fun.download))
+	{
+	   template.loginApp(fun.login);
 	   //exit();
     }
-    var launched=app.launchApp(initParam.appName);
-    if(!launched) launched=template.launch(fun.getAppName);
-    if(!launched)
-	{
-      exit();
-    }
-    toast("等待app 启动......");
-	var waitCount=0;
-	var waitFlag=true;
-	while(waitFlag  && waitCount<15){
-		waitCount++;
-		if(fun.findIndexPage != null && fun.findIndexPage())
-		{
-			waitFlag=false;
-		}
-		else
-	        sleep(1000);
+	else{
+       var launched=app.launchApp(initParam.appName);
+       if(!launched)launched=template.launch(fun.getAppName);
+       if(!launched)
+	   {
+          exit();
+       }
+       toast("等待app 启动......");
+	   var waitCount=0;
+	   var waitFlag=true;
+	   while(waitFlag  && waitCount<15){
+	      waitCount++;
+	      if(fun.findIndexPage != null && fun.findIndexPage())
+	      {
+			   waitFlag=false;
+	      }
+	      else
+	           sleep(1000);
+	    }
 	}
     toast("app 启动成功");
 	
@@ -81,36 +85,57 @@ template.run = function(fun){
     
     //toast("签到执行完成");
 
-    /**
-     * 新闻阅读流程
-     */
+	if(initParam.runMode=="新闻")
+    {   
+         /**
+         * 新闻阅读流程
+         */
      
-    while(true){
+        while(true){
 	    
-        //领取时段奖励
-        template.getTimeAward(fun.doingAfterTimeAward);
+            //领取时段奖励
+            template.getTimeAward(fun.doingAfterTimeAward);
         
-		//找到一条新闻
-        template.getOneNews(fun.findNewsItem,fun.getIndexBtnItem,fun.popWindow);
-        //阅读新闻60s
-        template.readNews(60,fun.isShouldBack);
-        //返回新闻列表
-        template.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2);
+		    //找到一条新闻
+            template.getOneNews(fun.findNewsItem,fun.getIndexBtnItem,fun.popWindow);
+            //阅读新闻60s
+            template.readNews(60,fun.isShouldBack);
+            //返回新闻列表
+            template.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2);
+		     /*
+		    //
+		    if(template.jumpToVideoIndex(fun.jumpToVideo)){
+		      	sleep(1000);
+		        //找到一条视频：
+                template.getOneVideo(fun.findVideoItem,fun.getIndexBtnItem);
+                //看视频60s
+                //template.viewVideo(60,fun.isShouldBack);
+                //template.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2);
+	            sleep(10000);  
+		    }
+		    */
 		
-		/*
-		//
-		if(template.jumpToVideoIndex(fun.jumpToVideo)){
-			sleep(1000);
-		   //找到一条视频：
-           template.getOneVideo(fun.findVideoItem,fun.getIndexBtnItem);
-           //看视频60s
-           //template.viewVideo(60,fun.isShouldBack);
-           //template.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2);
-	       sleep(10000);  
-		}
-		*/
-		
-    }
+        }//while(true){
+	}
+	else
+	{
+	     /**
+          * 看视频流程
+         */
+     
+         while(true){
+            //领取时段奖励
+             template.getTimeAward(fun.doingAfterTimeAward);
+            //找到一段视频
+             template.findOneVideo(fun.findVideoItem);
+             //看视频30s
+             template.viewVideo(30,fun.isShouldBack);
+	    
+		     template.jumpToIndex(fun.getIndexBtnItem,fun.popWindow);
+         }	
+	
+	}
+	
 }
 
 template.autoUpdate = function(fun){
@@ -182,14 +207,13 @@ template.launch=function(getAppName)
 	
 }
 
-template.login=function(login)
+template.loginApp=function(login)
 {
+    
     if(login == null){ 
        return  false;
     }else{
-      
-       return login(initParam.appName);
-    
+       return login();
     }
 
 
@@ -203,6 +227,12 @@ template.login=function(login)
 template.jumpToIndex = function(getIndexBtnItem,popWindow){
 
     //toast("jumpToIndex......");  
+	if(initParam.runMode=="视频")
+	{
+		click(initParam.indexFlagText);
+		return;
+	}
+	
     var indexFlag = text(initParam.indexFlagText).findOnce();
 	//add for 东方头条：
 	if(!indexFlag)indexFlag = text(initParam.indexFlagText1).findOnce();
@@ -319,11 +349,32 @@ template.jumpToVideoIndex=function(jumpToVideo)
  * 获取时段奖励
  */
 template.getTimeAward = function(doingAfterTimeAward){
-    
-	if(!utils.UITextBoundsClick(initParam.timeAwardText)){
-		return;
+    if(initParam.runMode=="新闻")
+	{
+	   if(!utils.UITextBoundsClick(initParam.timeAwardText)){
+		    return;
+	   }
 	}
-    //判断是否有提示
+    else
+	{
+        //看看是否有奖励可领：
+        var  awardFlag= id("iv_box_open_new").findOnce();
+	    if(!awardFlag)return;
+        awardFlag.click();  	
+	    sleep(1000); 
+        awardFlag= id("idBtn").findOnce();
+	    if(awardFlag){
+           //toast("领取你的元宝福利");
+	       awardFlag.click();
+	       sleep(1000);
+	       awardFlag= id("imgClose").findOnce();
+           if(awardFlag){
+              //toast("额外福利");
+	          awardFlag.click();
+	       }
+	    }
+	}	
+	//判断是否有提示
     if(doingAfterTimeAward != null){
         doingAfterTimeAward();
     }
@@ -441,7 +492,6 @@ template.readNews = function(seconds,isShouldBack){
  * 获取一个视频
  */
 template.getOneVideo = function(findVideoItem,getIndexBtnItem){
-    
     toast("开始获取视频资源");
     //上滑找新闻
     var isFindNews = false;//是否找到新闻
@@ -500,28 +550,80 @@ template.getOneVideo = function(findVideoItem,getIndexBtnItem){
 }
 
 
+/**
+ * 获取一个视频：
+ */
+template.findOneVideo = function(findVideoItem){
+    toast("开始获取视频资源");
+    var isFindVideo = false;//是否找到视频
+    var videoItem;         
+    initParam.loopTimeToFindNews = 0;//循环次数
+    while((!isFindVideo)  && initParam.loopTimeToFindNews < 3){
+        initParam.loopTimeToFindNews++;
+      
+        videoItem = findVideoItem();
+        if(!videoItem){
+						
+            isFindVideo = true;
+        }
+		else
+		{ //主页视频空空如也
+          //进入关注页面：
+          //utils.UITextClick("关注");
+		  //sleep(1000);
+		}
+        
+    }
+
+    //找到视频，点击阅读
+    if(isFindVideo){
+        //toast("找到视频，点击阅读");
+       
+    }else{
+        toast("20次滑动没有找到新闻，请检查新闻ID");
+        exit();
+    }
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+//看视频
+template.viewVideo = function(seconds,isShouldBack){
+    //看视频
+    for(var i = 0 ;i < seconds ;i++){
+       
+        //判断是否直接返回
+        var shouldBack = false;
+        if(isShouldBack != null){
+            shouldBack = isShouldBack(); //处理弹窗之类的
+        }
+        if(shouldBack){
+            return;
+        }
+	    sleep(1000);
+		if(i==15)
+		{
+	      // 点关注:
+          var idAttention= id("attention").findOnce();
+          if(idAttention)
+	      {
+	         //idAttention.click();
+	      }
+		  utils.UIClick("praise"); //点赞
+      
+		}
+		
+    }
+	
+}
 
 
 
 template.downloadApp=function(download){
-	
-	if(download==null)return false;
-	return download(initParam.appName);	
-    
+	if(download==null){
+	  return false;
+	}
+	return download(initParam.appName);
+
 }
 
 

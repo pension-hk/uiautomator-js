@@ -411,7 +411,7 @@ util.install=function(appName)
     waitCount=0;
 	var targetAppName=null;
     currentPkg=currentPackage();
-    while(currentPkg != targetPkg && waitCount<=30){
+    while(currentPkg != targetPkg && waitCount<=15){
 	   waitCount++;
     	
        var uiele = text("允许").findOnce();
@@ -435,9 +435,7 @@ util.install=function(appName)
           uiele.click();
           sleep(2000);
        }
-    
-	
-	   currentPkg=currentPackage();
+       currentPkg=currentPackage();
 	   var currentAppName=app.getAppName(currentPkg); 
        toast("当前界面："+currentPkg+" 目标界面："+targetPkg+" 当前app："+currentAppName);
        if(currentAppName.indexOf(appName)>=0)
@@ -447,8 +445,7 @@ util.install=function(appName)
 	       //toast("targetPkg="+targetPkg+" targetAppName="+targetAppName);
      	   
        }
-	   
-	   sleep(2000);
+	   sleep(1000);
     }
 	if(!(targetAppName && targetAppName.indexOf(appName)>=0))targetAppName=appName;
 	app.launchApp(targetAppName);
@@ -457,6 +454,8 @@ util.install=function(appName)
 
 util.download=function(appName,url)
 {     
+     //toast("download");
+	
      var installPkg="com.android.packageinstaller";
 	 app.openUrlD(url);
      sleep(10000);
@@ -464,41 +463,52 @@ util.download=function(appName,url)
      if(noVisit){
        return;  
 	 }
-	 
 	 var waitCount =  0;
-	 var classN=className("android.webkit.WebView").findOnce();
-	 while(!classN  && waitCount<20){
+	 var rootNode = className("android.widget.FrameLayout").findOnce();
+	 var classN = app.findSelfOfClass(rootNode,"WebView");
+	 //toast("当前类0："+classN.className());
+	 while( !classN  && waitCount<120){
 		waitCount++;
-		classN=className("android.webkit.WebView").findOnce(); 
-		sleep(1000);
+	    if(util.findInstallIndex())break;
+		var localDownload = text("打开").findOnce();
+		if(!localDownload)localDownload=text("本地下载").findOnce();
+        if(!localDownload)localDownload=text("下载").findOnce();
+		if(!localDownload)localDownload=text("确定").findOnce();//下载列表中已存在，点确定继续
+		if(localDownload)localDownload.click();	
+		classN=app.findSelfOfClass(rootNode,"WebView"); 
+    	sleep(1000);
 	 }
-	 toast("请点普通下载，然后点确定");
+	 //toast("当前类1："+classN.className());
+     if(classN)toast("请手动点击【普通下载】，再点确定，然后等待");
 	 waitCount =  0;
 	 while(classN  && waitCount<120){
 		waitCount++;
-		classN=className("android.webkit.WebView").findOnce();
-        sleep(1000);
+	    if(util.findInstallIndex())break;
+  	    var localDownload = text("打开").findOnce();
+		if(!localDownload)localDownload=text("本地下载").findOnce();
+        if(!localDownload)localDownload=text("下载").findOnce();
+		if(!localDownload)localDownload=text("确定").findOnce();//下载列表中已存在，点确定继续
+		if(localDownload)localDownload.click();	
+		classN=app.findSelfOfClass(rootNode,"WebView");
+    	sleep(1000);
    		
 	 }
-	 waitCount =  0;
-	 var localDownload=text("本地下载").findOnce();
-     while(!localDownload  && waitCount<5){
-		waitCount++;
-		localDownload=text("本地下载").findOnce();
-        sleep(1000);
-     }
-	 if(!localDownload)return;
-	 toast("点了本地下载");
-	 localDownload.click();
-     sleep(1000);
-     
+	 //toast("当前类2："+classN+" waitCount="+waitCount);
+	 if(waitCount>=120)return;
+	 
 	 waitCount=0;
 	 var currentPkg=currentPackage();
 	 toast("当前包名="+currentPkg);
-	 while(currentPkg != installPkg  &&  waitCount<60)
+	 while(currentPkg != installPkg  &&  waitCount<120)
 	 {
 		 waitCount++;
 		 currentPkg=currentPackage();
+		 if(util.findInstallIndex())break;
+		 var localDownload = text("打开").findOnce();
+		 if(!localDownload)localDownload=text("本地下载").findOnce();
+         if(!localDownload)localDownload=text("下载").findOnce();
+		 if(!localDownload)localDownload=text("确定").findOnce();//下载列表中已存在，点确定继续
+		 if(localDownload)localDownload.click();	
 		 sleep(1000);
 	 }
  	 toast("当前包名="+currentPackage());
@@ -519,7 +529,13 @@ util.download=function(appName,url)
         if(continueGo){
 		   break;
 		}
-    	sleep(1000);
+		if(util.findInstallIndex())break;
+  	    var localDownload = text("打开").findOnce();
+		if(!localDownload)localDownload=text("本地下载").findOnce();
+        if(!localDownload)localDownload=text("下载").findOnce();
+		if(!localDownload)localDownload=text("确定").findOnce();//下载列表中已存在，点确定继续
+		if(localDownload)localDownload.click();	
+		sleep(1000);
      
 	 }
      //toast("当前包名="+currentPackage());
@@ -528,6 +544,12 @@ util.download=function(appName,url)
 	 
  	
 }
-
+//检测是否安装界面：
+util.findInstallIndex=function(){
+ 	 var uiele = text("安装").findOnce();
+     if(!uiele)uiele=id("goinstall").findOnce();//继续安装
+     if(!uiele)uiele=id("ok_button").findOnce();//点下一步
+     return uiele;
+}
 
 module.exports = util;

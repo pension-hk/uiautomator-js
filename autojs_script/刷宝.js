@@ -1,11 +1,12 @@
 const commons    = require('common.js');
-const templates  = require('video.js');
+const templates  = require('template.js');
 const runAppName = "刷宝"; 
 const runAppName1= "刷宝短视频"; 
 const runPkg      ="com.jm.video";
 
 templates.init({
     appName:runAppName,
+	runMode:"视频",
     indexFlagText:"首页",
 });
 
@@ -30,11 +31,12 @@ templates.run({
 	  loginDone();
 	  //fillInviteCode(inviteCode);
 	  toast("登陆完成");
+	  return waitIndex();
 	},
-
+    
 	
     //签到
-    signIn:function(){
+    signIn:function(){ //刷宝签到改版以后是用android.webkit.WebView，暂时不能签
         toast("进入任务签到");
 		//进入任务 
         var taskFlag=text("任务").findOnce();
@@ -238,51 +240,52 @@ function loginDone()
 		 loginTip=text("请输入手机号").findOnce(); 
 		 sleep(1000);
 	  }
-	 
-	  
+	  var loginWechat=id("login_weixin").findOnce();
+	  if(!loginWechat)return;
+	  loginWechat.click();
+	  sleep(2000);
 	  wechatLogin();
 	  
 }
 
 function wechatLogin(){
 	 //微信一键登陆：
-	 var loginWechat=id("login_weixin").findOnce();
-	 if(!loginWechat)return;
-	 loginWechat.click();
+	 var pkg="com.tencent.mm";
+	 var classTarget="android.widget.ScrollView";
+	 var currentPkg= currentPackage();
+	 if(currentPkg !=  pkg){
+	     toast("非微信登陆界面");
+		 return;
+	 }
+	 toast("点击微信登陆后,当前包名="+currentPkg);
 	 
-	 sleep(2000); 
-	 var currentClass=className("android.widget.ScrollView").findOnce();
+	 var rootNode = className("android.widget.LinearLayout").findOnce();
+	                      
+	 var classN=app.findSelfOfClass(rootNode,"android.widget.ScrollView");
+	 toast("点击微信登陆后,classN 0="+(classN==null)?"null":classN.className());
 	 var waitCount = 0;
-	 while(!currentClass  && waitCount<20)
+	 while(!classN  && waitCount<20)
 	 {
 		waitCount++; 
-		currentClass=className("android.widget.ScrollView").findOnce(); 
+		classN=app.findSelfOfClass(rootNode,"android.widget.ScrollView"); 
 		sleep(1000);
 	 }
-		 
-	 var agreeBtn  =  text("同意").findOnce();
-	 if(!agreeBtn)
-	 {
-		 toast("未找到同意");
-		 agreeBtn=id("eb8").findOnce();
-	     if(!agreeBtn)
-	     {
-	 	    toast("未找到eb8");
-      	    
-	     }
-	 }
-	 if(!agreeBtn.click()){
-		 
-		 toast("点同意失败");
-	 }
-
+	 toast("点击微信登陆后,classN 1="+(classN==null)?"null":classN.className());
+	
 	 waitCount = 0;		
-	 while(currentClass && waitCount<30)
+	 while(classN && waitCount<20)
 	 {
 		 waitCount++; 
-		 currentClass=className("android.widget.ScrollView").findOnce(); 
+		 var agreeBtn  =  text("同意").findOnce();
+	     if(!agreeBtn)agreeBtn=id("eb8").findOnce();
+	     if(!agreeBtn)agreeBtn=text("确认登陆").findOnce();
+	     if(!agreeBtn)agreeBtn=id("c1u").findOnce();
+	     if(agreeBtn)agreeBtn.click();
+		 classN=app.findSelfOfClass(rootNode,"android.widget.ScrollView"); 
 		 sleep(1000);
 	 }
+	 toast("点击微信登陆后,classN 2="+(classN==null)?"null":classN.className());
+	
 	 toast("登陆退出,waitCount="+waitCount);
 }
 
