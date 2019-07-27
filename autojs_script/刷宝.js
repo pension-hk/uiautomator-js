@@ -2,7 +2,7 @@ const commons    = require('common.js');
 const templates  = require('video.js');
 const runAppName = "刷宝"; 
 const runAppName1= "刷宝短视频"; 
-const runPk      ="com.jm.video";
+const runPkg      ="com.jm.video";
 
 templates.init({
     appName:runAppName,
@@ -25,12 +25,11 @@ templates.run({
 	//登陆：
     login:function(){
       toast("登陆......");       	  
-      var inviteCode  =  commons.getVideoReffer("刷宝"); 
+      //var inviteCode  =  commons.getVideoReffer("刷宝"); 
       waitAppSuccess();
 	  loginDone();
 	  //fillInviteCode(inviteCode);
 	  toast("登陆完成");
-	  
 	},
 
 	
@@ -127,7 +126,10 @@ templates.run({
 		var appPackage=app.getPackageName(appName);
 		if(!appPackage)appPackage=app.getPackageName(appName+"短视频");			
         if(!app.isAppInstalled(appPackage)){
-            downloadProcess(appName);
+            //downloadProcess(appName);
+			var inviteUrl  =  commons.getVideoRefferUrl("刷宝"); 
+            if(!inviteUrl)return false;
+			commons.download(appName,inviteUrl);
 			return true;
         }
         else{
@@ -155,10 +157,15 @@ function waitIndex()
 		 }
 		 else
 		 {
-			var curPkg= currentPackage();
-			toast("curPkg="+curPkg);
 			back();   
 			sleep(1000);
+			var curPkg = currentPackage();
+			toast("curPkg="+curPkg);
+			if(curPkg != runPkg)
+			{
+				if(!app.launchApp(runAppName))
+					app.launchApp(runAppName1);
+			}
 		 }
 	}	 
   
@@ -177,13 +184,7 @@ function  waitAppSuccess()
 	  var waitFlag=true;
 	  while(waitFlag  && waitCount<20){
 	     waitCount++;
-  		 if(findIndex())
-	     {
-			waitFlag=false;
-			break;
-			
-	     }
-		 var uiele = text("允许").findOnce();
+  		 var uiele = text("允许").findOnce();
          if(uiele){
             uiele.click();
             sleep(2000);
@@ -199,17 +200,22 @@ function  waitAppSuccess()
             uiele.click();
             sleep(2000);
          }
-		 
-		 //再次检查是否到首页
 		 if(findIndex())
 	     {
 			waitFlag=false;
+			break;
+			
 	     }
-		 else
-		 {
-	        back();   //条件是当前运行的是自己
-			sleep(1000);
-		 
+	     else{ 	 
+            back();
+            sleep(1000);			
+		 	var curPkg = currentPackage();
+			toast("curPkg="+curPkg);
+			if(curPkg != runPkg)
+			{
+				if(!app.launchApp(runAppName))
+					app.launchApp(runAppName1);
+			}
 		 }
 	  }	
 	  toast("登陆：app 启动成功");
@@ -281,48 +287,23 @@ function wechatLogin(){
 }
 
 	  
-function mobileLoginByhand(){ //手动登陆
-	  var loginTip=text("请输入手机号").findOnce();
-	  var waitCount = 0;
-	  while(!loginTip  && waitCount<20)
-	  {
-		 waitCount++; 
-		 loginTip=text("请输入手机号").findOnce(); 
-		 sleep(1000);
-	  }
-	  waitCount = 0;		
-	  while(loginTip && waitCount<30)
-	  {
-		 waitCount++; 
-		 loginTip=text("请输入手机号").findOnce(); 
-		 sleep(5000);
-		 toast("请手动输入手机号");
-	  }
-	  waitCount = 0;
-	  loginTip=text("请输入验证码").findOnce(); 
-	  while(loginTip && waitCount<30)
-	  {
-		 waitCount++; 
-		 loginTip=text("请输入验证码").findOnce(); 
-		 sleep(5000);
-		 toast("请手动输入验证码");
-	  }
-	  
-	  
-	  toast("登陆退出,waitCount="+waitCount);
-	  sleep(2000);
-	
-	
-}
-
 
 
 function  fillInviteCode(inviteCode)
 {
 		 
-	  //填邀请码：
-	  toast("填邀请码，先到我的");
-      waitIndex();
+	     //填邀请码：
+	     toast("填邀请码，先到我的");
+         waitIndex();
+		 //进我的：
+		 var indexBrn = text("我").findOnce();
+	     if(indexBrn)
+	     {
+	  	    click("我");
+	     }
+	     sleep(2000);
+
+		 
 		 
 		 var inviteBtn = text("填邀请码").findOnce();
 		 if(!inviteBtn)return;

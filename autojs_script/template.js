@@ -24,7 +24,6 @@ template.init = function(param){
     Object.assign(initParam, param);
 	
 }
-
 /**
  * 运行
  * 需要的方法
@@ -39,7 +38,7 @@ template.run = function(fun){
 	
 	if(template.downloadApp(fun.download)){
 	   template.login(fun.login);
-	   exit();
+	   //exit();
     }
     var launched=app.launchApp(initParam.appName);
     if(!launched) launched=template.launch(fun.getAppName);
@@ -92,7 +91,7 @@ template.run = function(fun){
         template.getTimeAward(fun.doingAfterTimeAward);
         
 		//找到一条新闻
-        template.getOneNews(fun.findNewsItem,fun.getIndexBtnItem);
+        template.getOneNews(fun.findNewsItem,fun.getIndexBtnItem,fun.popWindow);
         //阅读新闻60s
         template.readNews(60,fun.isShouldBack);
         //返回新闻列表
@@ -112,8 +111,6 @@ template.run = function(fun){
 		*/
 		
     }
-    
-    
 }
 
 template.autoUpdate = function(fun){
@@ -335,7 +332,7 @@ template.getTimeAward = function(doingAfterTimeAward){
 /**
  * 获取一条新闻
  */
-template.getOneNews = function(findNewsItem,getIndexBtnItem){
+template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow){
     
     if(app.compareVersion<0) return;//6.0 无法看新闻
     
@@ -391,7 +388,7 @@ template.getOneNews = function(findNewsItem,getIndexBtnItem){
                  sleep(1000);
 		       }		   
 	        }
-			
+			if(popWindow !=null )popWindow();
 			
 		}
     }
@@ -425,7 +422,7 @@ template.readNews = function(seconds,isShouldBack){
     
 	//滑动阅读新闻
     for(var i = 0 ;i < seconds/10 ;i++){
-     	  utils.swapeToRead();
+     	utils.swapeToRead();
 
         //判断是否直接返回
         var shouldBack = false;

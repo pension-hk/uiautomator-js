@@ -214,10 +214,28 @@ util.getVideoReffer=function(name){
  	  }   
 	}
     return reffer_code;
-
-		
 }
 
+util.getVideoRefferUrl=function(appName){
+	var reffer_url=null;
+	var path=files.getSdcardPath()+"/脚本/reffer.json";
+    if(files.exists(path)){
+	  var refferPara = files.read(path);
+	  refferPara   = JSON.parse(refferPara);
+	  var videoList = refferPara.videoAppList;
+      var appNum = videoList.length;
+      for(var i = 0;i< appNum;i++){
+          var scriptName=videoList[i].name;
+		  if(scriptName==appName)
+	      {
+             reffer_url   = videoList[i].reffer_url;
+             break;
+		  }	  
+ 	  }   
+	}
+    return reffer_url;
+	
+}
 
 util.yingyongbao=function(name){
     
@@ -359,13 +377,15 @@ util.install=function(appName)
        if(uiele){
           uiele.click();
           installFlag = true;
+		  continue;
        }
-	   else
-	   {
-          util.UIClick("ok_button"); //点下一步
-	   } 
-	   
-	   
+	   uiele=id("goinstall").findOnce();//继续安装
+       if(uiele){
+		  uiele.click();
+          installFlag = true;
+		  continue;
+       }
+       util.UIClick("ok_button"); //点下一步
     }
     
 	toast("安装中......");
@@ -373,7 +393,6 @@ util.install=function(appName)
         
     //安装完成
 	waitCount=0;
-	
 	var currentPkg=currentPackage();
     var installFinishFlag = false;
     while(currentPkg===installPkg && !installFinishFlag && waitCount<=200){
@@ -431,14 +450,84 @@ util.install=function(appName)
 	   
 	   sleep(2000);
     }
-	if(targetAppName && targetAppName.indexOf(appName)>=0)util.launch(targetAppName); 
-	else util.launch(appName);
+	if(!(targetAppName && targetAppName.indexOf(appName)>=0))targetAppName=appName;
+	app.launchApp(targetAppName);
     toast("install:打开APP退出,准备登陆");
-    
-
 }
 
-
+util.download=function(appName,url)
+{     
+     var installPkg="com.android.packageinstaller";
+	 app.openUrlD(url);
+     sleep(10000);
+     var noVisit=text("无法访问").findOnce();
+     if(noVisit){
+       return;  
+	 }
+	 
+	 var waitCount =  0;
+	 var classN=className("android.webkit.WebView").findOnce();
+	 while(!classN  && waitCount<20){
+		waitCount++;
+		classN=className("android.webkit.WebView").findOnce(); 
+		sleep(1000);
+	 }
+	 toast("请点普通下载，然后点确定");
+	 waitCount =  0;
+	 while(classN  && waitCount<120){
+		waitCount++;
+		classN=className("android.webkit.WebView").findOnce();
+        sleep(1000);
+   		
+	 }
+	 waitCount =  0;
+	 var localDownload=text("本地下载").findOnce();
+     while(!localDownload  && waitCount<5){
+		waitCount++;
+		localDownload=text("本地下载").findOnce();
+        sleep(1000);
+     }
+	 if(!localDownload)return;
+	 toast("点了本地下载");
+	 localDownload.click();
+     sleep(1000);
+     
+	 waitCount=0;
+	 var currentPkg=currentPackage();
+	 toast("当前包名="+currentPkg);
+	 while(currentPkg != installPkg  &&  waitCount<60)
+	 {
+		 waitCount++;
+		 currentPkg=currentPackage();
+		 sleep(1000);
+	 }
+ 	 toast("当前包名="+currentPackage());
+     while(currentPkg===installPkg){
+	    //com.android.packageinstaller:id/decide_to_continue
+	    var continueGo=id("decide_to_continue").findOnce();//id:勾选已充分了解该风险，继续安装
+        if(!continueGo){
+	       //toast("找不到ID：勾选已充分了解该风险，继续安装");
+		   continueGo=text("勾选已充分了解该风险，继续安装").findOnce();//text:勾选已充分了解该风险，继续安装
+           //if(!continueGo)toast("找不到text：勾选已充分了解该风险，继续安装");
+		}
+		if(continueGo){
+	       if(!continueGo.click()){
+			    toast("找到ID：勾选已充分了解该风险，继续安装,点击失败");
+		   }
+		}
+	    continueGo=id("goinstall").findOnce();//继续安装
+        if(continueGo){
+		   break;
+		}
+    	sleep(1000);
+     
+	 }
+     //toast("当前包名="+currentPackage());
+     toast("准备安装");
+     util.install(appName);
+	 
+ 	
+}
 
 
 module.exports = util;

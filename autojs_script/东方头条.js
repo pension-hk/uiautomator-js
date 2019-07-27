@@ -130,6 +130,9 @@ templates.run({
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
+		
+		if(findIndex()) return true;
+	
     	var fl=text("忽略").findOnce();
         if(fl){
             fl.click();
@@ -156,6 +159,7 @@ templates.run({
         if(videoAd){
             videoAd.click();
         }
+		
 	
         return false;
     },
@@ -180,11 +184,21 @@ templates.run({
 			sleep(500);
         }
       
-        //关闭要闻推送
-        adFlag = text("忽略").findOnce();
+        //要文推送
+        adFlag = text("立即查看").findOnce();
+        if(adFlag){
+            if(adFlag.click()){
+               sleep(2000);
+			   back();
+			   sleep(500);
+			}
+ 	    }
+		/*
+	    adFlag = text("忽略").findOnce();
         if(adFlag){
             adFlag.click();
         }
+		*/
        
         //处理时段奖励提醒
         var timeAward = text("立即领取").findOnce(); //"立即领取";//时段奖励领取提醒
@@ -202,7 +216,7 @@ templates.run({
         if(videoAd){
             videoAd.click();
         }
-	    var coinTip = id("ax3").findOnce(); //立即领取
+	    var coinTip = id("ax3").findOnce(); //立即领取 金豆奖励提醒
 		if(coinTip)coinTip.click();
 	
     },
