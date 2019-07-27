@@ -61,7 +61,8 @@ templates.run({
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
-
+	    if(findIndex())return true;
+	
         //领取宝藏
         commons.UIClick("text_ok");
         commons.UIClick("bt_ok");      //如阅读奖励提醒，点知道了

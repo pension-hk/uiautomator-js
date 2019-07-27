@@ -209,6 +209,8 @@ templates.run({
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
+		if(findIndex())return true;
+		
 		return false;
         //不存在奖励，直接退出
         if(!id("news_income_container").findOnce()){

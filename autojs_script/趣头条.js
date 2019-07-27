@@ -67,6 +67,8 @@ templates.run({
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
+		if(findIndex())return true;
+	
 	    //图集直接返回
         var imgItem = className("android.support.v4.view.ViewPager").className("ImageView").findOnce();
         if(imgItem){
