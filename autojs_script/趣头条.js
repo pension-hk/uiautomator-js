@@ -70,10 +70,12 @@ templates.run({
 		if(findIndex())return true;
 	
 	    //图集直接返回
-        var imgItem = className("android.support.v4.view.ViewPager").className("ImageView").findOnce();
+       
+		var imgItem = className("android.support.v4.view.ViewPager").className("ImageView").findOnce();
         if(imgItem){
             return true;
         }
+ 	
 		var idTg = id("tg").findOnce();
 		if(idTg)idTg.click();
         //请完成验证，。。。

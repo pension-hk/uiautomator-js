@@ -26,8 +26,8 @@ util.launch = function(appName) {
     }
 
     //设置屏幕缩放
-    setScreenMetrics(1080, 1920);
-    sleep(15000);
+    //setScreenMetrics(1080, 1920);
+    //sleep(15000);
 };
 
 //通过坐标点击

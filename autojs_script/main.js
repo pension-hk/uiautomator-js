@@ -1,4 +1,5 @@
-const utils = require('common.js');
+//const utils = require('common.js');
+const script_url = "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/";
 
 /**
  * 执行规则
@@ -13,11 +14,33 @@ init();
 function init(){
     storages.remove("version");
     var path=files.getSdcardPath()+"/脚本/";
+    
+	var templatePath=path+"/"+"template.js";
+	var commonPath=path+"/"+"common.js";
+	if(!files.exists(templatePath)){
+	   downlaodScript("template");
+	}
+	
+	if(!files.exists(commonPath)){
+	   downlaodScript("common");
+	}
+	var refferPath = path+"/"+"reffer.json";
+	if(!files.exists(refferPath)){
+	    toast("缺少reffer.json"+"，下载中");
+        var pathFile = path+"reffer.json";
+        var jsonContent = http.get(script_url+"reffer.json").body.string();
+        if(null != jsonContent);
+            files.write(pathFile,jsonContent);
+        toast("reffer.json下载完成");
+
+	}
+	
+				
    
 	//每次阅读的时间
     var normalRumTime = 0.1*60*60;
     while(true){
-        var config = utils.getConfig();
+        var config = getConfig();
         //新闻类的列表
         var newsList = config.newsAppList;
        
@@ -36,7 +59,10 @@ function init(){
             for(var i = 0;i< appNum;i++){
                 scriptName=newsList[i].name;
                 var currPath=path+scriptName+".js";
-                if(!files.exists(currPath))continue;
+                if(!files.exists(currPath)){
+				   downlaodScript(scriptName);
+				   continue;
+				}
 			    exec(scriptName,normalRumTime);
             }
 			
@@ -44,7 +70,11 @@ function init(){
             for(var i = 0;i< appNum;i++){
                 scriptName=videoList[i].name;
                 var currPath=path+scriptName+".js";
-                if(!files.exists(currPath))continue;
+                if(!files.exists(currPath)){
+				   downlaodScript(scriptName);
+				   continue;
+				}
+
                 exec(scriptName,normalRumTime);
             }
         }else{
@@ -52,7 +82,11 @@ function init(){
             for(var i = 0;i< appNum;i++){
                 scriptName=videoList[i].name;
                 var currPath=path+scriptName+".js";
-                if(!files.exists(currPath))continue;
+                if(!files.exists(currPath)){
+				   downlaodScript(scriptName);
+				   continue;
+				}
+
              	exec(scriptName,normalRumTime);
             }
 	        //sleep(1000*60*30);//睡眠半个小时
@@ -124,7 +158,7 @@ function stopCurrent(exectuion){
       
     if(currentPkgName != myPkgName)
 	{
-        utils.launch("倍薪");
+        app.launchApp("倍薪");
 	}
 	
 
@@ -136,7 +170,7 @@ function updateScript(scriptName){
     var storage = storages.create("version");
     var scriptVersion = storage.get(scriptName);
 
-    var config = utils.getConfig();
+    var config = getConfig();
     var newsAppList = config.newsAppList;
     for(var i = 0; i< newsAppList.length;i++){
         var thisScript = newsAppList[i];
@@ -146,7 +180,7 @@ function updateScript(scriptName){
         if(scriptName == name && version != scriptVersion){
             toast("检测开始更新");
             var path = "/sdcard/脚本/"+scriptName+".js";
-            var scriptContent = http.get("https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/"+scriptName+".js").body.string();
+            var scriptContent = http.get(script_url+scriptName+".js").body.string();
             files.write(path,scriptContent);
             storage.put(scriptName,version);
             toast("检测更新完成");
@@ -157,3 +191,23 @@ function updateScript(scriptName){
     }
 }
 
+function downlaodScript(scriptName){
+   toast("缺少"+scriptName+".js，下载中");
+   var path = "/sdcard/脚本/"+scriptName+".js";
+   var scriptContent = http.get(script_url+scriptName+".js").body.string();
+   if(null == scriptContent)return false;
+   var b=files.write(path,scriptContent);
+   toast(scriptName+".js下载完成");
+
+}
+
+
+//获取主配置
+function getConfig(){
+    toast("开始获取配置");
+    var url = "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
+    var str = http.get(url);
+    str = JSON.parse(str.body.string());
+    toast("配置获取完成");
+    return str;    
+}

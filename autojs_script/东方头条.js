@@ -132,7 +132,7 @@ templates.run({
     isShouldBack:function(){
 		
 		if(findIndex()) return true;
-	
+	  
     	var fl=text("忽略").findOnce();
         if(fl){
             fl.click();
@@ -146,6 +146,13 @@ templates.run({
 	    if(fl){
        	   return  true;
         }
+		fl=id("tt_video_ad_close").findOnce();
+		if(fl){
+            fl.click();
+			return  true;
+        }
+	    
+		
 		var coinDouble=id("ax2").findOnce();//金币翻倍奖励
 		if(coinDouble){
 		   coinDouble.click();
