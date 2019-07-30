@@ -23,8 +23,7 @@ templates.run({
     login:function(){
       toast("登陆......");       	  
       var inviteCode  =  commons.getNewsReffer(runAppName); 
-      //reffer_code  =  commons.getVideoReffer("刷宝"); 
-	  waitAppSuccess();
+      waitAppSuccess();
 	  loginDone();
 	  fillInviteCode(inviteCode);
 	  toast("登陆完成");
@@ -185,6 +184,8 @@ function wechatLogin(){
 
 function  fillInviteCode(inviteCode)
 {
+	
+	  if(!inviteCode)return;
 	  //填邀请码：
 	  var inviteBtn = id("et_input").findOnce();//输入邀请码
 	  if(inviteBtn){

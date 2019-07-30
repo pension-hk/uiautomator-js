@@ -313,7 +313,7 @@ function mobileLogin(){ //手动登陆
 
 function  fillInviteCode(inviteCode)
 {
-		 
+		 if(!inviteCode)return;
 	     //填邀请码：
 	     toast("填邀请码，先到我的");
          waitIndex();

@@ -231,7 +231,7 @@ function  fillInviteCode(inviteCode)
 {
 	  var runPkg=getPackageName(runAppName);
 	  toast("填邀请码");
-	  inviteCode="123456";
+	  //inviteCode="123456";
 	  if(!inviteCode)return;
    
       toast("等待首页");
