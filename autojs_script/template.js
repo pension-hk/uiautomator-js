@@ -232,6 +232,7 @@ template.loginApp=function(login)
 template.jumpToIndex = function(getIndexBtnItem,popWindow){
 
     //toast("jumpToIndex......");  
+	var waitCount  =  0;
 	if(initParam.runMode=="视频")
 	{
          var indexFlag = text(initParam.indexFlagText).findOnce();
@@ -261,11 +262,11 @@ template.jumpToIndex = function(getIndexBtnItem,popWindow){
 	}
 	
     var indexFlag = text(initParam.indexFlagText).findOnce();
-	//add for 东方头条：
 	if(!indexFlag)indexFlag = text(initParam.indexFlagText1).findOnce();
 	if(!indexFlag)indexFlag = text(initParam.indexFlagText2).findOnce();
-    
-	while(!indexFlag){
+     
+	while(!indexFlag && waitCount<5){
+		waitCount++;
         if(popWindow  != null  )
 		{
 		   popWindow();
@@ -286,19 +287,35 @@ template.jumpToIndex = function(getIndexBtnItem,popWindow){
         //执行返回
         if(!flag){
            toast("找首页时，没有发现首页,back()");
-           back();
+           //回退前检查目前运行的APP状况
+		   var currentPkg=currentPackage();
+		   if(currentPkg==="org.yuyang.automake")
+		   {
+			   var launched=app.launchApp(initParam.appName);
+               if(!launched)launched=template.launch(fun.getAppName);
+               if(!launched)
+	           {
+                   exit();
+               }
+               else
+                   continue;				   
+           }
+           else     		   
+		     back();
         }
         
         sleep(1000);
 		
         //重新取flag
-        indexFlag = text(initParam.indexFlagText).findOnce();  //发布
-		//add for 东方头条：
-		if(!indexFlag)indexFlag = text(initParam.indexFlagText1).findOnce(); //扫一扫
-	    if(!indexFlag)indexFlag = text(initParam.indexFlagText2).findOnce(); //"搜索你感兴趣的内容"
-      
+        indexFlag = text(initParam.indexFlagText).findOnce();  
+		if(!indexFlag)indexFlag = text(initParam.indexFlagText1).findOnce(); 
+	    if(!indexFlag)indexFlag = text(initParam.indexFlagText2).findOnce();
     }
-    
+	
+	if(waitCount>=5){
+	   toast("找首页时，没有发现首页,连续返回5次都不起作用,退出!");
+       exit(); 
+    }
 }
 
 

@@ -23,6 +23,7 @@ function init(){
 	if(!files.exists(commonPath)){
 	   downlaodScript("common");
 	}
+	/*
 	var refferPath = path+"/"+"reffer.json";
 	if(!files.exists(refferPath)){
 	    toast("缺少reffer.json"+"，下载中");
@@ -33,7 +34,7 @@ function init(){
         toast("reffer.json下载完成");
 
 	}
-	
+	*/
 				
    
 	//每次阅读的时间
