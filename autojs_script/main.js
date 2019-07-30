@@ -1,4 +1,3 @@
-//const utils = require('common.js');
 const script_url = "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/";
 
 /**
@@ -137,8 +136,10 @@ function stopCurrent(exectuion){
 	var currentPkgName=currentPackage();
 	var myPkgName  = getPackageName("倍薪"); 
 	//toast("当前的包名为："+currentPkgName);
-	while(currentPkgName != myPkgName)
+	var waitCount = 0;
+	while(currentPkgName != myPkgName && waitCount<3)
 	{
+	   waitCount++;
 	   if(currentPkgName=="com.UCMobile")
 	   {
 	       var  exitText =  text("退出").findOnce();
@@ -155,11 +156,12 @@ function stopCurrent(exectuion){
 	   }
 	   currentPkgName=currentPackage();
 	}
-      
-    if(currentPkgName != myPkgName)
-	{
-        app.launchApp("倍薪");
+	if(waitCount>=3 && currentPkgName != myPkgName)
+    {
+        home();
+		sleep(2000);
 	}
+	app.launchApp("倍薪");
 	
 
 }

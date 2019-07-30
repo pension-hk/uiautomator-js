@@ -250,8 +250,6 @@ templates.run({
 			   
 		   //}
 		   
-		   
-		   
 		   adFlag=findParentOfImagView(adFlag);
 		   if(adFlag){
 		     adFlag.click();
@@ -262,7 +260,8 @@ templates.run({
 		
 		adFlag= text("查看详情").findOnce();
         if(adFlag){
-		   adFlag.click();  
+		   if(!adFlag.click())
+               click("查看详情"); 			   
 		   sleep(5000);
 		   back();
            sleep(1000); 		   
