@@ -417,9 +417,7 @@ template.getTimeAward = function(doingAfterTimeAward){
  * 获取一条新闻
  */
 template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow){
-    
-    if(app.compareVersion<0) return;//6.0 无法看新闻
-    
+  
 	toast("开始获取新闻资源");
     //阅读超过50条，刷新页面
     if(initParam.totalNewsReaded > initParam.totalNewsOneTime){
@@ -445,8 +443,11 @@ template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow){
         //找新闻次数+1
         initParam.loopTimeToFindNews++;
         //进行下翻
-        swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
-    	sleep(1000);
+        if(app.compareVersion()>=0)
+		  swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
+    	else sleep(2000);
+		
+		sleep(1000);
 
         //新闻条目
         newsItem = findNewsItem();
