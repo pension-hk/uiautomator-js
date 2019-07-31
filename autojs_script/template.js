@@ -485,10 +485,16 @@ template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow){
 	    if(!newsItem.click())
 		{
 		  var bounds=newsItem.bounds();
-          if(bounds){
-             if( (bounds.left>=0 && bounds.right>bounds.left)&&(bounds.top>=0&&bounds.bottom>bounds.top))
+          if(bounds && bounds.centerX()>0 && bounds.centerY()>0){
+             //( (bounds.left>=0 && bounds.right>bounds.left)&&(bounds.top>=0&&bounds.bottom>bounds.top))
 		         click(bounds.centerX(),bounds.centerY()); 
           }
+		  else
+		  {
+		     toast("找到新闻，点击失败");
+       	     exit(); 
+		  }
+		  
 		}
     }else{
         toast("20次滑动没有找到新闻，请检查新闻ID");
