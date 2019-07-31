@@ -135,22 +135,9 @@ templates.run({
     },
     //找出新闻的条目
     findNewsItem:function(){
-		/*
-		var newsItem=null;
-		var recyclerView = className("android.support.v7.widget.RecyclerView").findOnce();
-        if(!recyclerView) return null;
-    	var recyChildCount = recyclerView.childCount();
-        for(var  i=0;i<recyChildCount;i++){  //找出所有子条目
-     		var childLayout  = recyclerView.child(i);   
-			if(!childLayout)continue;
-			newsItem = commons.findParentOfTextWiew(childLayout);
-			if(newsItem)break;
-        }
-		*/
-		var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
-	    var newsItem = commons.findParentOfTextWiew(rootNode);
-	    
-		if(!newsItem){
+        var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
+	    var newsItem = app.findParentNode(rootNode);
+	 	if(!newsItem){
            //检查是否有弹窗：
             var adFlag= text("青豆奖励").findOnce();
             if(adFlag){
@@ -165,32 +152,7 @@ templates.run({
  		}	
 	    return newsItem;
 		
-		/* ver 1.5.1:
-        var newsItem = id("tv_read_count").findOnce(1);
-        //toast("read count="+newsItem.text());
-        
-        //判断是否是广告
-        if(newsItem){
-            
-            newsItem = newsItem.parent();
-            var adFlag = newsItem.child(1);
-            if(adFlag && adFlag.text() == "广告"){
-                newsItem = null;
-            }
-        }
-		else
-		{  
-     	//检查是否有弹窗：
-            var awardPop= text("青豆奖励").findOnce();
-            if(awardPop){
-				back();
-			}			
-  
-
-
-		}		
-        return newsItem;
-		*/
+	
 		
     },	
 	//时段奖励之后执行
