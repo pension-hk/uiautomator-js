@@ -293,7 +293,13 @@ function popWindowProcess()
 		   back();
 		   sleep(1000);
 		}
-		
+		//东方头条 无响应。是否将其关闭？
+		var closeApp = text("关闭应用").findOnce();
+		if(closeApp){
+			if(!closeApp.click()){
+			   click("关闭应用");
+			}
+		}
 }
 
 function findIndex(){
