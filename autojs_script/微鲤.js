@@ -1,6 +1,7 @@
 const commons = require('common.js');
 const templates = require('template.js');
 const runAppName ="微鲤"; 
+const runPkg     ="？？？";
 
 
 templates.init({

@@ -59,7 +59,9 @@ templates.run({
 		while(!signAtonce && waitCunt<10)
 		{
 			waitCunt++;
-			signAtonce=text("立即签到").findOnce();
+			commons.UITextClick("立即签到");
+        	signAtonce=text("立即签到").findOnce();
+			
 			if(!signAtonce)//commons.UITextClick("立即签到");
 			{
 			  var continueEarn=text("继续赚元宝").findOnce();

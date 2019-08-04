@@ -1,6 +1,7 @@
 const commons = require('common.js');
 const templates = require('template.js');
 const runAppName ="中青看点"; 
+const runPkg     ="？？？";
 
 
 templates.init({
@@ -172,6 +173,7 @@ templates.run({
     //阅读页面是否应该返回
     isShouldBack:function(){
 		if(findIndex())return true;
+		if(text("搜索").findOnce()) //带有搜索字样的页面，直接退出
 		
 		return false;
         //不存在奖励，直接退出

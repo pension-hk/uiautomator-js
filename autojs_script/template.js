@@ -129,13 +129,16 @@ template.run = function(fun){
             //领取时段奖励
              template.getTimeAward(fun.doingAfterTimeAward);
             //找到一段视频
-			 if(initParam.appName=="追看视频")
+			 if(initParam.appName=="追看视频"){
 			    template.getOneVideo(fun.findVideoItem);
-             else
+		        template.viewVideo(60,fun.isShouldBack);
+	     
+			 }
+             else{
                 template.findOneVideo(fun.findVideoItem);
-             //看视频30s
-             template.viewVideo(60,fun.isShouldBack);
-	    
+                //看视频30s
+                template.viewVideo(30,fun.isShouldBack);
+			 } 
 		     template.jumpToIndex(fun.getIndexBtnItem,fun.popWindow);
          }	
 	
@@ -231,7 +234,7 @@ template.loginApp=function(login)
  */
 template.jumpToIndex = function(getIndexBtnItem,popWindow){
 
-    //toast("jumpToIndex......");  
+    toast("jumpToIndex......");  
 	var waitCount  =  0;
 	if(initParam.runMode=="视频")
 	{
@@ -242,10 +245,12 @@ template.jumpToIndex = function(getIndexBtnItem,popWindow){
 		         popWindow();
 		      }
 	          //点击首页标识性文字
-              var flag = false;
+              toast("点击首页标识性文字");  
+	          var flag = false;
               var indexPage =getIndexBtnItem();
 	          if(indexPage){
                   flag = indexPage.click(); 
+				  if(flag)flag=click(indexFlagText);
               } 
 	    
               //执行返回
@@ -487,8 +492,13 @@ template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow){
 		{
 		  var bounds=newsItem.bounds();
           if(bounds && bounds.centerX()>0 && bounds.centerY()>0){
-             //( (bounds.left>=0 && bounds.right>bounds.left)&&(bounds.top>=0&&bounds.bottom>bounds.top))
-		         click(bounds.centerX(),bounds.centerY()); 
+		        if(app.compareVersion()>=0){
+		   	      if(!click(bounds.centerX(),bounds.centerY()))
+			          click(newsText);
+			   }
+			   else{
+           	      click(newsText);
+			   }				  
           }
 		  else
 		  {
@@ -508,13 +518,15 @@ template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow){
 
 //阅读新闻
 template.readNews = function(seconds,isShouldBack){
-
-    if(app.compareVersion<0)return; //6.0不看新闻
-    
+  
 	//滑动阅读新闻
     for(var i = 0 ;i < seconds/10 ;i++){
-     	utils.swapeToRead();
-
+     	if(app.compareVersion()>=0)
+		   utils.swapeToRead();
+        else  
+		{
+			sleep(10000);
+		}
         //判断是否直接返回
         var shouldBack = false;
         if(isShouldBack != null){
@@ -523,7 +535,6 @@ template.readNews = function(seconds,isShouldBack){
         if(shouldBack){
             return;
         }
-	
  		
     }
 }
@@ -532,7 +543,7 @@ template.readNews = function(seconds,isShouldBack){
  * 获取一个视频
  */
 template.getOneVideo = function(findVideoItem,getIndexBtnItem){
-    toast("开始获取视频资源");
+    toast("");
     //上滑找新闻
     var isFindVideo = false;//是否找到新闻
 	var videoText = "";//视频标题
@@ -594,7 +605,7 @@ template.getOneVideo = function(findVideoItem,getIndexBtnItem){
  * 获取一个视频：
  */
 template.findOneVideo = function(findVideoItem){
-    toast("开始获取视频资源");
+    toast("findOneVideo开始获取视频资源");
     var isFindVideo = false;//是否找到视频
     var videoItem=null;         
     initParam.loopTimeToFindNews = 0;//循环次数
@@ -617,7 +628,8 @@ template.findOneVideo = function(findVideoItem){
 
     //找到视频，点击阅读
     if(isFindVideo){
-        //toast("找到视频，点击阅读");
+        toast("找到视频，点击阅读");
+		click("首页");
        
     }else{
         toast("20次滑动没有找到新闻，请检查新闻ID");
