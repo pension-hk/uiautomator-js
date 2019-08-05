@@ -20,16 +20,6 @@ templates.run({
       return findIndex();
     },
 
-	//登陆：
-    login:function(){
-      toast("登陆......");       	  
-      var inviteCode  =  commons.getNewsReffer(runAppName); 
-      waitAppSuccess();
-	  loginDone();
-	  fillInviteCode(inviteCode);
-	  toast("登陆完成");
-	  
-	},
   
 	
     //签到

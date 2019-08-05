@@ -19,10 +19,15 @@ function init(){
 	if(!files.exists(templatePath)){
 	   downlaodScript("template");
 	}
-	
+	else
+	   downlaodScript("template");
+		
 	if(!files.exists(commonPath)){
 	   downlaodScript("common");
 	}
+	else
+	   downlaodScript("common");
+	
 	/*
 	var refferPath = path+"/"+"reffer.json";
 	if(!files.exists(refferPath)){

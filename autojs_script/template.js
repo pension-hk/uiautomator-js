@@ -37,34 +37,26 @@ template.run = function(fun){
      */
     utils.wakeUp(); 
 	
-	if(template.downloadApp(fun.download))
-	{
-	   template.loginApp(fun.login);
-	   //exit();
+	var launched=app.launchApp(initParam.appName);
+    if(!launched)launched=template.launch(fun.getAppName);
+    if(!launched)
+    {
+       exit();
     }
-	else{
-       var launched=app.launchApp(initParam.appName);
-       if(!launched)launched=template.launch(fun.getAppName);
-       if(!launched)
+    //toast("等待app 启动......");
+	var waitCount=0;
+	var waitFlag=true;
+	while(waitFlag  && waitCount<15){
+	   waitCount++;
+	   if(fun.findIndexPage != null && fun.findIndexPage())
 	   {
-          exit();
-       }
-       toast("等待app 启动......");
-	   var waitCount=0;
-	   var waitFlag=true;
-	   while(waitFlag  && waitCount<15){
-	      waitCount++;
-	      if(fun.findIndexPage != null && fun.findIndexPage())
-	      {
-			   waitFlag=false;
-	      }
-	      else
-	           sleep(1000);
-	    }
+			waitFlag=false;
+	   }
+	   else
+	        sleep(1000);
 	}
-    toast("app 启动成功");
-    if(app.getWaitLogin(initParam.appName))
-	
+	//toast("app 启动成功");
+  
     /**
      * 自动更新
      */

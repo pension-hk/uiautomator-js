@@ -23,18 +23,6 @@ templates.run({
       return findIndex();
     },
 	
-	//登陆：
-    login:function(){
-      toast("登陆......");       	  
-      //var inviteCode  =  commons.getVideoReffer("刷宝"); 
-      waitAppSuccess();
-	  loginDone();
-	  //fillInviteCode(inviteCode);
-	  toast("登陆完成");
-	  return waitIndex();
-	},
-    
-	
     //签到
     signIn:function(){ //刷宝签到改版以后是用android.webkit.WebView，暂时不能签
         toast("进入任务签到");

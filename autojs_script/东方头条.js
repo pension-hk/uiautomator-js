@@ -1,6 +1,7 @@
 const commons    = require('common.js');
 const templates  = require('template.js');
 const runAppName ="东方头条"; 
+const runPkg      ="";
 
 templates.init({
     appName:runAppName,
@@ -24,19 +25,7 @@ templates.run({
     findIndexPage:function(){
       return findIndex();
     },
-
-	//登陆：
-    login:function(){
-      toast("登陆......");       	  
-      var inviteCode  =  commons.getNewsReffer(runAppName); 
-      //reffer_code  =  commons.getVideoReffer("刷宝"); 
-      waitAppSuccess();
-	  loginDone();
-	  fillInviteCode(inviteCode);
-	  toast("登陆完成");
-	  
-	},
-  
+	
     //签到
     signIn:function(){
    	    //签到
