@@ -2,4 +2,17 @@
   "versionCode": 100,
   "versionName": "1.0.0 Beta2",
   "releaseNotes":"正式版本"
+  "downloads" : [
+	{
+	  "name": "Github",
+	  "url": "https://github.com/pension-hk/uiautomator-js/blob/master/java/apk/倍薪.apk?raw=true"
+	}
+  ],
+  "oldVersions": [
+    {
+	  "versionCode": 099,
+	  "issues": "[测试] 当前版本为Beta版本，问题很多，请尽快更新正式版"
+	}
+  ],
+  "deprecated": 099
 }
