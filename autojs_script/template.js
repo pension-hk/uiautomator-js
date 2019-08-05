@@ -7,7 +7,7 @@ var template = {};
  */
 var initParam = {
     appName:"",//应用名称
-	runMode:"新闻", //运行模式，新闻，视频，小视频。。。。。。
+	runMode:"新闻", //运行模式，新闻
  	lastNewsText:"",//上一次新闻标题
 
     totalNewsReaded : 0,//已经阅读的新闻条数

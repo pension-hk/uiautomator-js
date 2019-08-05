@@ -43,7 +43,7 @@ function init(){
 				
    
 	//每次阅读的时间
-    var normalRumTime = 0.1*60*60;
+    var normalRumTime = 0.25*60*60;
     while(true){
         var config = getConfig();
         //新闻类的列表
