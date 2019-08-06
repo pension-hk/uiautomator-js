@@ -146,10 +146,19 @@ util.backToIndex = function(indexFlagText,indexFlagText1,indexFlagText2) {
 //滑动阅读新闻
 util.swapeToRead = function() {
     //滑动阅读新闻
-    swipe(device.width / 2, device.height * 0.8 ,
+    /*
+	swipe(device.width / 2, device.height * 0.8 ,
         device.width / 2, device.height * 0.5, 5000);
     swipe(device.width / 2, device.height * 0.8 ,
         device.width / 2, device.height * 0.5, 5000);
+    */ 
+	swipe(device.width / 2, device.height * 0.8 ,
+        device.width / 2, device.height * 0.5, 1000);
+	sleep(9000);
+	
+	
+
+	
 }
 
 

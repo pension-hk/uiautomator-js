@@ -43,7 +43,7 @@ template.run = function(fun){
     {
        exit();
     }
-    //toast("等待app 启动......");
+    toast("等待启动......");
 	var waitCount=0;
 	var waitFlag=true;
 	while(waitFlag  && waitCount<15){
@@ -55,7 +55,7 @@ template.run = function(fun){
 	   else
 	        sleep(1000);
 	}
-	//toast("app 启动成功");
+	toast("启动成功!");
   
     /**
      * 自动更新
@@ -90,7 +90,7 @@ template.run = function(fun){
             template.getTimeAward(fun.doingAfterTimeAward);
         
 		    //找到一条新闻
-            template.getOneNews(fun.findNewsItem,fun.getIndexBtnItem,fun.popWindow);
+            template.getOneNews(fun.findNewsItem,fun.getIndexBtnItem,fun.popWindow,fun.preProcess);
             //阅读新闻60s
             template.readNews(60,fun.isShouldBack);
             //返回新闻列表
@@ -258,6 +258,7 @@ template.jumpToIndex = function(getIndexBtnItem,popWindow){
 		  return;
 	}
 	
+	
     var indexFlag = text(initParam.indexFlagText).findOnce();
 	if(!indexFlag)indexFlag = text(initParam.indexFlagText1).findOnce();
 	if(!indexFlag)indexFlag = text(initParam.indexFlagText2).findOnce();
@@ -413,7 +414,7 @@ template.getTimeAward = function(doingAfterTimeAward){
 /**
  * 获取一条新闻
  */
-template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow){
+template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow,preProcess){
   
 	toast("开始获取新闻资源");
     //阅读超过50条，刷新页面
@@ -449,15 +450,20 @@ template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow){
         //新闻条目
         newsItem = findNewsItem();
         if(newsItem){
-            newsText = newsItem.child(0).text();
-	     	var tmpNewsItem=app.findNodeByText(newsItem,"置顶");
-			if(!tmpNewsItem)tmpNewsItem=app.findNodeByText(newsItem,"广告");
-			if(!tmpNewsItem)isFindNews = true;
-		
+            var textItem = newsItem.child(0);
+			if(textItem){
+			  newsText = textItem.text();
+	    	  //toast("找到新闻,有标题："+newsText);
+         	  var tmpNewsItem=app.findNodeByText(newsItem,"置顶");
+			  if(!tmpNewsItem)tmpNewsItem=app.findNodeByText(newsItem,"广告");
+			  if(!tmpNewsItem)isFindNews = true;
+		    }
+			
         }
 		else
 		{
-			var currentPkgName=currentPackage();
+			toast("没找到新闻");
+      	    var currentPkgName=currentPackage();
 			//toast("查找新闻发现打开了："+currentPkgName);
             if(currentPkgName=="com.UCMobile")
 	        {
@@ -477,20 +483,22 @@ template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow){
 
     //找到新闻，点击阅读
     if(isFindNews){
-        //toast("找到新闻，点击阅读");
+        toast("找到新闻，点击阅读");
         initParam.lastNewsText = newsText;
         initParam.totalNewsReaded++;
 	    if(!newsItem.click())
 		{
 		  var bounds=newsItem.bounds();
           if(bounds && bounds.centerX()>0 && bounds.centerY()>0){
-		        if(app.compareVersion()>=0){
+               if(app.compareVersion()>=0){
 		   	      if(!click(bounds.centerX(),bounds.centerY()))
 			          click(newsText);
 			   }
 			   else{
            	      click(newsText);
-			   }				  
+			   }
+			   if(preProcess!=null)preProcess(newsText);//阅读前预处理
+         	   
           }
 		  else
 		  {
