@@ -41,25 +41,32 @@ templates.run({
         }
         if(animationView)animationView.click();
 		sleep(1000);
-        //点击签到领红包
-    	var waitCunt=0;
-	    var signAtonce=text("立即签到").findOnce();
-		while(!signAtonce && waitCunt<10)
+        
+		app.listNode(className("android.support.v4.view.ViewPager").findOnce(),0);
+		
+		//点击签到领红包
+    	waitCunt=0;
+	 	var signWebview=className("android.webkit.WebView").findOnce();
+		while(!signWebview && waitCunt<10)
 		{
 			waitCunt++;
-			commons.UITextClick("立即签到");
-        	signAtonce=text("立即签到").findOnce();
+	    	signWebview=className("android.webkit.WebView").findOnce();
+			sleep(1000); 
 			
-			if(!signAtonce)//commons.UITextClick("立即签到");
-			{
-			  var continueEarn=text("继续赚元宝").findOnce();
-	          if(continueEarn)break;
-			}
-			else
-			{
-			  commons.UITextClick("立即签到");
-              break;			  
-			}
+		}
+	   
+	    app.listNode(signWebview,0);
+		  
+		waitCunt=0
+	    while(waitCunt<10)
+		{
+			waitCunt++;
+			if(click("立即签到"))break;
+		    toast("点立即签到，失败");
+			
+     		if(click("继续赚元宝"))break;
+     		toast("点继续赚元宝，失败");
+		
 			sleep(1000); 
 			
 		}

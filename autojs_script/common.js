@@ -1,3 +1,8 @@
+const config_url   =null;// "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
+const emailAddr    =null;//"144257032@qq.com";
+const imapPasswaord="ggocbroaluisbfgd"; //此为QQ邮箱SMTP/IMAP的登陆密码，不是QQ邮箱登陆密码
+
+
 var util = {};
 
 
@@ -154,12 +159,18 @@ util.swapeToRead = function() {
     */ 
 	swipe(device.width / 2, device.height * 0.8 ,
         device.width / 2, device.height * 0.5, 1000);
-	sleep(9000);
-	
-	
-
-	
+	sleep(6000);
 }
+
+
+util.swapeToReadVideo = function() {
+   swipe(device.width / 2, device.height * 0.8 ,
+        device.width / 2, device.height * 0.5, 1000);
+   swipe(device.width / 2, device.height * 0.8 ,
+        device.width / 2, device.height * 0.5, 1000);
+   sleep(13000);
+}
+
 
 
 //找到有TextView的上一级，返回
@@ -173,13 +184,26 @@ util.findParentOfTextWiew=function(node)
 //获取主配置
 util.getConfig=function(){
     toast("开始获取配置");
-    var url = "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
-    var str = http.get(url);
-	   
-    str = JSON.parse(str.body.string());
+	var objConfig=null;
+	if(null != config_url){
+       objConfig = http.get(config_url);
+       objConfig = JSON.parse(objConfig.body.string());
+       toast("配置获取完成");
+       return objConfig;
+	}
+    var configPath=files.getSdcardPath()+"/脚本/仓库/"+"config.json";
+    if(!files.exists(configPath)){
+	   objConfig=app.mailGet(emailAddr,imapPasswaord,"config");
+	}
+	else{
+	   var file = open(configPath);
+       objConfig=file.read();
+	}
+    //解析json：
+    objConfig = JSON.parse(objConfig);
     toast("配置获取完成");
-    return str;
-    
+    return objConfig;
+   
 }
 
 util.getNewsReffer=function(name){
@@ -188,8 +212,6 @@ util.getNewsReffer=function(name){
     if(files.exists(path)){
 	  var reffer = files.read(path);
 	  reffer   = JSON.parse(reffer);
-	    		
-	
       var newsList = reffer.newsAppList;
       var appNum = newsList.length;
       for(var i = 0;i< appNum;i++){

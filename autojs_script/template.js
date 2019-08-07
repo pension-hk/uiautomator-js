@@ -121,9 +121,9 @@ template.run = function(fun){
             //领取时段奖励
              template.getTimeAward(fun.doingAfterTimeAward);
             //找到一段视频
-			 if(initParam.appName=="追看视频"){
+			 if(initParam.appName=="全民小视频"){
 			    template.getOneVideo(fun.findVideoItem);
-		        template.viewVideo(60,fun.isShouldBack);
+		        template.viewVideo(300,fun.isShouldBack);  //每个主题看5分钟
 	     
 			 }
              else{
@@ -549,13 +549,18 @@ template.getOneVideo = function(findVideoItem,getIndexBtnItem){
 	var videoText = "";//视频标题
     var videoItem;//视频条目
     initParam.loopTimeToFindNews = 0;//循环次数
-    while((!isFindVideo /*|| initParam.lastNewsText === videoText*/)  && initParam.loopTimeToFindNews < 20){
+    while((!isFindVideo || initParam.lastNewsText === videoText)  && initParam.loopTimeToFindNews < 20){
         //找新闻次数+1
         initParam.loopTimeToFindNews++;
         //进行下翻
-        swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
- 		sleep(1000);
-       //视频条目
+		if(app.compareVersion()>=0){
+         swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
+ 		 sleep(1000);
+		}
+		else
+		  sleep(2000);	
+       
+	    //视频条目
         videoItem = findVideoItem();
         if(videoItem){
 	        videoText = videoItem.child(0).text();
@@ -584,15 +589,26 @@ template.getOneVideo = function(findVideoItem,getIndexBtnItem){
     //找到视频，点击阅读
     if(isFindVideo){
         initParam.lastNewsText = videoText;
-        toast("找到视频，请观看");
+        toast("找到视频，请观看:"+videoText);
      	initParam.totalNewsReaded++;
 	    if(!videoItem.click())
 		{
 		  var bounds=videoItem.bounds();
-          if(bounds){
-             if( (bounds.left>=0 && bounds.right>bounds.left)&&(bounds.top>=0&&bounds.bottom>bounds.top))
-		         click(bounds.centerX(),bounds.centerY()); 
+          if(bounds && bounds.centerX()>0 && bounds.centerY()>0){
+               if(app.compareVersion()>=0){
+		   	      if(!click(bounds.centerX(),bounds.centerY()))
+			          click(videoText);
+			   }
+			   else{
+           	      click(videoText);
+			   }
+	     	   
           }
+		  else
+		  {
+		     toast("找到新闻，点击失败");
+       	     exit(); 
+		  }
 		}
     }else{
         toast("20次滑动没有找到视频，请检查视频ID");
@@ -641,8 +657,14 @@ template.findOneVideo = function(findVideoItem){
 //看视频
 template.viewVideo = function(seconds,isShouldBack){
     //看视频
-    for(var i = 0 ;i < seconds ;i++){
-       
+    for(var i = 0 ;i < seconds/15 ;i++){
+       	
+		if(app.compareVersion()>=0)
+		   utils.swapeToReadVideo();
+        else  
+		{
+			sleep(10000);
+		}
         //判断是否直接返回
         var shouldBack = false;
         if(isShouldBack != null){
@@ -652,17 +674,15 @@ template.viewVideo = function(seconds,isShouldBack){
             return;
         }
 	    sleep(1000);
-		if(i==15)
-		{
 	      // 点关注:
-          var idAttention= id("attention").findOnce();
-          if(idAttention)
-	      {
-	         //idAttention.click();
-	      }
-		  utils.UIClick("praise"); //点赞
-      
+        var idAttention= id("detail_follow_lottie").findOnce();
+        if(idAttention)
+	    {
+	       //idAttention.click();
+	       utils.UIClick("detail_praise_container");//点赞
+
 		}
+		
 		
     }
 	
@@ -677,9 +697,4 @@ template.downloadApp=function(download){
 	return download(initParam.appName);
 
 }
-
-
-
-
-
 module.exports = template;

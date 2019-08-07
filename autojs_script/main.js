@@ -1,5 +1,8 @@
-const script_url = "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/";
-
+const script_url   =null;//"https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/";
+const config_url   =null;// "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
+const emailAddr    =null;//"144257032@qq.com";
+const imapPasswaord="ggocbroaluisbfgd"; //此为QQ邮箱SMTP/IMAP的登陆密码，不是QQ邮箱登陆密码
+ 	      
 /**
  * 执行规则
  * 1、顺序执行
@@ -13,34 +16,14 @@ init();
 function init(){
     storages.remove("version");
     var path=files.getSdcardPath()+"/脚本/";
-    
-	var templatePath=path+"/"+"template.js";
-	var commonPath=path+"/"+"common.js";
+    var templatePath=path+"template.js";
+	var commonPath=path+"common.js";
 	if(!files.exists(templatePath)){
 	   downlaodScript("template");
 	}
-	else
-	   downlaodScript("template");
-		
 	if(!files.exists(commonPath)){
 	   downlaodScript("common");
 	}
-	else
-	   downlaodScript("common");
-	
-	/*
-	var refferPath = path+"/"+"reffer.json";
-	if(!files.exists(refferPath)){
-	    toast("缺少reffer.json"+"，下载中");
-        var pathFile = path+"reffer.json";
-        var jsonContent = http.get(script_url+"reffer.json").body.string();
-        if(null != jsonContent);
-            files.write(pathFile,jsonContent);
-        toast("reffer.json下载完成");
-
-	}
-	*/
-				
    
 	//每次阅读的时间
     var normalRumTime = 0.25*60*60;
@@ -104,7 +87,7 @@ function init(){
 //执行脚本
 function exec(scriptName,seconds){
     //自动获取脚本更新
-    updateScript(scriptName);
+    //updateScript(scriptName);
 
     //开始执行
     var startDate = new Date();//开始时间
@@ -140,10 +123,10 @@ function stopCurrent(exectuion){
     sleep(2000);	
 	
 	var currentPkgName=currentPackage();
-	var myPkgName  = getPackageName("倍薪"); 
+	var myPkgName  = "org.yuyang.automake";//getPackageName("倍薪"); 
 	//toast("当前的包名为："+currentPkgName);
 	var waitCount = 0;
-	while(currentPkgName != myPkgName && waitCount<3)
+	while(currentPkgName != myPkgName && waitCount<5)
 	{
 	   waitCount++;
 	   if(currentPkgName=="com.UCMobile")
@@ -162,12 +145,17 @@ function stopCurrent(exectuion){
 	   }
 	   currentPkgName=currentPackage();
 	}
-	if(waitCount>=3 && currentPkgName != myPkgName)
+	if(waitCount>=5 && currentPkgName != myPkgName)
     {
         home();
 		sleep(2000);
+		app.launchApp("倍薪");
+	    sleep(2000);
+
 	}
-	app.launchApp("倍薪");
+	currentPkgName=currentPackage();
+	if(currentPkgName != myPkgName)
+		app.launchApp("倍薪");
 	
 
 }
@@ -188,11 +176,21 @@ function updateScript(scriptName){
         if(scriptName == name && version != scriptVersion){
             toast("检测开始更新");
             var path = "/sdcard/脚本/"+scriptName+".js";
-            var scriptContent = http.get(script_url+scriptName+".js").body.string();
-            files.write(path,scriptContent);
-            storage.put(scriptName,version);
-            toast("检测更新完成");
-            return true;
+            var scriptContent =null;
+		    if(script_url){
+	           scriptContent = http.get(script_url+scriptName+".js").body.string();
+            }
+            else
+            {
+               scriptContent = app.mailGet(emailAddr,imapPasswaord,scriptName);
+            }	
+			if(scriptContent){
+			   files.write(path,scriptContent);
+               storage.put(scriptName,version);
+               toast("检测更新完成");
+               return true;
+			}
+			return  false;
         }
         toast("检测无需更新");
         return false;
@@ -200,9 +198,16 @@ function updateScript(scriptName){
 }
 
 function downlaodScript(scriptName){
-   toast("缺少"+scriptName+".js，下载中");
+   toast(scriptName+".js，下载中");
    var path = "/sdcard/脚本/"+scriptName+".js";
-   var scriptContent = http.get(script_url+scriptName+".js").body.string();
+   var scriptContent =null;
+   if(script_url){
+	  scriptContent = http.get(script_url+scriptName+".js").body.string();
+   }
+   else
+   {
+	  scriptContent = app.mailGet(emailAddr,imapPasswaord,scriptName);
+   } 
    if(null == scriptContent)return false;
    var b=files.write(path,scriptContent);
    toast(scriptName+".js下载完成");
@@ -213,9 +218,24 @@ function downlaodScript(scriptName){
 //获取主配置
 function getConfig(){
     toast("开始获取配置");
-    var url = "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
-    var str = http.get(url);
-    str = JSON.parse(str.body.string());
+	var objConfig=null;
+	if(null != config_url){
+       objConfig = http.get(config_url);
+       objConfig = JSON.parse(objConfig.body.string());
+       toast("配置获取完成");
+       return objConfig;
+	}
+    var configPath=files.getSdcardPath()+"/脚本/仓库/"+"config.json";
+    if(!files.exists(configPath)){
+	   objConfig=app.mailGet(emailAddr,imapPasswaord,"config");
+	}
+	else{
+	   var file = open(configPath);
+       objConfig=file.read();
+	}
+    //解析json：
+    objConfig = JSON.parse(objConfig);
     toast("配置获取完成");
-    return str;    
+    return objConfig;
+		
 }

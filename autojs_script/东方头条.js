@@ -215,21 +215,9 @@ templates.run({
 	    var coinTip = id("ax3").findOnce(); //立即领取 金豆奖励提醒
 		if(coinTip)coinTip.click();
 	
-    },
-	download:function(appName){
-		
-		var appPackage=app.getPackageName(appName);
-        if(!app.isAppInstalled(appPackage)){
-            toast(appName+"没有安装");
-            downloadProcess(appName);
-			return true;
-        }
-        else{
-           //toast("appName="+appName+"已经安装");
-		   return false;	
-        }		
-	}
+    }
 });
+
 
 function popWindowProcess()
 {
@@ -300,176 +288,8 @@ function findIndex(){
 }
 
 
-function waitIndex()
-{
-	var waitCount=0;
-	var waitFlag=true;
-	while(waitFlag  && waitCount<20){
-		 waitCount++;
-		 if(findIndex())
-		 {
-			waitFlag=false;
-			break;
-		 }
-		 else
-		 {
-			var curPkg= currentPackage();
-			toast("curPkg="+curPkg);
-			back();   
-			sleep(1000);
-		 }
-	}	 
-  
-    toast("退出waitIndex()，waitCount="+waitCount+"  waitFlag="+waitFlag);
-	if(waitFlag||waitCount>=20)
-		return   false;
-	else
-		return true;
-	
-}
-
-function  waitAppSuccess()
-{
-	  toast("登陆:等待启动......");
-	  var waitCount=0;
-	  var waitFlag=true;
-	  while(waitFlag  && waitCount<20){
-	     waitCount++;
-  		 if(findIndex())
-	     {
-			waitFlag=false;
-			break;
-			
-	     }
-		 var uiele = text("允许").findOnce();
-         if(uiele){
-            uiele.click();
-            sleep(2000);
-         }
-         uiele = text("始终允许").findOnce();
-         if(uiele){
-            uiele.click();
-            sleep(2000);
-         }
-		 //再次检查是否到首页
-		 if(findIndex())
-	     {
-			waitFlag=false;
-	     }
-		 else
-		 {
-	        back();   //条件是当前运行的是自己
-			sleep(1000);
-		 
-		 }
-	  }	
-	  toast("登陆：app 启动成功");
-}
-function loginDone()
-{
-	  /*
-	  var myBtn = text("我的").findOnce();
-	  if(myBtn){
-		myBtn.click();
-        sleep(1000);
-		if(!text("我的").findOnce())
-		{
-			back(); //前提是当前运行的是自己
-			sleep(1000);
-		}
-		
-	  }
-	  */
-	  var waitCount=0;
-	  var myBtn = text("我的").findOnce();
-	  while(!myBtn  && waitCount<20){
-		 waitCount++;
-		 myBtn = text("我的").findOnce();
-		 if(!myBtn)
-		 {
-			var curPkg= currentPackage();
-			toast("curPkg="+curPkg);
-			back();   
-			sleep(1000);
-		 }
-		 
-	  }	 
-      if(myBtn)
-		myBtn.click();
-      sleep(2000);  
-	  
-	  
-	  toast("点击登陆"); 
-      if(!commons.idClick("a80")){
-		toast("点击登陆失败");  
-	  }
-	  
-	  sleep(1000);
-	  
-	  wechatLoginByhand();
-	  
-}
-
-function wechatLoginByhand(){ //手动登陆
-	 //微信一键登陆：
-	  var currentClass=className("android.webkit.WebView").findOnce();
-	  var waitCount = 0;
-	  while(!currentClass  && waitCount<20)
-	  {
-		 waitCount++; 
-		 currentClass=className("android.webkit.WebView").findOnce(); 
-		 sleep(1000);
-	  }
-	  waitCount = 0;		
-	  while(currentClass && waitCount<30)
-	  {
-		 waitCount++; 
-		 currentClass=className("android.webkit.WebView").findOnce(); 
-		 sleep(5000);
-		 toast("请手动点击手机图标登陆,然后填手机号与验证码，或者点微信登陆");
-	  }
-	  toast("登陆退出,waitCount="+waitCount);
-	  sleep(2000);
-	
-	
-}
 
 
-
-function  fillInviteCode(inviteCode)
-{
-	  if(null==inviteCode)return;	 
-	  //填邀请码：
-	  toast("填邀请码，先到我的");
-      waitIndex();
-		 
-		 var inviteBtn = text("填邀请码").findOnce();
-		 if(!inviteBtn)return;
-		 if(!inviteBtn.click())
-		 {
-            click("填邀请码");
-		 }
-         sleep(2000);
-		 //android.webkit.WebView
-		 currentClass=className("android.webkit.WebView").findOnce();
-		 var waitCount = 0;
-		 while(!currentClass  && waitCount<20)
-		 {
-			waitCount++; 
-			currentClass=className("android.webkit.WebView").findOnce(); 
-			sleep(5000);
-		 }
-	     waitCount = 0;		
-		 while(currentClass && waitCount<20)
-		 {
-			waitCount++; 
-			currentClass=className("android.webkit.WebView").findOnce(); 
-			sleep(5000);
-			toast("请手动填入邀请码：【 "+inviteCode+" 】，然后点提交");
-		 }
-	
-
-}	
 function waitPlayAd()
 {         //com.songheng.eastnews:id/tt_video_reward_container
 		   //com.songheng.eastnews:id/tt_video_ad_close
@@ -499,8 +319,4 @@ function waitPlayAd()
 	
 }
 
-function downloadProcess(appName)
-{  
-	commons.yingyongbao(appName);
-}
 
