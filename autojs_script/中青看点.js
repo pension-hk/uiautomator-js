@@ -1,7 +1,7 @@
 const commons = require('common.js');
 const templates = require('template.js');
 const runAppName ="中青看点"; 
-const runPkg     ="？？？";
+const runPkg     ="cn.youth.news";
 
 
 templates.init({
@@ -100,18 +100,13 @@ templates.run({
     isShouldBack:function(){
 		if(findIndex())return true;
 		if(text("搜索").findOnce()) //带有搜索字样的页面，直接退出
+		//阅读中
+     
+		click("查看全文，奖励更多");
 		
-		return false;
-        //不存在奖励，直接退出
-        if(!id("news_income_container").findOnce()){
-            return true;
-        }
-
-        //存在下载安装
-        if(id("button2").findOnce()){
-            id("button2").findOnce().click();
-            return true;
-        }
+		
+		
+		
 
         return false;
     },

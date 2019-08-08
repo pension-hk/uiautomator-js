@@ -1,7 +1,7 @@
 const commons = require('common.js');
 const templates = require('template.js');
 const runAppName ="微鲤"; 
-const runPkg     ="？？？";
+const runPkg     ="cn.weli.story";
 
 
 templates.init({
@@ -56,7 +56,10 @@ templates.run({
         //领取宝藏
         commons.UIClick("text_ok");
         commons.UIClick("bt_ok");      //如阅读奖励提醒，点知道了
-
+	    //阅读中
+		if(text("展开查看全文").findOnce()){
+    		click("展开查看全文");
+		}
         return false;
     },
 	popWindow:function(){

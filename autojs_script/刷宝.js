@@ -114,27 +114,16 @@ templates.run({
        if(closeFlag){
           closeFlag.click();
 	   }
+	   closeFlag= id("iv_box_open_new").findOnce(); //点击收取金豆
+	   if(closeFlag){
+          closeFlag.click();
+	   }
+	   
 	   return false;
     },
 	getAppName:function(appName){
        return appName+"短视频";
-    },
-	
-	download:function(appName){
-		
-		var appPackage=app.getPackageName(appName);
-		if(!appPackage)appPackage=app.getPackageName(appName+"短视频");			
-        if(!app.isAppInstalled(appPackage)){
-            //downloadProcess(appName);
-			var inviteUrl  =  commons.getVideoRefferUrl("刷宝"); 
-            if(!inviteUrl)return false;
-			commons.download(appName,inviteUrl);
-			return true;
-        }
-        else{
-     	   return false;	
-        }		
-	}
+    }
 });
 
 function findIndex(){
@@ -332,11 +321,4 @@ function  fillInviteCode(inviteCode)
 	
 
 }	
-
-
-function downloadProcess(appName)
-{  
- 	commons.yingyongbao(appName);
-    
-}
 

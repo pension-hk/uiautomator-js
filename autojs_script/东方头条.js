@@ -1,7 +1,7 @@
 const commons    = require('common.js');
 const templates  = require('template.js');
 const runAppName ="东方头条"; 
-const runPkg      ="";
+const runPkg      ="com.songheng.eastnews";
 
 templates.init({
     appName:runAppName,
@@ -23,6 +23,9 @@ templates.run({
     },
 		//获取首页标志
     findIndexPage:function(){
+	  var result= findIndex();
+      if(result)return result;
+	  popWindowProcess();
       return findIndex();
     },
 	
@@ -56,26 +59,15 @@ templates.run({
     },
 	
 	findVideoItem:function(){
-		
+		//click("推荐");
 		var videoItem=null;
-		/*
+		
 		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
-        videoItem  = app.findParentNode(rootNode);//app.findNodeByClass(rootNode,"android.widget.TextView"); 
-        return videoItem;
-		*/
-		videoItem=className("android.support.v4.view.ViewPager")
-            .className("android.support.v7.widget.RecyclerView")
-            .className("LinearLayout").findOnce();
-		if(videoItem){
-           var child=videoItem.child(0);
-		   if(child)txt=child.text();
-		   toast("txt="+txt);
-		   
-		}
-        else
-           toast("videoItem=null");			
-			
-	    return videoItem;   		
+    	app.listNode(rootNode,0);
+    	videoItem=app.findNodeById(rootNode,"asr");
+		if(videoItem.id() != null) videoItem=null;
+	    return videoItem;
+             		
     },
 	
 	
@@ -86,35 +78,12 @@ templates.run({
     },
     //跳到视频页面：
 	jumpToVideo:function(){
-	   /*
 	   var videoId  = text("视频").findOnce();
 	   if(!videoId)return false;
-	   videoId=videoId.parent();
-	   if(!videoId)return false;
-	   //toast("找到视频父类："+videoId.className());
-	   if(!videoId.click()  && !click("视频"))return false;
-       var tuijieW=text("推荐").findOnce();  	 
-       if(!tuijieW)return false;
-       if(!tuijieW.click() && !click("推荐"))return false;	   
+	   if(!videoId.click())
+	      return click("视频");
 	   return true;
-	   */
-	   var videoId  = text("视频").findOnce();
-	   if(!videoId)return false;
-	   if(!click("视频")) return false;
-	   sleep(1000);
-	   var tuijieW=text("推荐").findOnce();  	 
-       if(!tuijieW){
-		  toast("没找到推荐");
-		  return false;
-	   }
-                
-	   if(!click("推荐")){
-          toast("点击推荐失败");
-		  return false;
-	   }
-       toast("点击推荐成功");
-       return true;
-	   
+	 
 	 	   
     },
     //阅读页面是否应该返回
@@ -122,10 +91,23 @@ templates.run({
 		
 		if(findIndex()) return true;
 	  
-    	var fl=text("忽略").findOnce();
-        if(fl){
-            fl.click();
+    	  /*
+        //关闭要闻推送
+        adFlag = text("忽略").findOnce();
+        if(adFlag){
+            adFlag.click();
         }
+		*/
+        //要文推送
+        adFlag = text("立即查看").findOnce();
+        if(adFlag){
+            if(adFlag.click()){
+               sleep(5000);
+			   back();
+			   sleep(500);
+			}
+ 	    }
+		
 		fl=text("禁止").findOnce();
 	    if(fl){
             fl.click();
@@ -135,6 +117,7 @@ templates.run({
 	    if(fl){
        	   return  true;
         }
+		
 		fl=id("tt_video_ad_close").findOnce();
 		if(fl){
             fl.click();
@@ -151,69 +134,15 @@ templates.run({
 		   waitPlayAd();
 		   
 		}
-	    var videoAd = id("tt_video_ad_close").findOnce();
-        if(videoAd){
-            videoAd.click();
-        }
-		
+	    
+		//阅读中
+		click("点击查看原文");
 	
         return false;
     },
 	popWindow:function(){
 	 
-        //add for 东方头条：
-		adFlag = id("aa3").findOnce();
-        if(adFlag){
-           back();
-           sleep(500);
-        }
-	    adFlag = id("ab0").findOnce();
-        if(adFlag){
-           back();
-		   sleep(500);
-        }
-		
-		//关闭微信提现提示窗
-        adFlag = id("a_y").findOnce();//"a_y";//提现到微信ID
-        if(adFlag){
-            back();
-			sleep(500);
-        }
-      
-        //要文推送
-        adFlag = text("立即查看").findOnce();
-        if(adFlag){
-            if(adFlag.click()){
-               sleep(2000);
-			   back();
-			   sleep(500);
-			}
- 	    }
-		/*
-	    adFlag = text("忽略").findOnce();
-        if(adFlag){
-            adFlag.click();
-        }
-		*/
-       
-        //处理时段奖励提醒
-        var timeAward = text("立即领取").findOnce(); //"立即领取";//时段奖励领取提醒
-        if(timeAward){
-            back();
-			sleep(500);
-         }
-        //处理回退提示
-        var backTip = text("继续赚钱").findOnce();
-        if(backTip){
-            backTip.click();
-        }
-		
-		var videoAd = id("tt_video_ad_close").findOnce();
-        if(videoAd){
-            videoAd.click();
-        }
-	    var coinTip = id("ax3").findOnce(); //立即领取 金豆奖励提醒
-		if(coinTip)coinTip.click();
+      popWindowProcess();
 	
     }
 });
@@ -239,18 +168,24 @@ function popWindowProcess()
 			sleep(500);
         }
       
+	    /*
         //关闭要闻推送
         adFlag = text("忽略").findOnce();
         if(adFlag){
             adFlag.click();
         }
+		*/
        
-        //处理时段奖励提醒
-        var timeAward = text("立即领取").findOnce(); //"立即领取";//时段奖励领取提醒
-        if(timeAward){
-            back();
-			sleep(500);
-         }
+	    //要文推送
+        adFlag = text("立即查看").findOnce();
+        if(adFlag){
+            if(adFlag.click()){
+               sleep(2000);
+			   back();
+			   sleep(500);
+			}
+ 	    }
+	   
         //处理回退提示
         var backTip = text("继续赚钱").findOnce();
         if(backTip){
@@ -261,7 +196,10 @@ function popWindowProcess()
         if(videoAd){
             videoAd.click();
         }
-	    var coinTip = id("ax3").findOnce(); //立即领取
+	    
+	 
+		
+		var coinTip = id("ax3").findOnce(); //立即领取
 		if(coinTip)coinTip.click();
 		
 		//升级处理：
@@ -277,6 +215,34 @@ function popWindowProcess()
 			   click("关闭应用");
 			}
 		}
+	
+	    
+	    //处理时段奖励提醒，这里只能回退
+        var timeAward = text("立即领取").findOnce(); //"立即领取";//时段奖励领取提醒
+        if(timeAward){
+            back();
+			sleep(500);
+        }
+		
+		//var coinTip = id("ax3").findOnce(); //立即领取 金豆奖励提醒
+		//if(coinTip)coinTip.click();
+		
+		//立即领取 金豆奖励提醒
+		var coinTip = text("立即领取").findOnce(); //立即领取 金豆奖励提醒
+		if(coinTip)click("立即领取");
+		
+		//立即领取 > (金币翻倍x2倍)
+		//coinTip = text("立即领取 >").findOnce();
+	    //if(coinTip) click("立即领取 >"); 
+		var coinDouble=id("ax2").findOnce();//金币翻倍奖励
+		if(coinDouble){
+		   coinDouble.click();
+		   sleep(1000);
+		   waitPlayAd();
+		}
+	
+	
+		
 }
 
 function findIndex(){

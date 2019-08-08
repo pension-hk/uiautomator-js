@@ -7,9 +7,9 @@ var template = {};
  */
 var initParam = {
     appName:"",//应用名称
-	runMode:"新闻", //运行模式，新闻
- 	lastNewsText:"",//上一次新闻标题
-
+	runMode:"新闻", //运行模式：新闻,全民小视频（九宫格模式），追看视频（竖向列表模式），刷宝（单列模式）
+ 	taskMode:    0,    //0==新闻,1==视频,2==小视频
+	lastNewsText:"",//上一次新闻标题
     totalNewsReaded : 0,//已经阅读的新闻条数
     totalNewsOneTime : 50,//一次性阅读多少条新闻
     loopTimeToFindNews : 20,//找了多少次新闻找不到会退出
@@ -44,6 +44,8 @@ template.run = function(fun){
        exit();
     }
     toast("等待启动......");
+	
+	
 	var waitCount=0;
 	var waitFlag=true;
 	while(waitFlag  && waitCount<15){
@@ -57,6 +59,7 @@ template.run = function(fun){
 	}
 	toast("启动成功!");
   
+    
     /**
      * 自动更新
      */
@@ -80,36 +83,26 @@ template.run = function(fun){
 
 	if(initParam.runMode=="新闻")
     {   
-         /**
-         * 新闻阅读流程
+    	template.newsLoop(fun); 
+    	/*		 
+	    switch(utils.getRandom(0,3))
+		{
+			case 0:
+				 toast("任务模式：0");
+				 template.newsLoop(fun);
+				 break;
+			case 1:
+				 template.videoLoop(fun);  
+				 break;
+		    case 2:
+				 template.shortVideoLoop(fun);
+				 break;
+		    default:
+				 template.newsLoop(fun);
+				 break;
+		}				
          */
-     
-        while(true){
-	    
-            //领取时段奖励
-            template.getTimeAward(fun.doingAfterTimeAward);
-        
-		    //找到一条新闻
-            template.getOneNews(fun.findNewsItem,fun.getIndexBtnItem,fun.popWindow,fun.preProcess);
-            //阅读新闻60s
-            template.readNews(60,fun.isShouldBack);
-            //返回新闻列表
-            template.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2,fun.popWindow);
-		    
-			/*
-		    //
-		    if(template.jumpToVideoIndex(fun.jumpToVideo)){
-		      	sleep(1000);
-		        //找到一条视频：
-                template.getOneVideo(fun.findVideoItem,fun.getIndexBtnItem);
-                //看视频60s
-                //template.viewVideo(60,fun.isShouldBack);
-                //template.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2);
-	            sleep(10000);  
-		    }
-		    */
-		
-        }//while(true){
+
 	}
 	else
 	{
@@ -137,6 +130,78 @@ template.run = function(fun){
 	}
 	
 }
+
+template.newsLoop=function(fun)
+{
+	/**
+    * 新闻阅读流程
+    */
+        
+	while(true)
+	{
+	   //领取时段奖励
+       template.getTimeAward(fun.doingAfterTimeAward);
+   	   //找到一条新闻
+       template.getOneNews(fun.findNewsItem,fun.getIndexBtnItem,fun.popWindow,fun.preProcess);
+       //阅读新闻60s
+       template.readNews(60,fun.isShouldBack);
+       //返回新闻列表
+       template.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2,fun.popWindow);	
+	}
+}
+
+template.videoLoop=function(fun)
+{
+	toast("阅读新闻：看视频");
+	while(true)
+	{
+	   //领取时段奖励
+       template.getTimeAward(fun.doingAfterTimeAward);
+       if(template.jumpToVideoIndex(fun.jumpToVideo))
+	   {
+		  //找到一条视频：
+          template.getOneVideo(fun.findVideoItem,fun.getIndexBtnItem);
+          //看视频30s
+          template.viewVideo(30,fun.isShouldBack);
+          template.backToIndex(initParam.indexFlagText,initParam.indexFlagText1,initParam.indexFlagText2);
+	        
+	   }
+	   else
+	   {
+         toast("找不到视频入口，退出");  
+		 exit(); 
+	   }		   
+	   
+	   /*
+	   //找到一段视频
+	   if(initParam.appName=="全民小视频"){
+		  template.getOneVideo(fun.findVideoItem);
+		  template.viewVideo(300,fun.isShouldBack);  //每个主题看5分钟
+	     
+	   }
+       else{ //刷宝（单列模式）
+          template.findOneVideo(fun.findVideoItem);
+          //看视频30s
+          template.viewVideo(30,fun.isShouldBack);
+	   } 
+	   template.jumpToIndex(fun.getIndexBtnItem,fun.popWindow);
+       */
+
+	}
+}
+
+template.shortVideoLoop=function(fun)
+{
+	toast("阅读新闻：看小视频");
+	while(true)
+	{
+	   //领取时段奖励
+       template.getTimeAward(fun.doingAfterTimeAward);
+	   exit();
+	}
+
+}
+
 
 template.autoUpdate = function(fun){
     var updateFlag = false;
@@ -226,7 +291,7 @@ template.loginApp=function(login)
  */
 template.jumpToIndex = function(getIndexBtnItem,popWindow){
 
-    toast("jumpToIndex......");  
+    //toast("jumpToIndex......");  
 	var waitCount  =  0;
 	if(initParam.runMode=="视频")
 	{
@@ -522,8 +587,16 @@ template.readNews = function(seconds,isShouldBack){
 	//滑动阅读新闻
     for(var i = 0 ;i < seconds/10 ;i++){
      	if(app.compareVersion()>=0)
-		   utils.swapeToRead();
-        else  
+		{
+		   if(className("android.webkit.WebView").findOnce())	
+		      utils.swapeToRead();
+		   else
+		   {
+			   //新闻条目是视频资源：
+			   utils.swapeToReadVideo();
+		   }
+        }
+		else  
 		{
 			sleep(10000);
 		}
@@ -543,14 +616,16 @@ template.readNews = function(seconds,isShouldBack){
  * 获取一个视频
  */
 template.getOneVideo = function(findVideoItem,getIndexBtnItem){
-    toast("");
+    
+	toast("获取一个视频");
+    
     //上滑找新闻
-    var isFindVideo = false;//是否找到新闻
+    var isFindVideo = false;//是否找到视频
 	var videoText = "";//视频标题
     var videoItem;//视频条目
     initParam.loopTimeToFindNews = 0;//循环次数
     while((!isFindVideo || initParam.lastNewsText === videoText)  && initParam.loopTimeToFindNews < 20){
-        //找新闻次数+1
+        //找视频次数+1
         initParam.loopTimeToFindNews++;
         //进行下翻
 		if(app.compareVersion()>=0){
@@ -591,7 +666,8 @@ template.getOneVideo = function(findVideoItem,getIndexBtnItem){
         initParam.lastNewsText = videoText;
         toast("找到视频，请观看:"+videoText);
      	initParam.totalNewsReaded++;
-	    if(!videoItem.click())
+	    var clickVideo=videoItem.click();
+		f(!clickVideo)
 		{
 		  var bounds=videoItem.bounds();
           if(bounds && bounds.centerX()>0 && bounds.centerY()>0){
@@ -606,8 +682,8 @@ template.getOneVideo = function(findVideoItem,getIndexBtnItem){
           }
 		  else
 		  {
-		     toast("找到新闻，点击失败");
-       	     exit(); 
+		     toast("找到视频，点击失败");
+       	     
 		  }
 		}
     }else{

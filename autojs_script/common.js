@@ -102,7 +102,12 @@ util.textBoundsClick = function(textContent) {
     return flag;
 }
 
-
+util.getRandom=function(n,m)//取得一个介于n，m之间的整数，包括n，但不包括m
+{
+	var l=m-n;
+	var num=random()*l;
+	return parseInt(num,10);
+}
 
 util.backToIndex = function(indexFlagText,indexFlagText1,indexFlagText2) {
     
