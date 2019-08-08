@@ -47,29 +47,42 @@ templates.run({
 		//点击签到领红包
     	waitCunt=0;
 	 	var signWebview=className("android.webkit.WebView").findOnce();
-		while(!signWebview && waitCunt<10)
+		while(!signWebview && waitCunt<15)
 		{
 			waitCunt++;
 	    	signWebview=className("android.webkit.WebView").findOnce();
 			sleep(1000); 
 			
 		}
-	   
-	    app.listNode(signWebview,0);
-		  
+ 	   
+	    //app.listNode(signWebview,0);
+		sleep(5000);
+		
 		waitCunt=0
 	    while(waitCunt<10)
 		{
 			waitCunt++;
-			if(click("立即签到"))break;
-		    toast("点立即签到，失败");
-			
-     		if(click("继续赚元宝"))break;
-     		toast("点继续赚元宝，失败");
-		
-			sleep(1000); 
-			
+			if(click("立即签到"))
+			   sleep(2000);
+			   break;
+		    }
 		}
+         
+    	if(click("开箱领元宝")){
+			waitCount=0;
+			var idClose = id("tt_video_ad_close").findOnce();
+			while(!idClose && waitCount<30){
+				waitCount++;
+				idClose = id("tt_video_ad_close").findOnce();
+				sleep(1000);
+			}
+		         	
+		   if(idClose)idClose.click();
+		
+		}
+	     	
+	
+		
 	    //删除弹出界面
         //寻找“恭喜您获得”
 		//var findWelcome=text("恭喜您获得").findOnce();
@@ -117,6 +130,22 @@ templates.run({
 	   closeFlag= id("iv_box_open_new").findOnce(); //点击收取金豆
 	   if(closeFlag){
           closeFlag.click();
+	   }
+
+	   //领取额外福利:
+       var idBtn= id("idBtn").findOnce();
+       if(idBtn)
+	   {
+	      idBtn.click();
+	   }
+
+	   // 点关注:
+       var idAttention= id("tv_attention_text").findOnce();
+       if(idAttention)
+	   {
+	       //idAttention.click();
+	       utils.UIClick("tv_praise_text");//点赞
+
 	   }
 	   
 	   return false;

@@ -29,55 +29,62 @@ function init(){
     var normalRumTime = 0.25*60*60;
     while(true){
         var config = getConfig();
-        //新闻类的列表
+        var appNum = 0;
+    	var scriptName=null;
+        
+		//新闻类的列表
         var newsList = config.newsAppList;
-       
-        //视频类的列表
+        appNum = newsList.length;
+		for(var i = 0;i< appNum;i++){
+            scriptName=newsList[i].name;
+            var currPath=path+scriptName+".js";
+            if(!files.exists(currPath))
+			   downlaodScript(scriptName);
+			
+	    }
+			
+		
+		//视频类的列表
         var videoList = config.videoAppList;
-
-		var scriptName=null;
-               
+	    appNum = videoList.length;
+        for(var i = 0;i< appNum;i++){
+            scriptName=videoList[i].name;
+            var currPath=path+scriptName+".js";
+            if(!files.exists(currPath))
+		       downlaodScript(scriptName);
+	
+        }
+		
         /**
          * 0-7点阅读视频
          * 其他时间阅读新闻
          */
         if(new Date().getHours() >= 7){
-            var appNum = newsList.length;
+            appNum = newsList.length;
         	//appNum = 1;
             for(var i = 0;i< appNum;i++){
                 scriptName=newsList[i].name;
                 var currPath=path+scriptName+".js";
-                if(!files.exists(currPath)){
-				   downlaodScript(scriptName);
-				   continue;
-				}
-			    exec(scriptName,normalRumTime);
+                if(files.exists(currPath))
+			       exec(scriptName,normalRumTime);
             }
 			
 			appNum = videoList.length;
             for(var i = 0;i< appNum;i++){
                 scriptName=videoList[i].name;
                 var currPath=path+scriptName+".js";
-                if(!files.exists(currPath)){
-				   downlaodScript(scriptName);
-				   continue;
-				}
-
-                exec(scriptName,normalRumTime);
+                if(files.exists(currPath))
+		           exec(scriptName,normalRumTime);
             }
         }else{
-			var appNum = videoList.length;
+			appNum = videoList.length;
             for(var i = 0;i< appNum;i++){
                 scriptName=videoList[i].name;
                 var currPath=path+scriptName+".js";
-                if(!files.exists(currPath)){
-				   downlaodScript(scriptName);
-				   continue;
-				}
-
-             	exec(scriptName,normalRumTime);
+                if(files.exists(currPath))
+             	  exec(scriptName,normalRumTime);
             }
-	        //sleep(1000*60*30);//睡眠半个小时
+	        
         }
     }
 }

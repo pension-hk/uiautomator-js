@@ -56,6 +56,16 @@ templates.run({
        if(closeFlag){
           closeFlag.click();
 	   }
+	   
+	   // 点关注:
+       var idAttention= id("detail_follow_lottie").findOnce();
+       if(idAttention)
+	   {
+	       //idAttention.click();
+	       utils.UIClick("detail_praise_container");//点赞
+
+	   }
+	 
 	   return false;
     },
 	popWindow:function(){

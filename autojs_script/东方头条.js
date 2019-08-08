@@ -150,7 +150,7 @@ templates.run({
 
 function popWindowProcess()
 {
-		adFlag = id("aa3").findOnce();
+		var adFlag = id("aa3").findOnce();
         if(adFlag){
            back();
            sleep(500);

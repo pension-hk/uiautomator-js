@@ -16,6 +16,10 @@
 		{
             "name":"微鲤",
 		    "version":1
+        },
+		{
+            "name":"悦头条",
+		    "version":1
         }
     ],
     "videoAppList":[

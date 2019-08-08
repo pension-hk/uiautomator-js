@@ -666,26 +666,8 @@ template.getOneVideo = function(findVideoItem,getIndexBtnItem){
         initParam.lastNewsText = videoText;
         toast("找到视频，请观看:"+videoText);
      	initParam.totalNewsReaded++;
-	    var clickVideo=videoItem.click();
-		f(!clickVideo)
-		{
-		  var bounds=videoItem.bounds();
-          if(bounds && bounds.centerX()>0 && bounds.centerY()>0){
-               if(app.compareVersion()>=0){
-		   	      if(!click(bounds.centerX(),bounds.centerY()))
-			          click(videoText);
-			   }
-			   else{
-           	      click(videoText);
-			   }
-	     	   
-          }
-		  else
-		  {
-		     toast("找到视频，点击失败");
-       	     
-		  }
-		}
+	    click(videoText);
+	
     }else{
         toast("20次滑动没有找到视频，请检查视频ID");
 	    exit();
@@ -749,15 +731,6 @@ template.viewVideo = function(seconds,isShouldBack){
         if(shouldBack){
             return;
         }
-	    sleep(1000);
-	      // 点关注:
-        var idAttention= id("detail_follow_lottie").findOnce();
-        if(idAttention)
-	    {
-	       //idAttention.click();
-	       utils.UIClick("detail_praise_container");//点赞
-
-		}
 		
 		
     }
