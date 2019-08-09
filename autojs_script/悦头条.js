@@ -28,21 +28,29 @@ templates.run({
     signIn:function(){
    	    //签到
 		toast("签到......");
+		
 		var taskText=text("任务").findOnce();
 		if(taskText)taskText=taskText.parent();
 		if(!taskText)return;
 	    if(!taskText.click() && !click("任务"))return;
 	    sleep(1000);
-        commons.UITextClick("立即签到");
+        if(text("已签到").findOnce()){
+		   //回到新闻
+     	   var textW=text("头条").findOnce(); 
+		   if(!textW)textW=text("刷新").findOnce();
+           if(textW)textW=textW.parent(); 
+ 		   if(textW)textW.click();
+		   return;
+		}
+		commons.UITextClick("立即签到");
         sleep(2000);
         //立即领取
 		var idClose = null;
 		if(text("立即领取").findOnce()&&click("立即领取"))
 		{
           var waitCount=0;
-          //com.expflow.reading:id/tt_video_ad_close
           idClose = id("tt_video_ad_close").findOnce();
-		  while(!idClsoe && waitCount<30)		
+		  while(!idClose&& waitCount<30)		
 		  {
 	         waitCount++;
 			 idClose = id("tt_video_ad_close").findOnce();
@@ -132,7 +140,10 @@ function popWindowProcess()
 		click("我知道了");  
 	}
 	
-	
+	knowText=text("继续阅读").findOnce(); 
+    if(knowText){
+		click("继续阅读");  
+	}
 		
 }
 
@@ -147,33 +158,5 @@ function findIndex(){
 
 
 
-function waitPlayAd()
-{         //com.songheng.eastnews:id/tt_video_reward_container
-		   //com.songheng.eastnews:id/tt_video_ad_close
-		 var  currentClass=className("android.webkit.WebView").findOnce();
-		 var waitCount = 0;
-		 while(!currentClass  && waitCount<30)
-		 {
-			waitCount++; 
-			currentClass=className("android.webkit.WebView").findOnce(); 
-			sleep(1000);
-		 }
-		 waitCount = 0;
-		 while(currentClass  && waitCount<30)
-		 {
-			waitCount++; 
-			var adClose = id("tt_video_ad_close").findOnce();
-			if(adClose)
-			{
-			   adClose.click();
-			   break;
-			}
-			currentClass=className("android.webkit.WebView").findOnce(); 
-			sleep(1000);
-		
-		 }
-	
-	
-}
 
 

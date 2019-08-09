@@ -122,7 +122,7 @@ template.run = function(fun){
              else{
                 template.findOneVideo(fun.findVideoItem);
                 //看视频30s
-                template.viewVideo(30,fun.isShouldBack);
+                template.viewVideo(300,fun.isShouldBack);
 			 } 
 		     template.jumpToIndex(fun.getIndexBtnItem,fun.popWindow);
          }	
@@ -518,7 +518,7 @@ template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow,preProcess
     	else{ 
 			  sleep(10000);
         }
-		sleep(1000);
+		sleep(2000);
 
         //新闻条目
         newsItem = findNewsItem();
@@ -556,7 +556,7 @@ template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow,preProcess
 
     //找到新闻，点击阅读
     if(isFindNews){
-        //toast("找到新闻，点击阅读");
+        toast("找到新闻，请阅读");
         initParam.lastNewsText = newsText;
         initParam.totalNewsReaded++;
 	    if(!newsItem.click())

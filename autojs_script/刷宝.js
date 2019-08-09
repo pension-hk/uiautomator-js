@@ -149,16 +149,32 @@ templates.run({
        if(idAttention)
 	   {
 	       //idAttention.click();
-	       utils.UIClick("tv_praise_text");//点赞
+	       commons.UIClick("tv_praise_text");//点赞
 
 	   }
-	   
+	   var popFlag = text("知道了").findOnce(); 
+       if(popFlag)click("知道了");
+   
 	   return false;
+    },
+	popWindow:function(){
+	  popWindowProcess();
+	
     },
 	getAppName:function(appName){
        return appName+"短视频";
     }
 });
+
+function popWindowProcess()
+{
+	var popFlag = text("知道了").findOnce(); 
+    if(popFlag)click("知道了");
+
+		
+}
+
+
 
 function findIndex(){
 
