@@ -125,15 +125,16 @@ templates.run({
         }
 	    
 		
-		var coinDouble=id("ax2").findOnce();//金币翻倍奖励
+		var coinDouble=text("金币翻倍x2倍").findOnce();//金币翻倍奖励
 		if(coinDouble){
-		   coinDouble.click();
-		   //com.songheng.eastnews:id/tt_video_reward_container
-		   //com.songheng.eastnews:id/tt_video_ad_close
+		   click("金币翻倍x2倍");
 		   sleep(1000);
 		   waitPlayAd();
 		   
 		}
+		
+			
+			
 	    
 		//阅读中
 		click("点击查看原文");
@@ -216,14 +217,22 @@ function popWindowProcess()
 			}
 		}
 	
-	    
+	   //立即领取 > (金币翻倍x2倍)
+	    var coinDouble=text("金币翻倍x2倍").findOnce();//金币翻倍奖励
+		if(coinDouble){
+		   click("金币翻倍x2倍");
+		   sleep(1000);
+		   waitPlayAd();
+		}
+	
+	    /*     
 	    //处理时段奖励提醒，这里只能回退
         var timeAward = text("立即领取").findOnce(); //"立即领取";//时段奖励领取提醒
         if(timeAward){
             back();
 			sleep(500);
         }
-		
+		*/
 		//var coinTip = id("ax3").findOnce(); //立即领取 金豆奖励提醒
 		//if(coinTip)coinTip.click();
 		
@@ -231,17 +240,7 @@ function popWindowProcess()
 		var coinTip = text("立即领取").findOnce(); //立即领取 金豆奖励提醒
 		if(coinTip)click("立即领取");
 		
-		//立即领取 > (金币翻倍x2倍)
-		//coinTip = text("立即领取 >").findOnce();
-	    //if(coinTip) click("立即领取 >"); 
-		var coinDouble=id("ax2").findOnce();//金币翻倍奖励
-		if(coinDouble){
-		   coinDouble.click();
-		   sleep(1000);
-		   waitPlayAd();
-		}
-	
-	
+		
 		
 }
 

@@ -27,16 +27,42 @@ templates.run({
     //签到
     signIn:function(){
    	    //签到
-        commons.UITextClick("任务");
-        sleep(2000);
+		toast("签到......");
+		var taskText=text("任务").findOnce();
+		if(taskText)taskText=taskText.parent();
+		if(!taskText)return;
+	    if(!taskText.click() && !click("任务"))return;
+	    sleep(1000);
         commons.UITextClick("立即签到");
         sleep(2000);
-        
+        //立即领取
+		var idClose = null;
+		if(text("立即领取").findOnce()&&click("立即领取"))
+		{
+          var waitCount=0;
+          //com.expflow.reading:id/tt_video_ad_close
+          idClose = id("tt_video_ad_close").findOnce();
+		  while(!idClsoe && waitCount<30)		
+		  {
+	         waitCount++;
+			 idClose = id("tt_video_ad_close").findOnce();
+             sleep(1000);			 
+		  }
+		}
+		if(idClose){
+		  idClose.click();
+		  sleep(1000);
+		}
+		 
+		idClose = id("iv_close").findOnce();
+		if(idClose)idClose.click();
+			
 		//回到新闻
      	var textW=text("头条").findOnce(); 
 		if(!textW)textW=text("刷新").findOnce();
         if(textW)textW=textW.parent(); 
  		if(textW)textW.click();
+		toast("签到完成");
         
     },
     //找出新闻的条目
@@ -87,8 +113,7 @@ templates.run({
         return false;
     },
 	popWindow:function(){
-	 
-      popWindowProcess();
+	  popWindowProcess();
 	
     }
 });
@@ -96,10 +121,16 @@ templates.run({
 
 function popWindowProcess()
 {
-	
 	var adFlag = id("iv_dismiss").findOnce(); //限时抢
-    if(adFlagad)Flag.click();
-        
+    if(adFlag)adFlag.click();
+
+    adFlag = id("iv_close").findOnce();
+	if(adFlag)adFlag.click();
+	
+	var knowText=text("我知道了").findOnce(); //新版时段奖励
+    if(knowText){
+		click("我知道了");  
+	}
 	
 	
 		

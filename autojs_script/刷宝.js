@@ -25,7 +25,8 @@ templates.run({
 	
     //签到
     signIn:function(){ //刷宝签到改版以后是用android.webkit.WebView，暂时不能签
-        toast("进入任务签到");
+        /*
+		toast("进入任务签到");
 		//进入任务 
         var taskFlag=text("任务").findOnce();
         if(!taskFlag)return;
@@ -58,18 +59,21 @@ templates.run({
 	    //app.listNode(signWebview,0);
 		sleep(5000);
 		
+		
+		
 		waitCunt=0
 	    while(waitCunt<10)
 		{
 			waitCunt++;
-			if(click("立即签到"))
+			if(click("立即签到")){
 			   sleep(2000);
 			   break;
 		    }
 		}
-         
-    	if(click("开箱领元宝")){
-			waitCount=0;
+        
+		waitCount=0;
+		if(click("开箱领元宝"))
+		{
 			var idClose = id("tt_video_ad_close").findOnce();
 			while(!idClose && waitCount<30){
 				waitCount++;
@@ -77,7 +81,7 @@ templates.run({
 				sleep(1000);
 			}
 		         	
-		   if(idClose)idClose.click();
+		    if(idClose)idClose.click();
 		
 		}
 	     	
@@ -99,7 +103,8 @@ templates.run({
        
         //返回主页面
         click("首页");
-        
+        */
+		
     },
     //找出视频
     findVideoItem:function(){  

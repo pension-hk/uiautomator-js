@@ -79,7 +79,7 @@ template.run = function(fun){
         
     }
     
-    //toast("签到执行完成");
+    
 
 	if(initParam.runMode=="新闻")
     {   
@@ -343,6 +343,7 @@ template.jumpToIndex = function(getIndexBtnItem,popWindow){
 		{
 		    var indexPage =getIndexBtnItem();
 	        if(indexPage){
+				
                 flag = indexPage.click(); 
             } 
 		}
@@ -375,6 +376,8 @@ template.jumpToIndex = function(getIndexBtnItem,popWindow){
 	    if(!indexFlag)indexFlag = text(initParam.indexFlagText2).findOnce();
     }
 	
+	//toast("找首页时，waitCount="+waitCount);
+    
 	if(waitCount>=5){
 	   toast("找首页时，没有发现首页,连续返回5次都不起作用,退出!");
        exit(); 
@@ -461,8 +464,12 @@ template.jumpToVideoIndex=function(jumpToVideo)
 template.getTimeAward = function(doingAfterTimeAward){
     if(initParam.runMode=="新闻")
 	{
-	   if(!utils.UITextBoundsClick(initParam.timeAwardText)){
-		    return;
+	   if(app.compareVersion()<0){
+	     click(initParam.timeAwardText);   
+	   }
+	   else	{
+	     if(!utils.UITextBoundsClick(initParam.timeAwardText))
+	            click(initParam.timeAwardText);   
 	   }
 	}
     else
@@ -508,8 +515,9 @@ template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow,preProcess
         //进行下翻
         if(app.compareVersion()>=0)
 		  swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
-    	else sleep(2000);
-		
+    	else{ 
+			  sleep(10000);
+        }
 		sleep(1000);
 
         //新闻条目
@@ -527,7 +535,7 @@ template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow,preProcess
         }
 		else
 		{
-			toast("没找到新闻");
+			//toast("没找到新闻");
       	    var currentPkgName=currentPackage();
 			//toast("查找新闻发现打开了："+currentPkgName);
             if(currentPkgName=="com.UCMobile")
@@ -548,7 +556,7 @@ template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow,preProcess
 
     //找到新闻，点击阅读
     if(isFindNews){
-        toast("找到新闻，点击阅读");
+        //toast("找到新闻，点击阅读");
         initParam.lastNewsText = newsText;
         initParam.totalNewsReaded++;
 	    if(!newsItem.click())
@@ -567,7 +575,7 @@ template.getOneNews = function(findNewsItem,getIndexBtnItem,popWindow,preProcess
           }
 		  else
 		  {
-		     toast("找到新闻，点击失败");
+		     //toast("找到新闻，点击失败");
        	     exit(); 
 		  }
 		  

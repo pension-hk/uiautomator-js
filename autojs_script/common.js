@@ -1,7 +1,3 @@
-const config_url   =null;// "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
-const emailAddr    =null;//"144257032@qq.com";
-const imapPasswaord="ggocbroaluisbfgd"; //此为QQ邮箱SMTP/IMAP的登陆密码，不是QQ邮箱登陆密码
-
 
 var util = {};
 
@@ -12,6 +8,7 @@ util.wakeUp = function(){
         device.wakeUpIfNeeded();
     }
 }
+
 
 //打开APP
 util.launch = function(appName) {
@@ -186,30 +183,6 @@ util.findParentOfTextWiew=function(node)
 
 
 
-//获取主配置
-util.getConfig=function(){
-    toast("开始获取配置");
-	var objConfig=null;
-	if(null != config_url){
-       objConfig = http.get(config_url);
-       objConfig = JSON.parse(objConfig.body.string());
-       toast("配置获取完成");
-       return objConfig;
-	}
-    var configPath=files.getSdcardPath()+"/脚本/仓库/"+"config.json";
-    if(!files.exists(configPath)){
-	   objConfig=app.mailGet(emailAddr,imapPasswaord,"config");
-	}
-	else{
-	   var file = open(configPath);
-       objConfig=file.read();
-	}
-    //解析json：
-    objConfig = JSON.parse(objConfig);
-    toast("配置获取完成");
-    return objConfig;
-   
-}
 
 util.getNewsReffer=function(name){
     var reffer_code=null;
