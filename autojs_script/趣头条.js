@@ -33,18 +33,7 @@ templates.run({
     //找出新闻的条目
     findNewsItem:function(){
         /*
-  	    var newsItem=null;
-		var recyclerView = className("android.support.v7.widget.RecyclerView").findOnce();//fu,go
-        if(!recyclerView)return null;
-    	var recyChildCount = recyclerView.childCount();
-        for(var  i=0;i<recyChildCount;i++){  //找出所有子条目
-     		var childLayout  = recyclerView.child(i);   
-			if(!childLayout)continue;
-			newsItem = commons.findParentOfTextWiew(childLayout);
-			if(newsItem)break;
-        }
-		*/
-        var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
+		var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
 	    var newsItem = commons.findParentOfTextWiew(rootNode);
 		
 	    if(!newsItem){
@@ -54,7 +43,18 @@ templates.run({
 		   }
 		}		
 	    return newsItem;
-    },
+        */
+		var newsItem =null;
+   	    var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
+	    //app.findNodeTest(rootNode,0,0);
+		if(app.compareVersion()>=0)
+		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0);
+		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2);
+		if(!newsItem && !findIndex()) backToIndex();
+		return newsItem;
+		
+		
+   },
     //阅读页面是否应该返回
     isShouldBack:function(){
 		if(findIndex())return true;
@@ -65,7 +65,9 @@ templates.run({
         if(imgItem){
             return true;
         }
- 	
+          	
+	    ucMobile();
+		
 		var idTg = id("tg").findOnce();
 		if(idTg)idTg.click();
         //请完成验证，。。。
@@ -78,11 +80,8 @@ templates.run({
 		return false;
     },
 	popWindow:function(){
-	    var adFlag=id("iv_activity").findOnce();
-        if(adFlag){
-           back();
-           sleep(500);
-        }
+	    popWindowProcess();
+	
 	  
     },
 	download:function(appName){
@@ -101,9 +100,78 @@ templates.run({
 	
 });
 
+function popWindowProcess()
+{
+	var adFlag=id("iv_activity").findOnce();
+    if(adFlag){
+       back();
+       sleep(500);
+    }
+
+}
+
+
+
 function findIndex(){
    return text("美食").findOnce(); 
 }
+
+function ucMobile(){
+    var currentPkgName=currentPackage();
+    if(currentPkgName=="com.UCMobile")
+    {
+	   app.dlog("处理打开的："+currentPkgName);
+       while(currentPkgName=="com.UCMobile")
+	   {
+		   var  exitText =  text("退出").findOnce();
+           if(exitText){
+		        if(!exitText.click())click("退出");
+		   }
+           else
+		   {
+			     back();
+                 sleep(1000);
+		   }
+		   currentPkgName=currentPackage();
+	    }		   
+	}	
+	
+}
+		
+
+function  backToIndex()
+{
+	/*
+    var currentPkgName=currentPackage();
+    if(currentPkgName=="com.UCMobile")
+	{
+	     toast("处理打开的："+currentPkgName);
+         var  exitText =  text("退出").findOnce();
+         if(exitText)exitText.click();
+         else
+		 {
+			back();
+            sleep(1000);
+		 }		   
+	}
+	*/
+	ucMobile();
+	
+    var idAllow = id("permission_allow_button").findOnce(); //始终允许
+    if(idAllow)
+	{
+	   idAllow.click();
+    }
+	popWindowProcess();
+	
+	if(!findIndex())
+	{
+	   back();
+       sleep(1000);  	
+	}
+	
+}
+
 
 function  waitAppSuccess()
 {

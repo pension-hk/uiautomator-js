@@ -28,6 +28,7 @@ templates.run({
     //签到
     signIn:function(){ //刷宝签到改版以后是用android.webkit.WebView，暂时不能签
         toast("进入任务签到");
+		if(text("登陆").findOnce())return;
 		//app.listNode(className("android.widget.FrameLayout").findOnce(),0);
 		if(text("去赚钱").findOnce())
            click("去赚钱");        
@@ -35,7 +36,8 @@ templates.run({
     },
     //找出视频
     findVideoItem:function(){  
-    	var rootNode = className("android.support.v4.view.ViewPager").findOnce();
+    	if(text("登陆").findOnce())return null;
+		var rootNode = className("android.support.v4.view.ViewPager").findOnce();
 		var testNode = className("android.widget.RelativeLayout").findOnce();
 		var videoItem = app.findNodeById(testNode,"com.baidu.minivideo:id/index_text_title");
 		return videoItem;

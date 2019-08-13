@@ -1,5 +1,5 @@
-const script_url   =null;//"https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/";
-const config_url   =null;// "https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
+const script_url   ="https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/";
+const config_url   ="https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
 const emailAddr    =null;//"144257032@qq.com";
 const imapPasswaord="ggocbroaluisbfgd"; //此为QQ邮箱SMTP/IMAP的登陆密码，不是QQ邮箱登陆密码
  	      
@@ -65,26 +65,34 @@ function init(){
             for(var i = 0;i< appNum;i++){
                 scriptName=newsList[i].name;
                 var currPath=path+scriptName+".js";
-                if(files.exists(currPath))
+			    if(files.exists(currPath) && app.getPackageName(scriptName))
 			       exec(scriptName,normalRumTime);
+			   
+			    
             }
 			
 			appNum = videoList.length;
             for(var i = 0;i< appNum;i++){
                 scriptName=videoList[i].name;
                 var currPath=path+scriptName+".js";
-                if(files.exists(currPath))
+            	if(files.exists(currPath) 
+					&& (app.getPackageName(scriptName)||app.getPackageName(scriptName+"短视频")))
 		           exec(scriptName,normalRumTime);
+				   
             }
+			sleep(5000);
         }else{
 			appNum = videoList.length;
             for(var i = 0;i< appNum;i++){
                 scriptName=videoList[i].name;
                 var currPath=path+scriptName+".js";
-                if(files.exists(currPath))
-             	  exec(scriptName,normalRumTime);
+                if(files.exists(currPath) 
+					&& (app.getPackageName(scriptName)||app.getPackageName(scriptName+"短视频")))
+		          exec(scriptName,normalRumTime);
+
             }
-	        
+	        sleep(5000);
+             
         }
     }
 }
@@ -205,7 +213,7 @@ function updateScript(scriptName){
 }
 
 function downlaodScript(scriptName){
-   toast(scriptName+".js，下载中");
+   toast(scriptName+".js下载中");
    var path = "/sdcard/脚本/"+scriptName+".js";
    var scriptContent =null;
    if(script_url){
@@ -225,23 +233,30 @@ function downlaodScript(scriptName){
 //获取主配置
 function getConfig(){
     toast("开始获取配置");
-	var objConfig=null;
-	if(null != config_url){
-       objConfig = http.get(config_url);
-       objConfig = JSON.parse(objConfig.body.string());
-       toast("配置获取完成");
-       return objConfig;
-	}
-    var configPath=files.getSdcardPath()+"/脚本/仓库/"+"config.json";
+	var configContent=null;
+	var configPath=files.getSdcardPath()+"/脚本/仓库/"+"config.json";
     if(!files.exists(configPath)){
-	   objConfig=app.mailGet(emailAddr,imapPasswaord,"config");
+	   if(null != config_url){
+         toast("开始远程获取配置");
+	     configContent = http.get(config_url).body.string();
+         //var objConfig = JSON.parse(configContent);
+         //toast("配置="+objConfig);
+          //return objConfig;
+	     if(configContent){
+		     files.write(configPath,configContent);
+		 }
+	     toast("远程配置获取完成");
+         return JSON.parse(configContent);   	   
+	   }
+	   else
+		  configContent=app.mailGet(emailAddr,imapPasswaord,"config");
 	}
 	else{
 	   var file = open(configPath);
-       objConfig=file.read();
+       configContent=file.read();
 	}
     //解析json：
-    objConfig = JSON.parse(objConfig);
+    objConfig = JSON.parse(configContent);
     toast("配置获取完成");
     return objConfig;
 		

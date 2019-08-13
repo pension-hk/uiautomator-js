@@ -9,12 +9,6 @@ templates.init({
     indexFlagText:"发布",	
 });
 
-//pop："您有新的时段奖励可以领取，请及时领取" ==》立即领取 x:id=hi,点立即领取==>时段奖励领取成功 x:id=hi 和【立即查看】
-//news：恭喜你获得 & 浏览广告赢更多金币,其父类才可以点，点进去=》是视频广告，等30秒后检查：com.songheng.eastnews:id/tt_video_ad_close
-//要文推送：“忽略” 和“立即查看”，点“立即查看”==》class：android.webkit.WebView
-//视频按钮=》
-//   找文本TextView类：android.widget.TextView，其父类是可以点击的，点击后进入播放，可查类：android.support.v4.widget.SlidingPaneLayout。只能back（）；
-//   还有跳入类：android.webkit.WebView，只能立即back。          
 templates.run({
     
     //获取首页按钮
@@ -48,20 +42,19 @@ templates.run({
     },
     //找出新闻的条目
     findNewsItem:function(){
-		var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();//fu,go
-	    var newsItem = commons.findParentOfTextWiew(rootNode);
-		if(!newsItem)
-		{
-		   popWindowProcess();
-		}
+		var newsItem =null;
+   	    var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
+	    //app.findNodeTest(rootNode,0,0);
+		if(app.compareVersion()>=0)
+		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0);
+		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2);
+		if(!newsItem && !findIndex()) backToIndex();
 		return newsItem;
 		
     },
 	
 	findVideoItem:function(){
-		//click("推荐");
 		var videoItem=null;
-		
 		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
     	app.listNode(rootNode,0);
     	videoItem=app.findNodeById(rootNode,"asr");
@@ -73,8 +66,8 @@ templates.run({
 	
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
-    	
-		back();
+   	    if(!findIndex()) 
+		    back();
     },
     //跳到视频页面：
 	jumpToVideo:function(){
@@ -88,42 +81,47 @@ templates.run({
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
-		
 		if(findIndex()) return true;
-	  
-    	  /*
-        //关闭要闻推送
-        adFlag = text("忽略").findOnce();
+    	//要文推送
+        var adFlag = text("立即查看").findOnce();
         if(adFlag){
-            adFlag.click();
-        }
-		*/
-        //要文推送
-        adFlag = text("立即查看").findOnce();
-        if(adFlag){
-            if(adFlag.click()){
+		    adFlag=adFlag.click();
+		    if(!adFlag)adFlag=click("立即查看"); 
+		    if(adFlag){
                sleep(5000);
 			   back();
 			   sleep(500);
 			}
  	    }
 		
-		fl=text("禁止").findOnce();
-	    if(fl){
-            fl.click();
+		adFlag=text("禁止").findOnce();
+	    if(adFlag){
+            adFlag.click();
 			return  true;
         }
-	    fl=text("立即下载").findOnce();
-	    if(fl){
+	    adFlag=text("立即下载").findOnce();
+	    if(adFlag){
        	   return  true;
         }
 		
-		fl=id("tt_video_ad_close").findOnce();
-		if(fl){
-            fl.click();
+		adFlag=id("tt_video_ad_close").findOnce();
+		if(adFlag){
+            adFlag.click();
 			return  true;
         }
 	    
+		//东方头条无响应。。。。。。
+		adFlag=text("确定").findOnce();
+		if(adFlag){
+            if(!adFlag.click())click("确定");
+			return  true;
+        }
+		
+		//com.android.packageinstaller
+		if(currentPackage()==="com.android.packageinstaller"){
+           if(text("取消").findOnce())click("取消");		
+ 			return  true;
+    	}
 		
 		var coinDouble=text("金币翻倍x2倍").findOnce();//金币翻倍奖励
 		if(coinDouble){
@@ -168,7 +166,15 @@ function popWindowProcess()
             back();
 			sleep(500);
         }
-      
+    
+	    //东方头条无响应。。。。。。
+		adFlag=text("确定").findOnce();
+		if(adFlag){
+            if(!adFlag.click())click("确定");
+			
+        }
+	
+	
 	    /*
         //关闭要闻推送
         adFlag = text("忽略").findOnce();
@@ -240,8 +246,6 @@ function popWindowProcess()
 		var coinTip = text("立即领取").findOnce(); //立即领取 金豆奖励提醒
 		if(coinTip)click("立即领取");
 		
-		
-		
 }
 
 function findIndex(){
@@ -252,7 +256,60 @@ function findIndex(){
     return textW;	
 }
 
+function ucMobile(){
+    var currentPkgName=currentPackage();
+    if(currentPkgName=="com.UCMobile")
+    {
+	   app.dlog("处理打开的："+currentPkgName);
+       while(currentPkgName=="com.UCMobile")
+	   {
+		   var  exitText =  text("退出").findOnce();
+           if(exitText){
+		        if(!exitText.click())click("退出");
+		   }
+           else
+		   {
+			     back();
+                 sleep(1000);
+		   }
+		   currentPkgName=currentPackage();
+	    }		   
+	}	
+	
+}
+		
 
+
+function  backToIndex()
+{
+   
+   /*	
+    var currentPkgName=currentPackage();
+	if(currentPkgName=="com.UCMobile")
+	{
+	     toast("处理打开的："+currentPkgName);
+         var  exitText =  text("退出").findOnce();
+         if(exitText)exitText.click();
+         else
+		 {
+			back();
+            sleep(1000);
+		 }		   
+	}
+    */
+	ucMobile();
+	
+	popWindowProcess();
+     
+	
+	if(!findIndex())
+	{
+	   //toast("发现webview界面，回退");
+       back();
+       sleep(1000);  	
+	}
+	
+}
 
 
 function waitPlayAd()

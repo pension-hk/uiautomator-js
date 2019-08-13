@@ -20,8 +20,6 @@ templates.run({
       return findIndex();
     },
 
-  
-	
     //签到
     signIn:function(){
         commons.UIClick("rl_bottom_4");
@@ -40,9 +38,15 @@ templates.run({
         //领取宝藏
         commons.UIClick("text_ok");
         commons.UIClick("bt_ok");
-		var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();//fu,go
-	    var newsItem = commons.findParentOfTextWiew(rootNode);
+		var newsItem =null;
+   	    var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
+	    //app.findNodeTest(rootNode,0,0);
+		if(app.compareVersion()>=0)
+		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0);
+		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2);
+		if(!newsItem && !findIndex()) backToIndex();
 		return newsItem;
+	
 		
     },
     //时段奖励之后执行
@@ -63,11 +67,8 @@ templates.run({
         return false;
     },
 	popWindow:function(){
-	    var adFlag=id("iv_activity").findOnce();
-        if(adFlag){
-           back();
-           sleep(500);
-        }
+	    popWindowProcess();
+	
 	  
     },
 	download:function(appName){
@@ -87,6 +88,67 @@ templates.run({
 
 function findIndex(){
    return text("美食").findOnce(); 
+}
+
+function ucMobile(){
+    var currentPkgName=currentPackage();
+    if(currentPkgName=="com.UCMobile")
+    {
+	   app.dlog("处理打开的："+currentPkgName);
+       while(currentPkgName=="com.UCMobile")
+	   {
+		   var  exitText =  text("退出").findOnce();
+           if(exitText){
+		        if(!exitText.click())click("退出");
+		   }
+           else
+		   {
+			     back();
+                 sleep(1000);
+		   }
+		   currentPkgName=currentPackage();
+	    }		   
+	}	
+	
+}
+
+
+function  backToIndex()
+{
+    /*
+	var currentPkgName=currentPackage();
+    if(currentPkgName=="com.UCMobile")
+	{
+	     toast("处理打开的："+currentPkgName);
+         var  exitText =  text("退出").findOnce();
+         if(exitText)exitText.click();
+         else
+		 {
+			back();
+            sleep(1000);
+		 }		   
+	}
+    */
+	ucMobile();
+	popWindowProcess();
+     
+	
+	if(!findIndex())
+	{
+	   //toast("发现webview界面，回退");
+       back();
+       sleep(1000);  	
+	}
+	
+}
+
+function popWindowProcess()
+{
+	var adFlag=id("iv_activity").findOnce();
+    if(adFlag){
+        back();
+        sleep(500);
+    }
 }
 
 function  waitAppSuccess()

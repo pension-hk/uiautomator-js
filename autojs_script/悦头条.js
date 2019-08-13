@@ -27,8 +27,7 @@ templates.run({
     //签到
     signIn:function(){
    	    //签到
-		toast("签到......");
-		
+		app.dlog("签到......");
 		var taskText=text("任务").findOnce();
 		if(taskText)taskText=taskText.parent();
 		if(!taskText)return;
@@ -75,13 +74,15 @@ templates.run({
     },
     //找出新闻的条目
     findNewsItem:function(){
-		var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
-	    var newsItem = commons.findParentOfTextWiew(rootNode);
-		if(!newsItem)
-		{
-		   popWindowProcess();
-		}
+		var newsItem =null;
+   	    var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
+	    //app.findNodeTest(rootNode,0,0);
+		if(app.compareVersion()>=0)
+		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0);
+		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2);
+		if(!newsItem && !findIndex()) backToIndex();
 		return newsItem;
+	
 		
     },
 	
@@ -115,9 +116,8 @@ templates.run({
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
-		
 		if(findIndex()) return true;
-	  
+        jumpProc();   //跳转页面
         return false;
     },
 	popWindow:function(){
@@ -126,6 +126,10 @@ templates.run({
     }
 });
 
+function jumpProc(){
+	
+	
+}
 
 function popWindowProcess()
 {
@@ -155,6 +159,61 @@ function findIndex(){
     return textW;	
 }
 
+function ucMobile(){
+    var currentPkgName=currentPackage();
+    if(currentPkgName=="com.UCMobile")
+    {
+	   app.dlog("处理打开的："+currentPkgName);
+       while(currentPkgName=="com.UCMobile")
+	   {
+		   var  exitText =  text("退出").findOnce();
+           if(exitText){
+		        if(!exitText.click())click("退出");
+		   }
+           else
+		   {
+			     back();
+                 sleep(1000);
+		   }
+		   currentPkgName=currentPackage();
+	    }		   
+	}	
+	
+}
+		
+
+
+function  backToIndex()
+{
+	//toast("没找到新闻");
+	/*
+    var currentPkgName=currentPackage();
+			//toast("查找新闻发现打开了："+currentPkgName);
+    if(currentPkgName=="com.UCMobile")
+	{
+	     toast("处理打开的："+currentPkgName);
+         var  exitText =  text("退出").findOnce();
+         if(exitText)exitText.click();
+         else
+		 {
+			back();
+            sleep(1000);
+		 }		   
+	}
+    */
+	ucMobile();
+	
+	popWindowProcess();
+     
+	
+	if(!findIndex())
+	{
+	   app.dlog("发现非主页，回退");
+       back();
+       sleep(1000);  	
+	}
+	
+}
 
 
 
