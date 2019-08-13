@@ -39,12 +39,13 @@ templates.run({
     },
     //找出新闻的条目
     findNewsItem:function(){
+		app.dlog("找出新闻的条目");
 		var newsItem =null;
    	    var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
 	    //app.findNodeTest(rootNode,0,0);
 		if(app.compareVersion()>=0)
-		    newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0);
-		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2);
+		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
+		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
 		if(!newsItem && !findIndex()) backToIndex();
 		return newsItem;
 		
