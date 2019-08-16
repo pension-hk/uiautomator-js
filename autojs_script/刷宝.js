@@ -171,7 +171,7 @@ function popWindowProcess()
 	var popFlag = text("知道了").findOnce(); 
     if(popFlag)click("知道了");
 	popFlag=id("tt_video_ad_close").findOnce();
-	if(fl)fl.click();
+	if(popFlag)popFlag.click();
 	
 		
 }
