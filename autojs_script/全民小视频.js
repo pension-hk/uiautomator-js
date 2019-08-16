@@ -64,7 +64,7 @@ templates.run({
        if(idAttention)
 	   {
 	       //idAttention.click();
-	       utils.UIClick("detail_praise_container");//点赞
+	       commons.UIClick("detail_praise_container");//点赞
 
 	   }
 	 

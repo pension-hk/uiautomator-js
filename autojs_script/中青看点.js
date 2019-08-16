@@ -24,41 +24,79 @@ templates.run({
     //签到
     signIn:function(){
         //进入我的
-        var myFlag=id("tv_user_tab").findOnce();
+        app.dlog("签到......");
+		var myFlag=id("a4a").findOnce();
         if(myFlag)myFlag=myFlag.parent();
-        if(!myFlag)return;
-		myFlag.click();
-        sleep(2000);
+        if(!myFlag){
+		  app.dlog("找【我的】ID失败");
+		  if(!click("我的"))
+		  {
+		     app.dlog("点[我的]失败");
+		     return;
+		  }
+		}
+		else
+		 if(!myFlag.click() && !click("我的")){
+		   app.dlog("点[我的id]与【我的】均失败");
+		   return;
+		 }
+        sleep(1000);
         //去掉广告
         var animationView=id("animationView").findOnce();
         if(animationView)animationView.click();
         
         sleep(500);
         //进入任务中心
-        var taskCenter = text("任务中心").findOnce();
+		app.dlog("进入任务中心");
+	    var taskCenter = text("任务中心").findOnce();
         if(taskCenter)taskCenter=taskCenter.parent();
-        if(taskCenter)taskCenter.click();
-        sleep(5000);
-        
-        //点击签到领红包
-		toast("点击签到领红包");
-        if(commons.textClick("立即签到")){
-           
-		   sleep(1000);
-           //删除弹出界面
-           commons.UIClick("iv_close");  
-        
+        if(taskCenter){
+		  if(!taskCenter.click())
+			  click("任务中心");
+           sleep(5000);
         }
-		//返回主页面
+        //点击签到领红包
+		app.dlog("点击签到领红包");
+		if(className("android.webkit.WebView").findOnce()){
+		  if(!click("立即签到")){
+               if(click("看视频得青豆")) 
+			   {
+		          app.dlog("等待看视频得青豆");
+				  waitPlayAd();
+	    		   
+			   }
+		  }	
+          
+		  back();
+		  sleep(1000);
+          click("不感兴趣");  
+        		  
+		}
+		app.dlog("返回主页面");
+	    //返回主页面
         back();
 		sleep(1000);
         back();
         sleep(1000);
 	   
 		//回到新闻
-        commons.UIClick("tv_home_tab");
-        
-        
+        var indexId=id("a0s").findOnce();
+		if(indexId){
+		   app.dlog("有首页ID a0s");
+	       if(!indexId.click()){
+			 app.dlog("点击ID失败");
+			 if(!click("首页")){
+			    app.dlog("点击首页失败,再点刷新");
+				click("刷新"); 
+			 }
+	       }
+		}
+		else{
+			 app.dlog("没有首页ID a0s");
+	      
+		}
+		
+	        
     },
     //找出新闻的条目
     findNewsItem:function(){
@@ -89,6 +127,9 @@ templates.run({
     //阅读页面是否应该返回
     isShouldBack:function(){
 		if(findIndex())return true;
+		
+		click("查看全文，奖励更多");
+		
 		if(text("搜索").findOnce())return true; //带有搜索字样的页面，直接退出
 		//推送处理：
         var viewText=text("查看详情").findOnce(); 
@@ -96,9 +137,6 @@ templates.run({
 			click(立即查看); 
 		}
 
-        var webView=className("android.webkit.WebView").findOnce();
-		
-		click("查看全文，奖励更多");
 		
 		
 
@@ -230,6 +268,32 @@ function  backToIndex()
 	
 }
 
+function waitPlayAd()
+{        var  currentClass=className("android.webkit.WebView").findOnce();
+		 var waitCount = 0;
+		 while(!currentClass  && waitCount<30)
+		 {
+			waitCount++; 
+			currentClass=className("android.webkit.WebView").findOnce(); 
+			sleep(1000);
+		 }
+		 waitCount = 0;
+		 while(currentClass  && waitCount<30)
+		 {
+			waitCount++; 
+			var adClose = id("tt_video_ad_close").findOnce();
+			if(adClose)
+			{
+			   adClose.click();
+			   break;
+			}
+			currentClass=className("android.webkit.WebView").findOnce(); 
+			sleep(1000);
+		
+		 }
+	
+	
+}
 
 
 

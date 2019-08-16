@@ -22,15 +22,24 @@ templates.run({
 
     //签到
     signIn:function(){
-        commons.UIClick("rl_bottom_4");
-        sleep(1000);
-        commons.UIClick("ll_not_sign");
-        sleep(1000);
-		commons.UITextClick("立即签到");
-        sleep(1000);
-		back();
-        sleep(1000);
-        commons.UIClick("rl_bottom_1");
+        /*
+		app.dlog("签到");
+		if(!commons.idClick("rl_bottom_4"))
+		{
+           app.dlog("点我的失败");
+		   return;
+		}			
+        if(!commons.idClick("ll_not_sign"))
+		{
+           app.dlog("点签到失败");
+		   return;
+		}
+    
+			
+        back();
+     	sleep(1000);
+        commons.idClick("rl_bottom_1");
+		*/
     },
     //找出新闻的条目
     findNewsItem:function(){
@@ -57,14 +66,18 @@ templates.run({
     //阅读页面是否应该返回
     isShouldBack:function(){
 	    if(findIndex())return true;
-	
-        //领取宝藏
+		
+		
+	    //领取宝藏
         commons.UIClick("text_ok");
-        commons.UIClick("bt_ok");      //如阅读奖励提醒，点知道了
-	    //阅读中
-		if(text("展开查看全文").findOnce()){
-    		click("展开查看全文");
-		}
+        
+		commons.UIClick("bt_ok");      //如阅读奖励提醒，点知道了
+	    
+		//阅读中
+		//if(text("展开查看全文").findOnce()){
+    	click("展开查看全文");
+		
+		
         return false;
     },
 	popWindow:function(){

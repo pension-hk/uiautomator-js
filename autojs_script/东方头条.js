@@ -83,6 +83,8 @@ templates.run({
     //阅读页面是否应该返回
     isShouldBack:function(){
 		if(findIndex()) return true;
+		click("点击阅读全文");  //东方头条
+		
     	//要文推送
         var adFlag = text("立即查看").findOnce();
         if(adFlag){
@@ -283,26 +285,8 @@ function ucMobile(){
 
 function  backToIndex()
 {
-   
-   /*	
-    var currentPkgName=currentPackage();
-	if(currentPkgName=="com.UCMobile")
-	{
-	     toast("处理打开的："+currentPkgName);
-         var  exitText =  text("退出").findOnce();
-         if(exitText)exitText.click();
-         else
-		 {
-			back();
-            sleep(1000);
-		 }		   
-	}
-    */
 	ucMobile();
-	
 	popWindowProcess();
-     
-	
 	if(!findIndex())
 	{
 	   //toast("发现webview界面，回退");

@@ -160,8 +160,12 @@ util.swapeToRead = function() {
         device.width / 2, device.height * 0.5, 5000);
     */ 
 	swipe(device.width / 2, device.height * 0.8 ,
-        device.width / 2, device.height * 0.5, 1000);
-	sleep(6000);
+        device.width / 2, device.height * 0.5, 4000);
+    sleep(1000); 		
+    swipe(device.width / 2, device.height * 0.8 ,
+        device.width / 2, device.height * 0.5, 4000);
+	sleep(1000); 		
+   
 }
 
 

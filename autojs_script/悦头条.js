@@ -74,7 +74,7 @@ templates.run({
     },
     //找出新闻的条目
     findNewsItem:function(){
-		app.dlog("找出新闻的条目");
+		app.dlog("找出新闻条目");
 		var newsItem =null;
    	    var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
 	    //app.findNodeTest(rootNode,0,0);
@@ -118,6 +118,7 @@ templates.run({
     //阅读页面是否应该返回
     isShouldBack:function(){
 		if(findIndex()) return true;
+		click("点击阅读全文");
         jumpProc();   //跳转页面
         return false;
     },
