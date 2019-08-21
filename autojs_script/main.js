@@ -1,5 +1,5 @@
-const script_url   =null;//"https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/";
-const config_url   =null;//"https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
+const script_url   ="https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/autojs_script/";
+const config_url   ="https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
 
 
 const emailAddr    =null;
