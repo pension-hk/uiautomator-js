@@ -1,7 +1,7 @@
 {
-  "versionCode": 100,
-  "versionName": "1.0.0 Beta2",
-  "releaseNotes":"正式版本",
+  "versionCode": 101,
+  "versionName": "1.0.1 Beta2",
+  "releaseNotes":"新版本，请更新后，点脚本，点+，然后下载main.js并重新运行",
   "downloads" : [
 	{
 	  "name": "Github",

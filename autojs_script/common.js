@@ -82,8 +82,24 @@ util.UITextBoundsClick = function(textContent) {
     var thisEle = text(textContent).findOnce();
     var flag = false;
     if (thisEle) {
-        util.boundsClick(thisEle);
-        flag = true;
+        if(app.compareVersion()>=0){
+		   util.boundsClick(thisEle);
+		   flag = true;
+		}
+		else
+		{
+		   var item = text(textContent).findOnce();
+           if(item)
+		   {
+			   var boubds=item.bounds();
+			   if(bounds && bounds.centerX()>=0 && bounds.centerY()>=0)
+			   {
+			      shell("input tap "+bounds.centerX()+" "+bounds.centerY(),true);
+			      flag = true;
+			   }
+		    }
+	    }		   
+        
     }
     sleep(1000);
     return flag;
@@ -153,28 +169,43 @@ util.backToIndex = function(indexFlagText,indexFlagText1,indexFlagText2) {
 //滑动阅读新闻
 util.swapeToRead = function() {
     //滑动阅读新闻
-    /*
-	swipe(device.width / 2, device.height * 0.8 ,
-        device.width / 2, device.height * 0.5, 5000);
-    swipe(device.width / 2, device.height * 0.8 ,
-        device.width / 2, device.height * 0.5, 5000);
-    */ 
-	swipe(device.width / 2, device.height * 0.8 ,
-        device.width / 2, device.height * 0.5, 4000);
-    sleep(1000); 		
-    swipe(device.width / 2, device.height * 0.8 ,
-        device.width / 2, device.height * 0.5, 4000);
-	sleep(1000); 		
+   if(app.compareVersion()>=0){  
+      /*
+	  swipe(device.width / 2, device.height * 0.8 ,
+          device.width / 2, device.height * 0.5, 5000);
+      swipe(device.width / 2, device.height * 0.8 ,
+          device.width / 2, device.height * 0.5, 5000);
+      */ 
+	  swipe(device.width / 2, device.height * 0.8 ,
+          device.width / 2, device.height * 0.5, 4000);
+      sleep(1000); 		
+      swipe(device.width / 2, device.height * 0.8 ,
+          device.width / 2, device.height * 0.5, 4000);
+	  sleep(1000); 		
+   }
+   else{
+	  shell("input swipe " + device.width / 2 + " " + device.height*0.5 + " " + device.width / 2 + " " + device.height*0.8,true);
+	  shell("input swipe " + device.width / 2 + " " + device.height*0.5 + " " + device.width / 2 + " " + device.height*0.8,true);
+      sleep(1000);
+   }
    
 }
 
 
 util.swapeToReadVideo = function() {
-   swipe(device.width / 2, device.height * 0.8 ,
-        device.width / 2, device.height * 0.5, 1000);
-   swipe(device.width / 2, device.height * 0.8 ,
-        device.width / 2, device.height * 0.5, 1000);
-   sleep(13000);
+   if(app.compareVersion()>=0){
+      swipe(device.width / 2, device.height * 0.8 ,
+           device.width / 2, device.height * 0.5, 1000);
+      swipe(device.width / 2, device.height * 0.8 ,
+           device.width / 2, device.height * 0.5, 1000);
+      sleep(13000);
+   }
+   else
+   {
+	  shell("input swipe " + device.width / 2 + " " + device.height*0.5 + " " + device.width / 2 + " " + device.height*0.8,true);
+	  shell("input swipe " + device.width / 2 + " " + device.height*0.5 + " " + device.width / 2 + " " + device.height*0.8,true);
+      sleep(10000);		   
+   }
 }
 
 

@@ -6,11 +6,15 @@ const runPkg      ="tv.yixia.bobo";
 
 templates.init({
     appName:runAppName,
+	appAlias:
 	runMode:"视频",
-    indexFlagText1:"推荐",
+    indexFlagText1:"音乐",
+	indexFlagText2:"推荐",
 	timeAwardText:"免费领"	
 
 });
+
+
 
 templates.run({
     
@@ -18,12 +22,16 @@ templates.run({
     getIndexBtnItem:function(){
 		return findIndex();
 	},
-	
+	/*
 	//获取首页标志
     findIndexPage:function(){
+      var result= findIndex();
+      if(result)return result;
+	  popWindowProcess();
       return findIndex();
+    
     },
-	
+	*/
 	//登陆：
     login:function(){
       toast("登陆......");       	  
@@ -37,8 +45,15 @@ templates.run({
     
 	
     //签到
-    signIn:function(){ //刷宝签到改版以后是用android.webkit.WebView，暂时不能签
-        toast("进入任务签到");
+    signIn:function(){ 
+        app.dlog("进入任务签到");
+		var signFlag=id("avg").findOnce();
+		if(signFlag)signFlag=signFlag.parent();
+		if(signFlag)signFlag=signFlag.click();
+		if(!signFlag)signFlag=click("任务");
+		if(!signFlag)return;
+		back();
+		sleep(1000);
         
     },
     //找出视频
@@ -46,11 +61,10 @@ templates.run({
      	app.dlog("找出视频条目");
 		var videoItem =null;
    	    var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
-	    app.findNodeTest(rootNode,0,0);
+        //app.findNodeTest(rootNode,0,0);
 		if(app.compareVersion()>=0)
 		     videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,1,2);
 		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,2);
-		if(!videoItem && !findIndex()) backToIndex();
 		return videoItem;
 	},
 	
@@ -95,22 +109,20 @@ templates.run({
 		  
 	   }
 		
-	   */  	
+	   */  
+       if(className("android.webkit.WebView").findOnce()){ 
+		   back();   
+		   return true;
+	   }
+	   
        return false;
-    },
-	getAppName:function(appName){
-       return appName+"短视频";
     },
 	
 	download:function(appName){
 		
 		var appPackage=app.getPackageName(appName);
-		if(!appPackage)appPackage=app.getPackageName(appName+"短视频");			
         if(!app.isAppInstalled(appPackage)){
             downloadProcess(appName);
-			//var inviteUrl  =  commons.getVideoRefferUrl("刷宝"); 
-            //if(!inviteUrl)return false;
-			//commons.download(appName,inviteUrl);
 			return true;
         }
         else{
@@ -121,7 +133,15 @@ templates.run({
 
 function popWindowProcess()
 {
-
+	 //点任务，进来的弹窗是分享再赚，但是是：android.webkit.WebView
+	 if(className("android.webkit.WebView").findOnce())
+	 {
+        back();
+        sleep(1000); 		
+	 }
+	 
+	 if(text("禁止").findOnce()) //com.android.packageinstaller
+        click("禁止"); 
 }
 
 function findIndex(){

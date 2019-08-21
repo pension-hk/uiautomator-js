@@ -2,27 +2,32 @@ const commons = require('common.js');
 const templates = require('template.js');
 const runAppName ="微鲤"; 
 const runPkg     ="cn.weli.story";
+const indexBtn    ="美食";
+const indexText   ="美食";
 
 
 templates.init({
     appName:runAppName,
-    indexFlagText:"发布",
+	indexBtnText:indexBtn,
+    indexFlagText:indexText,
     timeAwardText:"领红包",
 });
+
 
 templates.run({
     //获取首页按钮
     getIndexBtnItem:function(){
         return id("rl_bottom_1").findOnce();
     },
+	/*
 	//获取首页标志
     findIndexPage:function(){
       return findIndex();
     },
-
+    */
     //签到
     signIn:function(){
-        /*
+        
 		app.dlog("签到");
 		if(!commons.idClick("rl_bottom_4"))
 		{
@@ -34,12 +39,34 @@ templates.run({
            app.dlog("点签到失败");
 		   return;
 		}
-    
-			
+        var waitCount = 0;
+		var classN=className("android.webkit.WebView").findOnce();
+        while(!classN && waitCount<15){
+           waitCount++;
+		   classN=className("android.webkit.WebView").findOnce();
+		   sleep(1000);
+		}			
+        
+		app.dlog("签到界面waitCount="+waitCount);
+	    app.findNodeTest(classN,0,0);
+		//app.printCurrentViewPageInfo();
+		if(classN){
+           app.dlog("点立即签到");
+		   var flag=desc("立即签到").findOnce();//click("立即签到");
+		   
+		   if(flag){
+			  app.dlog("立即签到id=true");
+		 	  if(!flag.click())click("立即签到");
+		   }
+		   else
+			  app.dlog("立即签到id=false");
+			   
+		}
+	   
         back();
      	sleep(1000);
         commons.idClick("rl_bottom_1");
-		*/
+		
     },
     //找出新闻的条目
     findNewsItem:function(){
@@ -53,7 +80,6 @@ templates.run({
 		if(app.compareVersion()>=0)
 		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
 		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
-		if(!newsItem && !findIndex()) backToIndex();
 		return newsItem;
 
 	
@@ -61,12 +87,39 @@ templates.run({
     },
     //时段奖励之后执行
     doingAfterTimeAward:function(){
-        back();
+		app.dlog("doingAfterTimeAward");
+		//cn.weli.story:id/rl_bottom_0 聊一聊
+        if(commons.idClick("rl_bottom_0")){
+           //android.support.v7.widget.RecyclerView 聊一聊界面
+		   sleep(1000);
+	       /*
+		   var rootNode = className("android.widget.FrameLayout").findOnce();
+		   //app.findNodeTest(rootNode,0,0);
+		   app.listNode(rootNode,0); //tv_group_tag
+		   var newsItem =app.findNodeByTextById(rootNode,"红包","tv_group_tag");
+   	 	   if(newsItem){
+			  var count = newsItem.childCount();
+			  for(var i=0;i<count;i++){
+				  var child  = newsItem.child(i);
+                  var classN=  child.className();
+                  if(classN && classN.indexOf("android.widget.TextView")>=0) 
+                     app.dlog("text="+child.text());					  
+				  
+			  }
+		   }
+		   */
+		   var idW= id("tv_group_tag").findOnce()
+		   if(idW){
+			   
+			  idW.parent().click(); 
+		   }
+		   
+		   
+	    }
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
-	    if(findIndex())return true;
-		
+	  
 		
 	    //领取宝藏
         commons.UIClick("text_ok");
@@ -84,6 +137,9 @@ templates.run({
 	    popWindowProcess();
 	
 	  
+    },
+	getAppName:function(appName){
+       return appName;
     },
 	download:function(appName){
 		

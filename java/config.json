@@ -24,6 +24,14 @@
 		{
             "name":"悦头条",
 		    "version":1
+        },
+		{
+            "name":"玩赚星球",
+		    "version":1
+        },
+		{
+            "name":"想看",
+		    "version":1
         }
     ],
     "videoAppList":[
@@ -36,6 +44,11 @@
 		    "version":1
         }
 		
+    ],
+	"version":[
+	    {
+            "name":"config",
+		    "version":1
+        }
     ]
-	
 }

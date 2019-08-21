@@ -2,19 +2,23 @@ const commons    = require('common.js');
 const templates  = require('template.js');
 const runAppName ="东方头条"; 
 const runPkg      ="com.songheng.eastnews";
+const indexBtn    ="新闻";
+const indexText   ="刷新";
 
 templates.init({
     appName:runAppName,
-	indexBtnText:"新闻",
-    indexFlagText:"发布",	
+	indexBtnText:indexBtn,
+	indexFlagText:indexText,
 });
+
 
 templates.run({
     
-    //获取首页按钮
+    //获取首页按钮,不可以删除！
     getIndexBtnItem:function(){
 	    return findIndex();		
     },
+	/*
 		//获取首页标志
     findIndexPage:function(){
 	  var result= findIndex();
@@ -22,7 +26,7 @@ templates.run({
 	  popWindowProcess();
       return findIndex();
     },
-	
+	*/
     //签到
     signIn:function(){
    	    //签到
@@ -34,10 +38,8 @@ templates.run({
         
         sleep(5000);
         //回到新闻
-     	var textW=text("新闻").findOnce(); 
-		if(!textW)textW=text("刷新").findOnce();
-        if(textW)textW=textW.parent(); 
- 		if(textW)textW.click();
+     	var textW=findIndex(); 
+		if(textW)textW.click();
         
     },
     //找出新闻的条目
@@ -49,7 +51,6 @@ templates.run({
 		if(app.compareVersion()>=0)
 		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
 		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
-		if(!newsItem && !findIndex()) backToIndex();
 		return newsItem;
 		
     },
@@ -67,8 +68,8 @@ templates.run({
 	
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
-   	    if(!findIndex()) 
-		    back();
+   	    //if(!findIndex()) 
+		//    back();
     },
     //跳到视频页面：
 	jumpToVideo:function(){
@@ -82,7 +83,7 @@ templates.run({
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
-		if(findIndex()) return true;
+		//if(findIndex()) return true;
 		click("点击阅读全文");  //东方头条
 		
     	//要文推送
@@ -97,11 +98,23 @@ templates.run({
 			}
  	    }
 		
+		if(currentPackage()==="com.android.packageinstaller")
+		{
+			var textNo=text("禁止").findOnce();
+			if(textNo && !textNo.click()){
+				click("禁止");
+			}
+			else back();
+		    sleep(1000);
+			return true;
+		}
+        /*
 		adFlag=text("禁止").findOnce();
 	    if(adFlag){
             adFlag.click();
 			return  true;
         }
+		*/
 	    adFlag=text("立即下载").findOnce();
 	    if(adFlag){
        	   return  true;
@@ -133,19 +146,18 @@ templates.run({
 		   waitPlayAd();
 		   
 		}
-		
-			
-			
-	    
 		//阅读中
 		click("点击查看原文");
-	
         return false;
     },
-	popWindow:function(){
+	popWindow:function()
+	{
 	 
       popWindowProcess();
 	
+    },
+	getAppName:function(appName){
+       return appName;
     }
 });
 
@@ -155,27 +167,27 @@ function popWindowProcess()
 		var adFlag = id("aa3").findOnce();
         if(adFlag){
            back();
-           sleep(500);
-        }
+           sleep(1000);
+     	}
+		
 	    adFlag = id("ab0").findOnce();
         if(adFlag){
            back();
-		   sleep(500);
-        }
+		   sleep(1000);
+	    }
 		
 		//关闭微信提现提示窗
         adFlag = id("a_y").findOnce();//"a_y";//提现到微信ID
         if(adFlag){
             back();
-			sleep(500);
+			sleep(1000);
         }
     
 	    //东方头条无响应。。。。。。
 		adFlag=text("确定").findOnce();
 		if(adFlag){
             if(!adFlag.click())click("确定");
-			
-        }
+	    }
 	
 	
 	    /*
@@ -249,12 +261,19 @@ function popWindowProcess()
 		var coinTip = text("立即领取").findOnce(); //立即领取 金豆奖励提醒
 		if(coinTip)click("立即领取");
 		
+		//com.android.packageinstaller
+		if(currentPackage()==="com.android.packageinstaller")
+		{
+			var textNo=text("禁止").findOnce();
+			if(textNo && !textNo.click())click("禁止");
+		}
+		
 }
 
 function findIndex(){
 
-    var textW=text("新闻").findOnce(); 
-	if(!textW)textW=text("刷新").findOnce();
+    var textW=text(indexBtn).findOnce(); 
+	if(!textW)textW=text(indexText).findOnce();
     if(textW)textW=textW.parent();
     return textW;	
 }
@@ -296,6 +315,26 @@ function  backToIndex()
 	
 }
 
+
+function waitRefresh()
+{
+    app.dlog("等待刷新......");
+	var  waitCount=0;
+	var textFlag=text("刷新中…").findOnce(); //刷新中…
+	while(!textFlag && waitCount<10){
+		  waitCount++;
+		  textFlag=text("刷新中…").findOnce();
+		  sleep(1000);
+	}
+	app.dlog("刷新退出 0：textFlag="+textFlag+" waitCount="+waitCount);
+    while(textFlag && waitCount<10){
+		waitCount++;
+		textFlag=text("刷新中…").findOnce();
+		sleep(1000);
+	}
+	app.dlog("刷新退出 1：textFlag="+textFlag+" waitCount="+waitCount);
+		
+}
 
 function waitPlayAd()
 {         //com.songheng.eastnews:id/tt_video_reward_container

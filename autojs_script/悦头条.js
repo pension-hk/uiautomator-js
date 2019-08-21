@@ -2,11 +2,14 @@ const commons    = require('common.js');
 const templates  = require('template.js');
 const runAppName ="悦头条"; 
 const runPkg      ="com.expflow.reading";
+const indexBtn    ="头条";
+const indexText   ="刷新";
 
 templates.init({
     appName:runAppName,
-	indexBtnText:"头条",
-    indexFlagText:"生活",
+	indexBtnText:indexBtn,
+    //indexFlagText1:"健康",
+	//indexFlagText2:"生活",
     timeAwardText:"阅读领取"	
 });
 
@@ -16,6 +19,7 @@ templates.run({
     getIndexBtnItem:function(){
 	    return findIndex();		
     },
+	/*
 		//获取首页标志
     findIndexPage:function(){
 	  var result= findIndex();
@@ -23,7 +27,7 @@ templates.run({
 	  popWindowProcess();
       return findIndex();
     },
-	
+	*/
     //签到
     signIn:function(){
    	    //签到
@@ -81,7 +85,6 @@ templates.run({
 		if(app.compareVersion()>=0)
 		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
 		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
-		if(!newsItem && !findIndex()) backToIndex();
 		return newsItem;
 
 		
@@ -102,8 +105,7 @@ templates.run({
 	
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
-    	
-		back();
+ 		//back();
     },
     //跳到视频页面：
 	jumpToVideo:function(){
@@ -117,15 +119,14 @@ templates.run({
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
-		if(findIndex()) return true;
 		click("点击阅读全文");
         jumpProc();   //跳转页面
         return false;
     },
 	popWindow:function(){
 	  popWindowProcess();
-	
     }
+	
 });
 
 function jumpProc(){
@@ -155,8 +156,8 @@ function popWindowProcess()
 
 function findIndex(){
 
-    var textW=text("头条").findOnce(); 
-	if(!textW)textW=text("刷新").findOnce();
+    var textW=text(indexBtn).findOnce(); 
+	if(!textW)textW=text(indexText).findOnce();
     if(textW)textW=textW.parent();
     return textW;	
 }

@@ -2,11 +2,15 @@ const commons    = require('common.js');
 const templates  = require('template.js');
 const runAppName ="今日头条极速版"; 
 const runPkg      ="";
+const indexBtn     ="首页";
+const indexText    ="首页";
+
+
 
 templates.init({
     appName:runAppName,
-	indexBtnText:"首页",
-    indexFlagText:"推荐",	
+	//indexBtnText:indexBtn,
+	indexFlagText : indexText,
 });
 
 templates.run({
@@ -15,20 +19,13 @@ templates.run({
     getIndexBtnItem:function(){
 	    return findIndex();		
     },
-		//获取首页标志
-    findIndexPage:function(){
-	  var result= findIndex();
-      if(result)return result;
-	  popWindowProcess();
-      return findIndex();
-    },
 	
     //签到
     signIn:function(){
    	  if(!click("任务"))return;
 	  sleep(1000);
 	  if(!className("android.webkit.WebView").findOnce()){
-		click("首页");     
+		click(indexText);     
 		return;  
 	  }
 	  //看视频再领1500金币
@@ -51,11 +48,9 @@ templates.run({
    	    var rootNode = className("android.widget.TabHost").findOnce();
 	    //app.findNodeTest(rootNode,0,0);
 		//app.listNode(rootNode,0);
-		
 		if(app.compareVersion()>=0)
 		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,10);
 		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,10);
-		if(!newsItem && !findIndex()) backToIndex();
 		return newsItem;
 		
     },
@@ -88,10 +83,8 @@ templates.run({
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
-		if(findIndex()) return true;
 		//click("点击阅读全文");  //
-    	
-        return false;
+       return false;
     },
 	popWindow:function(){
 	 
@@ -110,8 +103,7 @@ function popWindowProcess()
 
 function findIndex(){
 
-    var textW=text("首页").findOnce(); 
-	if(!textW)textW=text("刷新").findOnce();
+    var textW=text(indexText).findOnce(); 
     if(textW)textW=textW.parent();
     return textW;	
 }

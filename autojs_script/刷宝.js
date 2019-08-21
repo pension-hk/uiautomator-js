@@ -3,26 +3,29 @@ const templates  = require('template.js');
 const runAppName = "刷宝"; 
 const runAppName1= "刷宝短视频"; 
 const runPkg      ="com.jm.video";
+const indexBtn     ="首页";
+const indexText    ="首页";
 
 templates.init({
     appName:runAppName,
+	appAlias:runAppName1,
 	runMode:"视频",
-    indexFlagText:"首页",
+	//indexBtnText:indexBtn,
+    indexFlagText:indexText,
 });
 
 templates.run({
     
     //获取首页按钮
     getIndexBtnItem:function(){
-		
-        return text("首页").findOnce();
+        return findIndex();
     },
-	
+	/*
 	//获取首页标志
     findIndexPage:function(){
       return findIndex();
     },
-	
+	*/
     //签到
     signIn:function(){ //刷宝签到改版以后是用android.webkit.WebView，暂时不能签
         /*
@@ -160,16 +163,21 @@ templates.run({
 	popWindow:function(){
 	  popWindowProcess();
 	
-    },
+    }
+	/*,
 	getAppName:function(appName){
        return appName+"短视频";
     }
+	*/
 });
 
 function popWindowProcess()
 {
 	var popFlag = text("知道了").findOnce(); 
     if(popFlag)click("知道了");
+	popFlag=id("btn_view").findOnce(); //知道了 id
+	if(popFlag)popFlag.click();
+	
 	popFlag=id("tt_video_ad_close").findOnce();
 	if(popFlag)popFlag.click();
 	
@@ -180,7 +188,7 @@ function popWindowProcess()
 
 function findIndex(){
 
-    return text("首页").findOnce();	
+    return text(indexText).findOnce();	
 }
 
 

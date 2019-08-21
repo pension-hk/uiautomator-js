@@ -2,18 +2,28 @@ const commons = require('common.js');
 const templates = require('template.js');
 const runAppName = "趣头条";
 const runPkg     ="";
+const indexBtn    ="头条";
+const indexText   ="刷新";
 
 templates.init({
-    appName:runAppName
+    appName:runAppName,
+	indexBtnText:indexBtn,
+	//indexFlagText:indexText,
 });
 
 templates.run({
 	
+	 //获取首页按钮
+    getIndexBtnItem:function(){
+        return findIndex();
+    },
+	
+	/*
 	//获取首页标志
     findIndexPage:function(){
       return findIndex();
     },
-	
+	*/
 	
     //签到
     signIn:function(){
@@ -39,15 +49,13 @@ templates.run({
 		if(app.compareVersion()>=0)
 		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
 		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
-		if(!newsItem && !findIndex()) backToIndex();
 		return newsItem;
 	
 		
    },
     //阅读页面是否应该返回
     isShouldBack:function(){
-		if(findIndex())return true;
-	   
+	  
 	    //图集直接返回
         var imgItem = className("android.support.v4.view.ViewPager").className("ImageView").findOnce();
         if(imgItem){
@@ -62,7 +70,7 @@ templates.run({
 		//向右滑动滑块填充拼图
 		if(desc("向右滑动滑块填充拼图").findOnce())
 		{
-		   toast("趣头条阅读新闻需滑块验证"); 
+		   app.dlog("趣头条阅读新闻需滑块验证"); 
 		  
 		}
 		return false;
@@ -101,7 +109,10 @@ function popWindowProcess()
 
 
 function findIndex(){
-   return text("美食").findOnce(); 
+   var textW=text(indexBtn).findOnce(); 
+   if(!textW)textW=text(indexText).findOnce();
+   return textW;
+   
 }
 
 function ucMobile(){
