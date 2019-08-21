@@ -1,6 +1,6 @@
 const commons    = require('common.js');
 const templates  = require('template.js');
-const runAppName ="东方头条"; 
+const runAppName ="淘小说"; 
 const runPkg      ="com.songheng.eastnews";
 const indexBtn    ="新闻";
 const indexText   ="刷新";
@@ -18,15 +18,6 @@ templates.run({
     getIndexBtnItem:function(){
 	    return findIndex();		
     },
-	/*
-		//获取首页标志
-    findIndexPage:function(){
-	  var result= findIndex();
-      if(result)return result;
-	  popWindowProcess();
-      return findIndex();
-    },
-	*/
     //签到
     signIn:function(){
    	    //签到
@@ -50,7 +41,7 @@ templates.run({
 	    //app.findNodeTest(rootNode,0,0);
 		if(app.compareVersion()>=0)
 		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
-		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,1);
+		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
 		return newsItem;
 		
     },
@@ -156,38 +147,8 @@ templates.run({
       popWindowProcess();
 	
     },
-	waitRefresh:function(){
-       
-	   var waitCount=0;
-       while(waitCount<5)
-	   {
-		   waitCount++;
-		   if(text("刷新中...").findOnce())break;
-		   sleep(1000);
-	   }
-	   //app.dlog("退出刷新中waitCount="+waitCount);
-	   waitCount=0;
-	   while(waitCount<5)
-	   {
-	 	   waitCount++;
-		   if(text("下拉刷新").findOnce())break;
-		   sleep(1000);
-	   }
-	   //app.dlog("0 退出下拉刷新waitCount="+waitCount);
-	   
-	   var  textRef=text("下拉刷新").findOnce();
-	   waitCount=0;
-	   while(textRef && waitCount<5)
-	   {
-		   waitCount++;
-		   textRef=text("下拉刷新").findOnce();
-		   sleep(1000);
-	   }
-	   //app.dlog("1 退出下拉刷新waitCount="+waitCount);
-	  
-	   
-	 
-	  
+	getAppName:function(appName){
+       return appName;
     }
 });
 

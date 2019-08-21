@@ -558,6 +558,7 @@ template.getOneNews = function(fun){
 		  if(template.clickIndexPage(fun)){
 		     if(fun.waitRefresh)fun.waitRefresh();
 		  }
+		  
 	    }
         //新闻条目
         newsItem = fun.findNewsItem();

@@ -4,13 +4,17 @@ const runAppName = "波波视频";
 const runAppName1= "波波视频"; 
 const runPkg      ="tv.yixia.bobo";
 
+const indexBtn    ="首页";
+const indexText   ="刷新";
+
+
 templates.init({
     appName:runAppName,
-	appAlias:
+	appAlias:"",
 	runMode:"视频",
-    indexFlagText1:"音乐",
-	indexFlagText2:"推荐",
-	timeAwardText:"免费领"	
+    indexBtnText:indexBtn,
+    indexFlagText:indexText,
+    timeAwardText:"免费领"	
 
 });
 
@@ -146,8 +150,8 @@ function popWindowProcess()
 
 function findIndex(){
 
-    var textW=text("首页").findOnce();  
-	if(!textW)textW=text("刷新").findOnce();  
+    var textW=text(indexBtn).findOnce();  
+	if(!textW)textW=text(indexText).findOnce();  
     if(textW)textW=textW.parent();
     return textW;	
 }

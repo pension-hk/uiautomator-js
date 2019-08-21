@@ -79,7 +79,7 @@ templates.run({
 	    //app.findNodeTest(rootNode,0,0);
 		if(app.compareVersion()>=0)
 		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
-		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
+		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,3);
 		return newsItem;
 
 	
@@ -138,8 +138,24 @@ templates.run({
 	
 	  
     },
-	getAppName:function(appName){
-       return appName;
+	waitRefresh:function(){
+       var waitCount=0;
+       while(waitCount<10)
+	   {
+	 	   waitCount++;
+		   if(text("刷新中").findOnce())break;
+		   sleep(1000);
+	   }
+	   var textRef=text("刷新中").findOnce();
+	   waitCount=0;
+	   while(textRef && waitCount<10)
+	   {
+	       waitCount++;
+		   textRef=text("刷新中").findOnce();
+		   sleep(1000);
+	   }
+	    app.dlog("刷新中退出waitCount="+waitCount);
+	  
     },
 	download:function(appName){
 		
@@ -157,7 +173,7 @@ templates.run({
 });
 
 function findIndex(){
-   return text("美食").findOnce(); 
+   return text(indexText).findOnce(); 
 }
 
 function ucMobile(){
