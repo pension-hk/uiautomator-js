@@ -82,10 +82,11 @@ util.UITextBoundsClick = function(textContent) {
     var thisEle = text(textContent).findOnce();
     var flag = false;
     if (thisEle) {
-        if(app.compareVersion()>=0){
+        //if(app.compareVersion()>=0){
 		   util.boundsClick(thisEle);
 		   flag = true;
-		}
+		//}
+		/*
 		else
 		{
 		   var item = text(textContent).findOnce();
@@ -98,7 +99,8 @@ util.UITextBoundsClick = function(textContent) {
 			      flag = true;
 			   }
 		    }
-	    }		   
+	    }
+        */		
         
     }
     sleep(1000);
@@ -114,6 +116,136 @@ util.textBoundsClick = function(textContent) {
     sleep(1000);
     return flag;
 }
+
+util.clickWebViewText = function(classN,textContent){
+	
+	app.dlog("查找并点击："+textContent);
+		 
+	var flag=click(textContent);
+	if(!flag){	
+	   var rootNode=className(classN).findOnce();
+       app.findNodeTest(rootNode,0,0);
+	   var newsItem=util.findNodeByClassByText(rootNode,"android.view.View",textContent,0,0,-1);
+	   if(newsItem){
+		   flag=newsItem.click();
+		   if(!flag)flag=click(textContent);
+	   }
+    }
+	
+	app.dlog("点击："+textContent+" "+flag);
+		
+	return flag;
+}
+
+util.clickWebViewElement = function(classRoot,classN,textContent){
+	
+	app.dlog("查找并点击："+textContent);
+		 
+	var flag=click(textContent);
+	if(!flag){	
+	   var rootNode=className(classRoot).findOnce();
+       app.findNodeTest(rootNode,0,0);
+	   var viewItem=util.findNodeByClassByText(rootNode,classN,textContent,0,0,-1);
+	   if(viewItem){
+		   var count = viewItem.childCount();
+		   for(var i=0;i<count;i++){
+			   var childNode=viewItem.child(i);
+			   if(childNode==null)continue;
+			   var childDesc  = childNode.desc();
+               //app.dlog("childDesc="+childDesc);
+			   if(childDesc===textContent)flag=childNode.click();
+		   }
+		   if(!flag)flag=viewItem.click();
+	   }
+    }
+	if(flag)sleep(5000);
+	app.dlog("点击："+textContent+" "+flag);
+	return flag;
+}
+
+
+util.findNodeByClassByText=function(node,className,textName,level,startIndex,endIndex) 
+{
+    var  result=null;
+    if(null==node) return  null;
+    level++;
+    var levelStr="";
+    for(var  i=0;i<level;i++){
+            levelStr =levelStr+" ";
+    }
+    var levelCount = level-1;
+    levelStr = levelStr+levelCount;
+    var childCount=node.childCount();
+    var parentClassName=  node.className();
+    var textString = node.text();
+    var  start=0;
+    if(level==1)start=startIndex;
+    for(var index=start;index<childCount;index++)
+    {
+       if(null != result)break;
+       var childNode =  node.child( index );
+       if(null==childNode)continue;
+       var childNodeCount   =  childNode.childCount();
+       var childClassName=  childNode.className();
+       var childId = childNode.id();
+       var childDesc  = childNode.desc();
+       var childText  =  childNode.text();
+       var lvl = level-1;
+       if(endIndex>=0)
+       {
+          if(childClassName && childClassName== className && lvl == endIndex){
+              if (childText && childText===textName) 
+			  {
+                  // Log.e( "TAG", levelStr + childClassName + "(index:" + index + ")" + "  " + childText
+                  //        +"[child:"+ childNodeCount+"]"+"id:"+childId);
+                  result = node;
+                  break;
+              }
+			  else
+			  if (childDesc && childDesc===textName) 
+			  {
+                  //app.dlog( "TAG:"+levelStr + childClassName + "(index:" + index + ")" + "  " + childDesc
+                  //        +"[child:"+ childNodeCount+"]"+"id:"+childId);
+                  result = node;
+                  break;
+              }
+              //else
+              //Log.e( "TAG", levelStr + childClassName + "(index:" + index + ")"+"[child:"+ childNodeCount+"]"+"id:"+childId);
+          }
+        }
+        else 
+		{
+          if(childClassName && childClassName.indexOf(className )>=0)
+		  {
+              //if (childText && childText.indexOf( textName)>=0) 
+			  if (childText && childText===textName) 
+			  {
+                  //Log.e( "TAG", levelStr + childClassName + "(index:" + index + ")" + "  " + childText
+                  //        +"[child:"+ childNodeCount+"]"+"id:"+childId);
+                  result = node;
+                  break;
+              }
+			  else
+			  if (childDesc && childDesc===textName) 
+			  {
+                  //app.dlog( "TAG:"+levelStr + childClassName + "(index:" + index + ")" + "  " + childDesc
+                  //        +"[child:"+ childNodeCount+"]"+"id:"+childId);
+                  result = node;
+                  break;
+              }	  
+              //else
+              //    Log.e( "TAG", levelStr + childClassName + "(index:" + index + ")"+"[child:"+ childNodeCount+"]"+"id:"+childId);
+          }
+        }
+        if(childNodeCount>0){
+            result=util.findNodeByClassByText(childNode,className,textName,level,startIndex,endIndex);
+        }
+    }
+    return result;
+
+}
+
+
 
 util.getRandom=function(n,m)//取得一个介于n，m之间的整数，包括n，但不包括m
 {
@@ -166,46 +298,46 @@ util.backToIndex = function(indexFlagText,indexFlagText1,indexFlagText2) {
 }
 
 
-//滑动阅读新闻
 util.swapeToRead = function() {
-    //滑动阅读新闻
-   if(app.compareVersion()>=0){  
-      /*
-	  swipe(device.width / 2, device.height * 0.8 ,
-          device.width / 2, device.height * 0.5, 5000);
-      swipe(device.width / 2, device.height * 0.8 ,
-          device.width / 2, device.height * 0.5, 5000);
-      */ 
-	  swipe(device.width / 2, device.height * 0.8 ,
+    /*
+	swipe(device.width / 2, device.height * 0.8 ,
           device.width / 2, device.height * 0.5, 4000);
-      sleep(1000); 		
-      swipe(device.width / 2, device.height * 0.8 ,
+    sleep(1000); 		
+    swipe(device.width / 2, device.height * 0.8 ,
           device.width / 2, device.height * 0.5, 4000);
-	  sleep(1000); 		
-   }
-   else{
-	  shell("input swipe " + device.width / 2 + " " + device.height*0.5 + " " + device.width / 2 + " " + device.height*0.8,true);
-	  shell("input swipe " + device.width / 2 + " " + device.height*0.5 + " " + device.width / 2 + " " + device.height*0.8,true);
-      sleep(1000);
-   }
-   
+	sleep(1000); 		
+	*/
+	swipe(device.width / 2, device.height * 0.8 ,
+          device.width / 2, device.height * 0.5, 2000);
+    sleep(3000); 		
+    swipe(device.width / 2, device.height * 0.8 ,
+          device.width / 2, device.height * 0.5, 2000);
+	sleep(3000); 		
+	
+	/*  
+	shell("input swipe " + device.width / 2 + " " + device.height*0.5 + " " + device.width / 2 + " " + device.height*0.8,true);
+	shell("input swipe " + device.width / 2 + " " + device.height*0.5 + " " + device.width / 2 + " " + device.height*0.8,true);
+    sleep(1000);
+   */
 }
 
 
 util.swapeToReadVideo = function() {
-   if(app.compareVersion()>=0){
-      swipe(device.width / 2, device.height * 0.8 ,
-           device.width / 2, device.height * 0.5, 1000);
-      swipe(device.width / 2, device.height * 0.8 ,
-           device.width / 2, device.height * 0.5, 1000);
-      sleep(13000);
-   }
-   else
-   {
-	  shell("input swipe " + device.width / 2 + " " + device.height*0.5 + " " + device.width / 2 + " " + device.height*0.8,true);
+ 	swipe(device.width / 2, device.height * 0.8 ,
+           device.width / 2, device.height * 0.5, 500);  
+    swipe(device.width / 2, device.height * 0.8 ,
+           device.width / 2, device.height * 0.5, 500);  
+ 	
+	swipe(device.width / 2, device.height * 0.8 ,
+           device.width / 2, device.height * 0.5, 500);  
+    swipe(device.width / 2, device.height * 0.8 ,
+           device.width / 2, device.height * 0.5, 500);  
+ 	
+	/*
+       shell("input swipe " + device.width / 2 + " " + device.height*0.5 + " " + device.width / 2 + " " + device.height*0.8,true);
 	  shell("input swipe " + device.width / 2 + " " + device.height*0.5 + " " + device.width / 2 + " " + device.height*0.8,true);
       sleep(10000);		   
-   }
+    */ 
 }
 
 

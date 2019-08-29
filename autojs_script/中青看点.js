@@ -2,13 +2,20 @@ const commons = require('common.js');
 const templates = require('template.js');
 const runAppName ="中青看点"; 
 const runPkg     ="cn.youth.news";
-const indexBtn    ="首页";
+const indexBtn    ="首页"
+const indexBtn1    ="刷新";
 const indexText   ="美文";
+const indexText1  =null;
 
 
 templates.init({
     appName:runAppName,
-    indexFlagText:indexText,
+	packageName:runPkg,
+  	indexBtnText:indexBtn,
+	indexBtnText1:indexBtn1,
+	indexFlagText:indexText,
+	indexFlagText1:indexText1,
+	timeAwardText:"领取"
 });
 
 
@@ -18,16 +25,6 @@ templates.run({
     getIndexBtnItem:function(){
         return id("a0s").findOnce();
     },
-	
-	/*
-	//获取首页标志
-    findIndexPage:function(){
-	  var result= findIndex();
-      if(result)return result;
-	  popWindowProcess();
-      return findIndex();
-    },
-    */
 	
     //签到
     signIn:function(){
@@ -87,9 +84,12 @@ templates.run({
 		}
 		classN=className("android.webkit.WebView").findOnce();
 		if(classN){
-		  app.dlog("点击签到领红包,类="+classN.className());
-		  if(!click("立即签到")){
-			   app.dlog("点立即签到失败，尝试点看视频得青豆");
+          
+		  /*
+          app.dlog("点击签到领红包,类="+classN.className());
+          //if(!click("立即签到")){
+		  if(!click("签到")){
+		      app.dlog("点立即签到失败，尝试点看视频得青豆");
 			   if(click("看视频得青豆")) 
 			   {
 		          app.dlog("等待看视频得青豆");
@@ -113,8 +113,39 @@ templates.run({
 		  else{
 			  app.dlog("点立即签到OK");
 		  }
+		  */
+		  if(!commons.clickWebViewText("android.widget.FrameLayout","签到")){
+		      app.dlog("点签到失败，尝试点看视频得青豆");
+			   if(click("看视频得青豆")) 
+			   {
+		          app.dlog("等待看视频得青豆");
+			      //5秒判断是否进入了看青豆广告界面 	  
+				  waitCount=0;
+				  classN=className("android.webkit.WebView").findOnce();
+				  var flag=true;
+				  while(flag && waitCount<15){
+				     waitCount++;
+					 flag=click("看视频得青豆");
+					 sleep(1000);
+				  }
+				  waitPlayAd();
+				  popWindowProcess();
+			      
+			   }
+			   else
+               app.dlog("点看视频得青豆失败");
+			  				   
+		  }	
+		  else{
+			  app.dlog("点立即签到OK");
+		  }
+		  
+		  
 		}
         else  app.dlog("没有进入android.webkit.WebView");   		
+		
+		//累计阅读60分钟:
+		award60Minutes();
 		
 		app.dlog("返回主页面");
 	    //返回主页面
@@ -124,6 +155,7 @@ templates.run({
         //sleep(1000);
 	   
 		//回到新闻
+		/*
         var indexId=id("a0s").findOnce();
 		while(!indexId){
 		   back();
@@ -146,6 +178,24 @@ templates.run({
 			 app.dlog("没有首页ID a0s");
 	      
 		}
+		*/
+
+        var indexId=findIndex();
+		while(!indexId){
+		   back();
+		   sleep(1000);
+		   popWindowProcess();
+       	   indexId=findIndex();//id("a0s").findOnce();
+		}
+		if(indexId){
+		   app.dlog("有首页ID a0s");
+	       clickIndex();
+		   
+		}
+		else{
+			 app.dlog("没有首页ID a0s");
+	      
+		}
 		
 	        
     },
@@ -158,9 +208,31 @@ templates.run({
 		if(app.compareVersion()>=0)
 		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
 		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
-		//if(!newsItem && !findIndex()) backToIndex();
 		return newsItem;
     },	
+	findVideoItem:function(){
+		var videoItem=null;
+		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
+         //app.findNodeTest(rootNode,0,0);
+		if(app.compareVersion()>=0)
+		    videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,2);
+		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,2);
+	    return videoItem;
+             		
+    },
+    getVideoTitle:function(videoItem){
+
+        return videoItem.child(1).text();
+	},		
+	//跳到视频页面：
+	jumpToVideo:function(){
+	   var videoId  = id("a4f").findOnce();
+	   if(!videoId)return false;
+	   if(!videoId.click())
+	      return click("视频");
+	   return true;
+    },
+
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
 		//检查是否有弹窗：
@@ -175,25 +247,26 @@ templates.run({
 		 }
   	
     },
+	
     //阅读页面是否应该返回
     isShouldBack:function(){
-		//if(findIndex())return true;
-		
-		click("查看全文，奖励更多");
-		
+		commons.clickWebViewText("android.widget.FrameLayout","查看全文，奖励更多")
 		if(text("搜索").findOnce())return true; //带有搜索字样的页面，直接退出
 		//推送处理：
         var viewText=text("查看详情").findOnce(); 
         if(viewText){
 			click(立即查看); 
 		}
-
-		
-		
-
         return false;
     },
-	
+	findIndexPage:function()
+	{
+		return findIndex();
+	},
+	clickIndexPage:function()
+	{
+		return clickIndex();
+	},
 	popWindow:function(){
 		
 		popWindowProcess();
@@ -213,6 +286,27 @@ templates.run({
         }		
 	}
 });
+
+function award60Minutes(){
+	
+	swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 2000);
+	sleep(1000);
+	swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 2000);
+	sleep(1000);
+    swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 2000);
+	sleep(1000);
+	swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 2000);
+	sleep(1000);
+	
+    if(!commons.clickWebViewText("android.widget.FrameLayout","立即阅读"))return;
+	
+	var waitCount=0;
+	while(commons.clickWebViewText("android.widget.FrameLayout","点击领取")&& waitCount<3){
+       waitCount++;
+	   sleep(1000);
+	}
+}
+
 
 function popWindowProcess()
 {
@@ -287,8 +381,27 @@ function popWindowProcess()
 }
 
 function findIndex(){
-   return text("美文").findOnce(); 
+	var indexW  = id("a0s").findOnce();
+	var indexW1 = text(indexBtn).findOnce()||text(indexBtn1).findOnce()||text(indexText).findOnce()||text(indexText1).findOnce();
+	return indexW && indexW1;
 }
+
+function clickIndex(){
+	var flag=false;
+	var clickW=id("a0s").findOnce();
+    if(clickW)
+	{  
+       flag=clickW.click();
+	   if(!flag && indexBtn)
+		  flag=click(indexBtn);	
+	   if(!flag && indexBtn1)
+		  flag=click(indexBtn1);	
+	   
+	}
+    return flag;	
+}
+
+
 
 function ucMobile(){
     var currentPkgName=currentPackage();

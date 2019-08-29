@@ -1,22 +1,21 @@
 const commons    = require('common.js');
 const templates  = require('template.js');
-const runAppName = "刷宝"; 
-const runAppName1= "刷宝短视频"; 
-const runPkg      ="com.jm.video";
-
-const indexBtn    ="首页"
+const runAppName = "快手极速版"; 
+const runPkg      ="com.kuaishou.nebula";
+const indexBtn    ="com.kuaishou.nebula:id/tabs"
 const indexBtn1    =null;
-const indexText   ="首页";
+const indexText   ="com.kuaishou.nebula:id/tabs";
 const indexText1  =null;
 
 
 templates.init({
     appName:runAppName,
-	appAlias:runAppName1,
 	packageName:runPkg,
 	runMode:"视频",
 	indexBtnText:indexBtn,
+    indexBtnText:indexBtn1,
     indexFlagText:indexText,
+	indexFlagText1:indexText1
 });
 
 templates.run({
@@ -91,19 +90,16 @@ templates.run({
     },
     //找出视频
     findVideoItem:function(){  
-        //检查首页是否注焦：
-		if(!text("首页").findOnce()){  
-		   back();
-		   sleep(200);
-		}
-     	var videoItem = text("空空如也").findOnce();
-	    return videoItem;
+        var videoItem= id("com.kuaishou.nebula:id/container").findOnce();
+    	//app.findNodeTest(videoItem,0,0);
+		if(videoItem)videoItem.click();
+		return videoItem;
+     
     },
 	
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
-       var btnView  =  id("btn_view").findOnce();
-	   if(btnView)btnView.click();
+    
 	   
     },
 
@@ -111,34 +107,7 @@ templates.run({
 	
     //阅读页面是否应该返回
     isShouldBack:function(){
-       var closeFlag= id("imgClose").findOnce();
-       if(closeFlag){
-          closeFlag.click();
-	   }
-	   closeFlag= id("iv_box_open_new").findOnce(); //点击收取金豆
-	   if(closeFlag){
-          closeFlag.click();
-	   }
-
-	   //领取额外福利:
-       var idBtn= id("idBtn").findOnce();
-       if(idBtn)
-	   {
-	      idBtn.click();
-	   }
-
-	   // 点关注:
-       var idAttention= id("tv_attention_text").findOnce();
-       if(idAttention)
-	   {
-	       //idAttention.click();
-	       commons.UIClick("tv_praise_text");//点赞
-
-	   }
-	   var popFlag = text("知道了").findOnce(); 
-       if(popFlag)click("知道了");
-   
-	   return false;
+       return false;
     },
 	findIndexPage:function()
 	{
@@ -153,48 +122,31 @@ templates.run({
 	  popWindowProcess();
 	
     }
-	/*,
-	getAppName:function(appName){
-       return appName+"短视频";
-    }
-	*/
+
 });
 
 function popWindowProcess()
 {
-	var popFlag = text("知道了").findOnce(); 
-    if(popFlag)click("知道了");
-	popFlag=id("btn_view").findOnce(); //知道了 id
-	if(popFlag)popFlag.click();
-	
-	popFlag=id("tt_video_ad_close").findOnce();
-	if(popFlag)popFlag.click();
-	
-		
+	 var popW=text("我知道了").findOnce();
+	 if(popW)click("我知道了");
 }
 
 
 
 
 function findIndex(){
-	var indexW  = text(indexBtn).findOnce()||text(indexBtn1).findOnce();
-	var indexW1 = text(indexText).findOnce()||text(indexText1).findOnce();
-	return indexW && indexW1;
+	return id("tabs").findOnce();
+
 }
 
 function clickIndex(){
+	
 	var flag=false;
-	var clickW=text(indexBtn).findOnce();
-    if(clickW)
-	{  
-       flag=clickW.click();
-	   if(!flag && indexBtn)
-		  flag=click(indexBtn);	
-	   if(!flag && indexBtn1)
-		  flag=click(indexBtn1);	
-	   
-	}
-    return flag;	
+    back();
+	sleep(1000);
+	return true;
+    
+ 
 }
 
 

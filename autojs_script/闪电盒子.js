@@ -5,6 +5,7 @@ const runPkg      ="c.l.a";
 
 templates.init({
     appName:runAppName,
+	packageName:runPkg,	
 	indexBtnText:"首页",
     indexFlagText:"首页",	
 });

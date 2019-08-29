@@ -2,15 +2,22 @@ const commons    = require('common.js');
 const templates  = require('template.js');
 const runAppName ="今日头条极速版"; 
 const runPkg      ="";
-const indexBtn     ="首页";
-const indexText    ="首页";
+const indexBtn    ="首页";
+const indexBtn1   ="刷新";
+const indexText   ="热点";
+const indexText1  =null;
 
 
 
 templates.init({
     appName:runAppName,
-	//indexBtnText:indexBtn,
-	indexFlagText : indexText,
+	packageName:runPkg,
+	indexBtnText:indexBtn,
+	indexBtnText1:indexBtn1,
+	indexFlagText:indexText,
+	indexFlagText1:indexText1,
+	
+
 });
 
 templates.run({
@@ -54,38 +61,51 @@ templates.run({
 		return newsItem;
 		
     },
-	
+	/*
 	findVideoItem:function(){
-		var videoItem=null;
-		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
-    	app.listNode(rootNode,0);
-    	videoItem=app.findNodeById(rootNode,"asr");
-		if(videoItem.id() != null) videoItem=null;
+	    var videoItem=null;
+		var rootNode= className("android.widget.FrameLayout").findOnce();
+        app.findNodeTest(rootNode,0,0);
+		if(app.compareVersion()>=0)
+		    videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,16);
+		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,16);
 	    return videoItem;
              		
     },
+	*/
+	getVideoTitle:function(videoItem){
+        return videoItem.child(1).text();
+	},
 	
+	 //跳到视频页面：
+	jumpToVideo:function(){
+	   var videoId  = text("视频").findOnce();
+	   if(!videoId)return false;
+	   videoId = videoId.parent();
+	   if(videoId && !videoId.click())
+	      return click("视频");
+	   else return true;
+    },
 	
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
    	    if(!findIndex()) 
 		    back();
     },
-    //跳到视频页面：
-	jumpToVideo:function(){
-	   var videoId  = text("视频").findOnce();
-	   if(!videoId)return false;
-	   if(!videoId.click())
-	      return click("视频");
-	   return true;
-	 
-	 	   
-    },
+  
     //阅读页面是否应该返回
     isShouldBack:function(){
 		//click("点击阅读全文");  //
        return false;
     },
+		findIndexPage:function()
+	{
+		return findIndex();
+	},
+	clickIndexPage:function()
+	{
+		return clickIndex();
+	},
 	popWindow:function(){
 	 
       popWindowProcess();
@@ -98,14 +118,44 @@ function popWindowProcess()
 {
 	 var popFlag = id("a1s").findOnce();
 	 if(popFlag)popFlag.click();
-
+     popFlag = text("允许").findOnce();  //授权
+	 if(popFlag && !popFlag.click())click("允许");
+	 popFlag = text("确定").findOnce();  //授权
+	 if(popFlag && !popFlag.click())click("确定");
+	 
 }
 
 function findIndex(){
+    var textW=text(indexBtn).findOnce()||text(indexBtn1).findOnce(); 
+    var textW1=text(indexText).findOnce()||text(indexText1).findOnce();
+	return textW && textW1;
+}
 
-    var textW=text(indexText).findOnce(); 
+
+
+function clickIndex(){
+	var flag=false;
+	var textW=text(indexBtn).findOnce();
     if(textW)textW=textW.parent();
-    return textW;	
+    if(textW)
+	{  
+       flag=textW.click();
+	   if(!flag)
+		  flag=click(indexBtn);	
+	}
+	else{
+	   if(indexBtn1){	
+	      textW=text(indexBtn1).findOnce();
+          if(textW)textW=textW.parent();
+          if(textW)
+	      {  
+            flag=textW.click();
+	        if(!flag)
+		      flag=click(indexBtn1);	
+	      }
+	   }
+	}
+    return flag;	
 }
 
 function ucMobile(){

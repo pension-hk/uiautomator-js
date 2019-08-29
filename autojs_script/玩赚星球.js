@@ -2,13 +2,19 @@ const commons    = require('common.js');
 const templates  = require('template.js');
 const runAppName ="玩赚星球"; 
 const runPkg      ="com.planet.light2345";
-const indexBtn     ="头条";
-const indexText    ="";
+const indexBtn    ="头条"
+const indexBtn1    =null;
+const indexText   ="社会";
+const indexText1  ="笑话";
+
 
 templates.init({
     appName:runAppName,
+	packageName:runPkg,
 	indexBtnText:indexBtn,
-    //indexFlagText:"社会",
+	indexBtnText1:indexBtn1,
+	indexFlagText:indexText,
+	indexFlagText1:indexText1,
 	timeAwardText:"领取"		
 });
 
@@ -18,20 +24,10 @@ templates.run({
     getIndexBtnItem:function(){
 	    return findIndex();		
     },
-	/*
-		//获取首页标志
-    findIndexPage:function(){
-	  var result= findIndex();
-      if(result)return result;
-	  popWindowProcess();
-      return findIndex();
-    },
-	*/
 	
     //签到
     signIn:function(){
-   	    //签到
-        commons.UITextClick("首页");
+   	    commons.UITextClick("首页");
         sleep(1000);
         var signText = text("签到").findOnce(); 
         if(signText)signText=signText.parent();
@@ -54,47 +50,61 @@ templates.run({
 		app.dlog("找出新闻的条目");
 		var newsItem =null;
    	    var rootNode = className("android.widget.ListView").findOnce();
-//app.findNodeTest(rootNode,0,0);
+        //app.findNodeTest(rootNode,0,0);
 		if(app.compareVersion()>=0)
 		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
 		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
 		return newsItem;
 		
     },
-	
+	/*
 	findVideoItem:function(){
 		var videoItem=null;
 		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
-    	app.listNode(rootNode,0);
-    	videoItem=app.findNodeById(rootNode,"asr");
-		if(videoItem.id() != null) videoItem=null;
+         //app.findNodeTest(rootNode,0,0);
+		if(app.compareVersion()>=0)
+		    videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,2);
+		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,2);
 	    return videoItem;
              		
     },
-	
-	
+	*/
+    getVideoTitle:function(videoItem){
+
+        return videoItem.child(1).text();
+	},		
+	//跳到视频页面：
+	jumpToVideo:function(){
+	   var videoId  = id("a4f").findOnce();
+	   if(!videoId)return false;
+	   if(!videoId.click())
+	      return click("视频");
+	   return true;
+    },
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
    	    //if(!findIndex()) 
 		//    back();
     },
-    //跳到视频页面：
-	jumpToVideo:function(){
-	   var videoId  = text("视频").findOnce();
-	   if(!videoId)return false;
-	   if(!videoId.click())
-	      return click("视频");
-	   return true;
-	 
-	 	   
-    },
+
     //阅读页面是否应该返回
     isShouldBack:function(){
 		//if(findIndex()) return true;
-		click("点击阅读全文");  
+		//click("点击阅读全文"); 
+	    commons.clickWebViewText("android.widget.FrameLayout","点击阅读全文")
+			
 	
         return false;
     },
+	findIndexPage:function()
+	{
+		return findIndex();
+	},
+	clickIndexPage:function()
+	{
+		return clickIndex();
+	},
+	
 	popWindow:function(){
 	 
       popWindowProcess();
@@ -115,12 +125,47 @@ function popWindowProcess()
 		
 }
 
+/*
 function findIndex(){
 
     var textW=text(indexBtn).findOnce(); 
 	if(textW)textW=textW.parent();
     return textW;	
 }
+*/
+
+function findIndex(){
+	var indexW  = text(indexBtn).findOnce()||text(indexBtn1).findOnce();
+	var indexW1 = text(indexText).findOnce()||text(indexText1).findOnce();
+	return indexW && indexW1;
+}
+
+function clickIndex(){
+    var flag=false;
+	var textW=text(indexBtn).findOnce();
+    if(textW)textW=textW.parent();
+    if(textW)
+	{  
+       flag=textW.click();
+	   if(!flag)
+		  flag=click(indexBtn);	
+	}
+	else{
+	   if(indexBtn1){	
+	      textW=text(indexBtn1).findOnce();
+          if(textW)textW=textW.parent();
+          if(textW)
+	      {  
+            flag=textW.click();
+	        if(!flag)
+		      flag=click(indexBtn1);	
+	      }
+	   }
+	}
+    return flag;	
+}
+
+
 
 function ucMobile(){
     var currentPkgName=currentPackage();

@@ -2,15 +2,21 @@ const commons = require('common.js');
 const templates = require('template.js');
 const runAppName ="微鲤"; 
 const runPkg     ="cn.weli.story";
-const indexBtn    ="美食";
+
+const indexBtn    ="头条"
+const indexBtn1    =null;
 const indexText   ="美食";
+const indexText1  =null;
 
 
 templates.init({
     appName:runAppName,
+	packageName:runPkg,
 	indexBtnText:indexBtn,
-    indexFlagText:indexText,
-    timeAwardText:"领红包",
+	indexBtnText1:indexBtn1,
+	indexFlagText:indexText,
+	indexFlagText1:indexText1,	
+    timeAwardText:"领取时段奖励",
 });
 
 
@@ -19,12 +25,7 @@ templates.run({
     getIndexBtnItem:function(){
         return id("rl_bottom_1").findOnce();
     },
-	/*
-	//获取首页标志
-    findIndexPage:function(){
-      return findIndex();
-    },
-    */
+
     //签到
     signIn:function(){
         
@@ -34,7 +35,7 @@ templates.run({
            app.dlog("点我的失败");
 		   return;
 		}			
-        if(!commons.idClick("ll_not_sign"))
+        if(!commons.idClick("ll_not_sign"))//签到
 		{
            app.dlog("点签到失败");
 		   return;
@@ -48,15 +49,13 @@ templates.run({
 		}			
         
 		app.dlog("签到界面waitCount="+waitCount);
-	    app.findNodeTest(classN,0,0);
-		//app.printCurrentViewPageInfo();
+	    sleep(5000);
 		if(classN){
            app.dlog("点立即签到");
-		   var flag=desc("立即签到").findOnce();//click("立即签到");
-		   
+		   var flag=commons.clickWebViewElement("android.widget.FrameLayout","android.widget.Button","立即签到")
+   	       //desc("立即签到").findOnce();//click("立即签到");
 		   if(flag){
 			  app.dlog("立即签到id=true");
-		 	  if(!flag.click())click("立即签到");
 		   }
 		   else
 			  app.dlog("立即签到id=false");
@@ -65,7 +64,15 @@ templates.run({
 	   
         back();
      	sleep(1000);
-        commons.idClick("rl_bottom_1");
+        //commons.idClick("rl_bottom_1");
+		//领红包：
+		if(jumpToChat()){
+           app.dlog("点聊一聊界面成功");
+		   getOneGroup();
+		   getOneRedPack();
+		   backToChat();
+	    }
+		commons.idClick("rl_bottom_1");
 		
     },
     //找出新闻的条目
@@ -85,37 +92,43 @@ templates.run({
 	
 		
     },
+	
+	findVideoItem:function(){
+		var videoItem=null;
+		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
+        app.findNodeTest(rootNode,0,0);
+		if(app.compareVersion()>=0)
+		    videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,2);
+		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,2);
+	    return videoItem;
+             		
+    },
+	
+	getVideoTitle:function(videoItem){
+
+        return videoItem.child(2).text();
+	},		
+
     //时段奖励之后执行
     doingAfterTimeAward:function(){
 		app.dlog("doingAfterTimeAward");
-		//cn.weli.story:id/rl_bottom_0 聊一聊
-        if(commons.idClick("rl_bottom_0")){
-           //android.support.v7.widget.RecyclerView 聊一聊界面
-		   sleep(1000);
-	       /*
-		   var rootNode = className("android.widget.FrameLayout").findOnce();
-		   //app.findNodeTest(rootNode,0,0);
-		   app.listNode(rootNode,0); //tv_group_tag
-		   var newsItem =app.findNodeByTextById(rootNode,"红包","tv_group_tag");
-   	 	   if(newsItem){
-			  var count = newsItem.childCount();
-			  for(var i=0;i<count;i++){
-				  var child  = newsItem.child(i);
-                  var classN=  child.className();
-                  if(classN && classN.indexOf("android.widget.TextView")>=0) 
-                     app.dlog("text="+child.text());					  
-				  
-			  }
-		   }
-		   */
-		   var idW= id("tv_group_tag").findOnce()
-		   if(idW){
-			   
-			  idW.parent().click(); 
-		   }
-		   
-		   
+        /*
+	    if(jumpToChat()){
+           app.dlog("点聊一聊界面成功");
+		   getOneGroup();
+		   getOneRedPack();
+		   backToChat();
 	    }
+		*/
+    },
+	
+	//跳到视频页面：
+	jumpToVideo:function(){
+	   var videoId  = id("rl_bottom_2").findOnce();
+	   if(!videoId)return false;
+	   if(!videoId.click())
+	      return click("视频");
+	   return true;
     },
     //阅读页面是否应该返回
     isShouldBack:function(){
@@ -127,12 +140,23 @@ templates.run({
 		commons.UIClick("bt_ok");      //如阅读奖励提醒，点知道了
 	    
 		//阅读中
-		//if(text("展开查看全文").findOnce()){
-    	click("展开查看全文");
+		click("展开查看全文");
+		//commons.clickWebViewText("android.widget.FrameLayout","展开查看全文")
+	
 		
 		
         return false;
     },
+    findIndexPage:function()
+	{
+		return findIndex();
+	},
+	clickIndexPage:function()
+	{
+		return clickIndex();
+	},
+
+	
 	popWindow:function(){
 	    popWindowProcess();
 	
@@ -173,7 +197,286 @@ templates.run({
 });
 
 function findIndex(){
-   return text(indexText).findOnce(); 
+	var indexW  = id("rl_bottom_1").findOnce();
+	var indexW1 = text(indexBtn).findOnce()||text(indexBtn1).findOnce()||text(indexText).findOnce()||text(indexText1).findOnce();
+	return indexW && indexW1;
+}
+
+function clickIndex(){
+	var flag=false;
+	var clickW=id("rl_bottom_1").findOnce();
+    if(clickW)
+	{  
+       flag=clickW.click();
+	   if(!flag && indexBtn)
+		  flag=click(indexBtn);	
+	   if(!flag && indexBtn1)
+		  flag=click(indexBtn1);	
+	   
+	}
+    return flag;	
+}
+
+
+function  findTextItem(textContent)
+{
+	var rootNode = className("android.widget.FrameLayout").findOnce();
+	//app.findNodeTest(rootNode,0,0);
+ 	var resultItem =app.findNodeByClassByText(rootNode,"android.widget.TextView",textContent,0,0,-1);
+   	return  resultItem;
+}
+
+
+
+function  jumpToChat(){
+	if(commons.idClick("rl_bottom_0"))
+	{
+       sleep(3000);
+	   return true;
+	}
+    else{
+      return false;
+    }		
+}
+
+function  getOneGroup(){
+	//上滑找群
+    app.dlog("上滑找群...");
+	var isFindGroup = false;//是否找到群
+    var groupTitle = "";//群名称
+    var groupItem;    //群条目
+    var loopTimeToFind = 0;//循环次数
+	var lastGroupTitle=null;
+    while((!isFindGroup || lastGroupTitle === groupTitle)  
+		  && loopTimeToFind < 5)
+    {
+   	    loopTimeToFind++;
+     	//进行下翻
+        if(app.compareVersion()>=0)
+		{
+		   swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
+		   sleep(3000);
+		}
+    	else{
+		   jumpToChat();	
+	    }
+        //群条目
+        groupItem = findTextItem("红包");
+        if(groupItem){
+			var groupTitle =null;
+			var count =groupItem.childCount();
+			for(var i=0;i<count;i++){
+			  var childItem= groupItem.child(i);
+			  if(childItem)childItem=childItem.child(0);
+			  if(childItem)childItem=childItem.child(0);
+			  if(childItem)
+			  {
+				//app.dlog("i="+i+" text="+child.text());
+			    groupTitle=childItem.text();
+			  }
+			}
+		    if(groupTitle)
+			{
+		      isFindGroup = true;
+		    }
+			else
+			{
+				app.dlog("找到群,但无名称");
+         	}			
+			
+        }
+		else
+		{
+		 	if(isFindGroup)isFindGroup=false;
+			app.dlog("没找到群");  
+		}
+    }
+   
+    //找到红包群，点击进入
+    if(isFindGroup)
+	{
+        lastGroupText = groupTitle;
+        app.dlog("找到群："+groupTitle);
+    	var flag=true;
+		if(groupItem){
+	       if(!groupItem.click())
+		   {
+		     app.dlog("click play item fail");
+		     if(!click("红包"))
+		     {
+			    app.dlog("click play text fail");
+		        if(app.compareVersion()>=0){
+                  var bounds = groupItem.bounds();
+                  if(bounds && bounds.centerX()>=0 && bounds.centerY()>=0){
+			        if(click(bounds.centerX(),bounds.centerY())){
+                   	   app.dlog("click play text bounds success:x="+bounds.centerX()+" y="+bounds.centerY());
+		    		   sleep(1000);
+				    }
+				    else
+				    {
+			            app.dlog("click play text bounds fail");
+		    		    flag=false;
+				    }
+			      }
+			      else{
+				        app.dlog("click play bounds fail");
+		    	        flag=false;
+			      }
+			    }
+			    else 
+			    {
+				   flag=false; //6.0
+				   app.dlog("6.0以下不能点坐标");
+		        }
+		     }
+			 else
+			 { 
+			   app.dlog("click play text success");
+		     }
+		   }
+		   else{
+			  app.dlog("click play item success");
+		   }
+		   
+		}
+		else flag=false;
+	    if(flag){
+		  app.dlog("找到群，已点击进入");
+        }
+		else{
+		  app.dlog("找到群，点击未进入");
+    	}
+	     
+	}
+	else
+	{
+        app.dlog("5次滑动没有找到群，请检查");
+	}
+	//sleep(2000);
+	app.dlog("退出获取群");	   
+}
+
+function  getOneRedPack(){
+	//上滑找红包
+    app.dlog("上滑红包...");
+	var isFindRed = false;//是否找到红包
+    var redItem;    //红包条目
+    var loopTimeToFind = 0;//循环次数
+    while((!isFindRed)  
+		  && loopTimeToFind < 3)
+    {
+   	    loopTimeToFind++;
+     	//进行下翻
+        if(app.compareVersion()>=0)
+		{
+		   swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
+		   sleep(2000);
+		}
+    	else{
+	       sleep(3000);    
+	    }
+        
+        //红包条目
+        //redItem = findTextItem("来领我的亲情红包");
+        redItem = findTextItem("点击领取");
+        if(redItem){
+			app.dlog("有亲情红包"); 
+            var count=redItem.childCount();
+			for(var i=0;i<count;i++){
+				var child=redItem.child(i);
+				if(child)app.dlog("text="+child.text());
+			}
+			
+		    var textItem = app.findNodeByText(redItem,"点击领取");    
+			if(textItem){
+			  app.dlog("有点击领取");
+		      isFindRed = true;
+		 	}
+		    else {
+				app.dlog("没有发现有点击领取");
+				textItem = app.findNodeByText(redItem,"已领取");
+				if(textItem)app.dlog("发现有已领取");
+			}
+        }
+		else
+		{
+		 	if(isFindRed)isFindRed=false;
+			app.dlog("没找到有效红包");  
+		}
+    }
+   
+    //找到红包，点击领取
+    if(isFindRed)
+	{
+        app.dlog("找到红包了");
+    	var flag=true;
+		if(redItem){
+	       if(!redItem.click())
+		   {
+		     app.dlog("click play item fail");
+		     if(!click("点击领取"))
+		     {
+			    app.dlog("click play text fail");
+		        if(app.compareVersion()>=0){
+                  var bounds = redItem.bounds();
+                  if(bounds && bounds.centerX()>=0 && bounds.centerY()>=0){
+			        if(click(bounds.centerX(),bounds.centerY())){
+                   	   app.dlog("click play text bounds success:x="+bounds.centerX()+" y="+bounds.centerY());
+		    		   sleep(1000);
+				    }
+				    else
+				    {
+			            app.dlog("click play text bounds fail");
+		    		    flag=false;
+				    }
+			      }
+			      else{
+				        app.dlog("click play bounds fail");
+		    	        flag=false;
+			      }
+			    }
+			    else 
+			    {
+				   flag=false; //6.0
+				   app.dlog("6.0以下不能点坐标");
+		        }
+		     }
+			 else
+			 { 
+			   app.dlog("click play text success");
+		     }
+		   }
+		   else{
+			  app.dlog("click play item success");
+		   }
+		   
+		}
+		else flag=false;
+	    if(flag){
+		  app.dlog("找到红包，已点击进入");
+        }
+		else{
+		  app.dlog("找到红包，点击未进入");
+    	}
+	     
+	}
+	else
+	{
+        app.dlog("5次滑动没有找到红包，请检查");
+	}
+	sleep(2000);
+	app.dlog("退出获取红包");	   
+}
+
+
+function backToChat(){
+	
+    back();
+	sleep(1000);
+	back();
+	sleep(5000);
+			
+	
 }
 
 function ucMobile(){

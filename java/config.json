@@ -40,6 +40,10 @@
 		    "version":1
         },
 		{
+            "name":"快手极速版",
+		    "version":1
+        },
+		{
             "name":"波波视频",
 		    "version":1
         }
@@ -48,7 +52,7 @@
 	"version":[
 	    {
             "name":"config",
-		    "version":1
+		    "version":2
         }
     ]
 }

@@ -3,12 +3,17 @@ const templates  = require('template.js');
 const runAppName ="东方头条"; 
 const runPkg      ="com.songheng.eastnews";
 const indexBtn    ="新闻";
-const indexText   ="刷新";
+const indexBtn1    ="刷新";
+const indexText   ="发布";
+const indexText1  ="扫一扫";
 
 templates.init({
     appName:runAppName,
+	packageName:runPkg,
 	indexBtnText:indexBtn,
+	indexBtnText1:indexBtn1,
 	indexFlagText:indexText,
+	indexFlagText1:indexText1,
 });
 
 
@@ -16,31 +21,60 @@ templates.run({
     
     //获取首页按钮,不可以删除！
     getIndexBtnItem:function(){
-	    return findIndex();		
+	    var textW=text(indexBtn).findOnce(); 
+	    if(!textW && indexBtn1)textW=text(indexBtn1).findOnce();
+        if(textW)textW=textW.parent();
+        return textW;
     },
-	/*
-		//获取首页标志
-    findIndexPage:function(){
-	  var result= findIndex();
-      if(result)return result;
-	  popWindowProcess();
-      return findIndex();
-    },
-	*/
+
     //签到
     signIn:function(){
-   	    //签到
-        commons.UITextClick("去签到");
-        sleep(2000);
-        //删除弹出界面
+   	    if(text("立即登陆").findOnce()){
+			toast("没有登陆，请登陆！");
+			exit();
+		}
+		else
+		{
+		  if(text("去签到").findOnce()){ 
+		     //签到
+             commons.UITextClick("去签到");
+              sleep(2000);
+             //删除弹出界面
         
-        //返回主页面
+             //返回主页面
         
-        sleep(5000);
-        //回到新闻
-     	var textW=findIndex(); 
-		if(textW)textW.click();
-        
+             sleep(5000);
+             //回到新闻
+			 clickIndex();
+     		 return;
+          }
+		  app.dlog("没有去签到字样，需检查是否登陆");
+          commons.UITextClick("我的");
+          var waitCount=0;
+		  while(waitCount<5){
+			 waitCount++;
+			 popWindowProcess();
+			 sleep(1000);
+		  }
+		  
+		  //var rootNode=className("android.widget.FrameLayout").findOnce();
+          //var ifItem=app.findNodeByClassByText(rootNode,"android.view.View","登陆领金币",0,0,-1);
+	      //if(ifItem)
+		  if(text("点击登录").findOnce())
+		  {
+		     toast("没有登陆，请登陆！");
+			 exit();
+		  }
+		  else{
+		     app.dlog("好像登陆了");
+             //回到首页
+     	     //var textW=findIndex(); 
+		     //if(textW)textW.click();
+		  	 clickIndex();  
+		  }
+		  
+		  
+		}
     },
     //找出新闻的条目
     findNewsItem:function(){
@@ -54,37 +88,42 @@ templates.run({
 		return newsItem;
 		
     },
-	
+	/*
+	// 东方头条找不到视频？
 	findVideoItem:function(){
-		var videoItem=null;
-		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
-    	app.listNode(rootNode,0);
-    	videoItem=app.findNodeById(rootNode,"asr");
-		if(videoItem.id() != null) videoItem=null;
+	    var videoItem=null;
+		var rootNode= className("android.widget.FrameLayout").findOnce();
+        app.findNodeTest(rootNode,0,0);
+		if(app.compareVersion()>=0)
+		    videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,15);
+		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,15);
 	    return videoItem;
-             		
+             
+		 
     },
+	*/
+	getVideoTitle:function(videoItem){
+
+        return videoItem.child(0).text();
+	},
 	
-	
-	//时段奖励之后执行
-    doingAfterTimeAward:function(){
-   	    //if(!findIndex()) 
-		//    back();
-    },
-    //跳到视频页面：
+	 //跳到视频页面：
 	jumpToVideo:function(){
 	   var videoId  = text("视频").findOnce();
 	   if(!videoId)return false;
 	   if(!videoId.click())
 	      return click("视频");
 	   return true;
-	 
-	 	   
     },
+	//时段奖励之后执行
+    doingAfterTimeAward:function(){
+   	    //if(!findIndex()) 
+		//    back();
+    },
+   
     //阅读页面是否应该返回
     isShouldBack:function(){
-		//if(findIndex()) return true;
-		click("点击阅读全文");  //东方头条
+		//clickReadAll();
 		
     	//要文推送
         var adFlag = text("立即查看").findOnce();
@@ -147,9 +186,26 @@ templates.run({
 		   
 		}
 		//阅读中
-		click("点击查看原文");
-        return false;
+		//click("点击查看原文");
+		var  flag=false;
+		var clickView=text("点击阅读全文").findOnce();
+		if(clickView  && clickView.parent())flag=clickView.parent().click();
+		if(!flag)flag=click("点击阅读全文");
+		if(!flag){
+		  clickView=text("点击查看原文").findOnce();
+		  if(clickView  && clickView.parent())flag=clickView.parent().click();
+		  if(!flag)flag=click("点击查看原文");
+		}
+	    return false;
     },
+	findIndexPage:function()
+	{
+		return findIndex();
+	},
+	clickIndexPage:function()
+	{
+		return clickIndex();
+	},
 	popWindow:function()
 	{
 	 
@@ -183,7 +239,6 @@ templates.run({
 		   textRef=text("下拉刷新").findOnce();
 		   sleep(1000);
 	   }
-	   //app.dlog("1 退出下拉刷新waitCount="+waitCount);
 	  
 	   
 	 
@@ -291,22 +346,67 @@ function popWindowProcess()
 		var coinTip = text("立即领取").findOnce(); //立即领取 金豆奖励提醒
 		if(coinTip)click("立即领取");
 		
-		//com.android.packageinstaller
 		if(currentPackage()==="com.android.packageinstaller")
 		{
 			var textNo=text("禁止").findOnce();
 			if(textNo && !textNo.click())click("禁止");
 		}
 		
+		
+		
 }
 
 function findIndex(){
-
-    var textW=text(indexBtn).findOnce(); 
-	if(!textW)textW=text(indexText).findOnce();
-    if(textW)textW=textW.parent();
-    return textW;	
+    var textW=text(indexBtn).findOnce()||text(indexBtn1).findOnce(); 
+    var textW1=text(indexText).findOnce()||text(indexText1).findOnce();
+	return textW && textW1;
 }
+
+
+
+function clickIndex(){
+	var flag=false;
+	var textW=text(indexBtn).findOnce();
+    if(textW)textW=textW.parent();
+    if(textW)
+	{  
+       flag=textW.click();
+	   if(!flag)
+		  flag=click(indexBtn);	
+	}
+	else{
+	   if(indexBtn1){	
+	      textW=text(indexBtn1).findOnce();
+          if(textW)textW=textW.parent();
+          if(textW)
+	      {  
+            flag=textW.click();
+	        if(!flag)
+		      flag=click(indexBtn1);	
+	      }
+	   }
+	}
+    return flag;	
+}
+
+function clickReadAll()
+{
+    app.dlog("clickReadAll");
+    //if(click("点击查看全文"))return;	
+	if(click("点击阅读全文"))return;	
+	
+	var rootNode=className("android.widget.FrameLayout").findOnce();
+    //app.findNodeTest(rootNode,0,0);
+	//android.view.View
+	//if(className("android.view.View").findOnce())
+	var newsItem=app.findNodeByClassByText(rootNode,"android.view.View","点击阅读全文",0,0,-1);
+	if(newsItem){app.dlog("点击阅读全文，点击");click("点击阅读全文");}
+    //else 
+	//newsItem=app.findNodeByClassByText(rootNode,"android.view.View","点击查看全文",0,0,-1);
+	//if(newsItem){app.dlog("点击点击查看全文，点击");click("点击查看全文");}	
+	
+}
+
 
 function ucMobile(){
     var currentPkgName=currentPackage();

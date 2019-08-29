@@ -3,13 +3,17 @@ const templates  = require('template.js');
 const runAppName ="悦头条"; 
 const runPkg      ="com.expflow.reading";
 const indexBtn    ="头条";
-const indexText   ="刷新";
+const indexBtn1   ="刷新";
+const indexText   ="生活";
+const indexText1  ="时尚";
 
 templates.init({
     appName:runAppName,
+	packageName:runPkg,
 	indexBtnText:indexBtn,
-    //indexFlagText1:"健康",
-	//indexFlagText2:"生活",
+	indexBtnText1:indexBtn1,
+	indexFlagText:indexText,
+	indexFlagText1:indexText1,
     timeAwardText:"阅读领取"	
 });
 
@@ -19,19 +23,10 @@ templates.run({
     getIndexBtnItem:function(){
 	    return findIndex();		
     },
-	/*
-		//获取首页标志
-    findIndexPage:function(){
-	  var result= findIndex();
-      if(result)return result;
-	  popWindowProcess();
-      return findIndex();
-    },
-	*/
+	
     //签到
     signIn:function(){
-   	    //签到
-		app.dlog("签到......");
+   		app.dlog("签到......");
 		var taskText=text("任务").findOnce();
 		if(taskText)taskText=taskText.parent();
 		if(!taskText)return;
@@ -91,38 +86,48 @@ templates.run({
     },
 	
 	findVideoItem:function(){
-		//click("推荐");
-		var videoItem=null;
-		
+	    var videoItem=null;
 		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
-    	app.listNode(rootNode,0);
-    	videoItem=app.findNodeById(rootNode,"asr");
-		if(videoItem.id() != null) videoItem=null;
+         //app.findNodeTest(rootNode,0,0);
+		if(app.compareVersion()>=0)
+		    videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,2);
+		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,2);
 	    return videoItem;
-             		
+         		
     },
+	getVideoTitle:function(videoItem){
+
+        return videoItem.child(0).text();
+	},
 	
-	
-	//时段奖励之后执行
-    doingAfterTimeAward:function(){
- 		//back();
-    },
-    //跳到视频页面：
+	 //跳到视频页面：
 	jumpToVideo:function(){
 	   var videoId  = text("视频").findOnce();
 	   if(!videoId)return false;
 	   if(!videoId.click())
 	      return click("视频");
 	   return true;
-	 
-	 	   
     },
+	
+	//时段奖励之后执行
+    doingAfterTimeAward:function(){
+ 		//back();
+    },
+  
     //阅读页面是否应该返回
     isShouldBack:function(){
 		click("点击阅读全文");
         jumpProc();   //跳转页面
         return false;
     },
+	findIndexPage:function()
+	{
+		return findIndex();
+	},
+	clickIndexPage:function()
+	{
+		return clickIndex();
+	},
 	popWindow:function(){
 	  popWindowProcess();
     }
@@ -154,13 +159,42 @@ function popWindowProcess()
 		
 }
 
-function findIndex(){
 
-    var textW=text(indexBtn).findOnce(); 
-	if(!textW)textW=text(indexText).findOnce();
-    if(textW)textW=textW.parent();
-    return textW;	
+function findIndex(){
+    var textW=text(indexBtn).findOnce()||text(indexBtn1).findOnce(); 
+    var textW1=text(indexText).findOnce()||text(indexText1).findOnce();
+	var flag = textW && textW1;
+	if(flag==null)flag=false;
+    else flag = true;	
+	return flag;
 }
+
+function clickIndex(){
+	var flag=false;
+	var textW=text(indexBtn).findOnce();
+    if(textW)textW=textW.parent();
+    if(textW)
+	{  
+       flag=textW.click();
+	   if(!flag)
+		  flag=click(indexBtn);	
+	}
+	else{
+	   if(indexBtn1){	
+	      textW=text(indexBtn1).findOnce();
+          if(textW)textW=textW.parent();
+          if(textW)
+	      {  
+            flag=textW.click();
+	        if(!flag)
+		      flag=click(indexBtn1);	
+	      }
+	   }
+	}
+    return flag;	
+}
+
+
 
 function ucMobile(){
     var currentPkgName=currentPackage();

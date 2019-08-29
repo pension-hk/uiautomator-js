@@ -7,6 +7,7 @@ const indexText   ="刷新";
 
 templates.init({
     appName:runAppName,
+	packageName:runPkg,
 	indexBtnText:indexBtn,
 	indexFlagText:indexText,
 });

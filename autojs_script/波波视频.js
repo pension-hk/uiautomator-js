@@ -1,19 +1,21 @@
 const commons    = require('common.js');
 const templates  = require('template.js');
 const runAppName = "波波视频"; 
-const runAppName1= "波波视频"; 
 const runPkg      ="tv.yixia.bobo";
-
-const indexBtn    ="首页";
-const indexText   ="刷新";
+const indexBtn    ="新闻";
+const indexBtn1    ="刷新";
+const indexText   ="搞笑";
+const indexText1  ="音乐";
 
 
 templates.init({
     appName:runAppName,
-	appAlias:"",
+	packageName:runPkg,
 	runMode:"视频",
     indexBtnText:indexBtn,
-    indexFlagText:indexText,
+	indexBtnText1:indexBtn1,
+	indexFlagText:indexText,
+	indexFlagText1:indexText1,	
     timeAwardText:"免费领"	
 
 });
@@ -26,16 +28,7 @@ templates.run({
     getIndexBtnItem:function(){
 		return findIndex();
 	},
-	/*
-	//获取首页标志
-    findIndexPage:function(){
-      var result= findIndex();
-      if(result)return result;
-	  popWindowProcess();
-      return findIndex();
-    
-    },
-	*/
+	
 	//登陆：
     login:function(){
       toast("登陆......");       	  
@@ -118,10 +111,27 @@ templates.run({
 		   back();   
 		   return true;
 	   }
+	   if(currentPackage()!= runPkg){ 
+		   back();   
+		   return true;
+	   }
 	   
        return false;
     },
+	findIndexPage:function()
+	{
+		return findIndex();
+	},
+	clickIndexPage:function()
+	{
+		return clickIndex();
+	},
+    popWindow:function()
+	{
+	 
+      popWindowProcess();
 	
+    },
 	download:function(appName){
 		
 		var appPackage=app.getPackageName(appName);
@@ -137,24 +147,70 @@ templates.run({
 
 function popWindowProcess()
 {
-	 //点任务，进来的弹窗是分享再赚，但是是：android.webkit.WebView
-	 if(className("android.webkit.WebView").findOnce())
-	 {
-        back();
-        sleep(1000); 		
-	 }
-	 
-	 if(text("禁止").findOnce()) //com.android.packageinstaller
-        click("禁止"); 
+	
+	var adClose = id("tt_video_ad_close").findOnce();
+	if(adClose)
+	{
+	   adClose.click();
+    }
+	var currentClass=className("android.webkit.WebView").findOnce();
+	if(currentClass && currentPackage===runPkg)
+	{
+	   var exitW=className("android.widget.ImageView").findOnce();	
+	   if(exitW)exitW=exitW.bounds();
+          if(exitW)
+	      {
+		    app.dlog("找到  X");
+		    if(app.compareVersion()<0)exit();
+		    else
+			{
+			    if(exitW.centerX()>=0 && exitW.centerY()>=0){
+					if(click(exitW.centerX(),exitW.centerY())) 	
+				       app.dlog("点击X成功");
+				    else app.dlog("点击X失败");
+				}
+			}			 
+	     }	  
+	     else{
+		    app.dlog("没有找到 X，back()");
+		 }
+	}
+	
+		
 }
+
 
 function findIndex(){
-
-    var textW=text(indexBtn).findOnce();  
-	if(!textW)textW=text(indexText).findOnce();  
-    if(textW)textW=textW.parent();
-    return textW;	
+    var textW=text(indexBtn).findOnce()||text(indexBtn1).findOnce(); 
+    var textW1=text(indexText).findOnce()||text(indexText1).findOnce();
+	return textW && textW1;
 }
+
+function clickIndex(){
+	var flag=false;
+	var textW=text(indexBtn).findOnce();
+    if(textW)textW=textW.parent();
+    if(textW)
+	{  
+       flag=textW.click();
+	   if(!flag)
+		  flag=click(indexBtn);	
+	}
+	else{
+	   if(indexBtn1){	
+	      textW=text(indexBtn1).findOnce();
+          if(textW)textW=textW.parent();
+          if(textW)
+	      {  
+            flag=textW.click();
+	        if(!flag)
+		      flag=click(indexBtn1);	
+	      }
+	   }
+	}
+    return flag;	
+}
+
 
 function ucMobile(){
     var currentPkgName=currentPackage();
@@ -197,7 +253,7 @@ function waitPlayAd()
     app.dlog("waitPlayAd()");
 	var waitCount = 0;
     var currentClass=className("android.webkit.WebView").findOnce();
-	while(!currentClass  && waitCount<30)
+	while(!currentClass  && waitCount<60)
 	{
 		waitCount++; 
 		currentClass=className("android.webkit.WebView").findOnce(); 
@@ -216,12 +272,42 @@ function waitPlayAd()
 		  back();
 	   }
 	   currentClass=className("android.webkit.WebView").findOnce(); 
-	   sleep(1000);
+	   if(currentClass)
+	   {
+		  sleep(1000);
+	   }
     }
     app.dlog("1 waitPlayAd() waitCount="+waitCount);
-    app.dlog("waitPlayAd() back()");
-    if(currentClass)
-	  back(); 	
+    currentClass=className("android.webkit.WebView").findOnce(); 
+    if(currentClass){
+	  var adClose = id("tt_video_ad_close").findOnce();
+	  if(adClose)
+	  {
+	     adClose.click();
+	  }else{
+	      app.dlog("waitPlayAd() 退出后还是WebView，检测是否Imageview （X）");    
+	      var exitW=className("android.widget.ImageView").findOnce();	
+	      if(exitW)exitW=exitW.bounds();
+          if(exitW)
+	      {
+		    app.dlog("找到  X");
+		    if(app.compareVersion()<0)exit();
+		    else
+			{
+			    if(exitW.centerX()>=0 && exitW.centerY()>=0){
+					if(click(exitW.centerX(),exitW.centerY())) 	
+				       app.dlog("点击X成功");
+				    else app.dlog("点击X失败");
+				}
+			}			 
+	     }	  
+	     else{
+		    app.dlog("没有找到 X，back()");
+			back();
+	     }
+	  }
+	}
+     
 }
 
 

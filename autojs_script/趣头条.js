@@ -2,28 +2,24 @@ const commons = require('common.js');
 const templates = require('template.js');
 const runAppName = "趣头条";
 const runPkg     ="";
-const indexBtn    ="头条";
-const indexText   ="刷新";
+const indexBtn    ="头条"
+const indexBtn1    ="刷新";
+const indexText   ="热点" || "深圳";
+const indexText1  ="美食"||"好货";
+
 
 templates.init({
     appName:runAppName,
+	packageName:runPkg,
 	indexBtnText:indexBtn,
-	//indexFlagText:indexText,
+	indexBtnText1:indexBtn1,
+	indexFlagText:indexText,
+	indexFlagText1:indexText1
+
 });
 
 templates.run({
 	
-	 //获取首页按钮
-    getIndexBtnItem:function(){
-        return findIndex();
-    },
-	
-	/*
-	//获取首页标志
-    findIndexPage:function(){
-      return findIndex();
-    },
-	*/
 	
     //签到
     signIn:function(){
@@ -45,14 +41,40 @@ templates.run({
      	app.dlog("找出新闻的条目");
 		var newsItem =null;
    	    var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
-	    //app.findNodeTest(rootNode,0,0);
+        //var rootNode = className("android.widget.FrameLayout").findOnce();
+	    app.findNodeTest(rootNode,0,0);
 		if(app.compareVersion()>=0)
 		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
 		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
 		return newsItem;
 	
 		
-   },
+    },
+	
+	findVideoItem:function(){
+		var videoItem=null;
+		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
+        app.findNodeTest(rootNode,0,0);
+		if(app.compareVersion()>=0)
+		    videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
+		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
+	    return videoItem;
+             		
+    },
+	
+    getVideoTitle:function(videoItem){
+
+        return videoItem.child(0).text();
+	},
+    //跳到视频页面：
+	jumpToVideo:function(){
+	   var videoId  = text("视频").findOnce();
+	   if(!videoId)return false;
+	   if(!videoId.click())
+	      return click("视频");
+	   return true;
+    },
+	
     //阅读页面是否应该返回
     isShouldBack:function(){
 	  
@@ -75,6 +97,16 @@ templates.run({
 		}
 		return false;
     },
+	
+	findIndexPage:function()
+	{
+		return findIndex();
+	},
+	clickIndexPage:function()
+	{
+		return clickIndex();
+	},
+
 	popWindow:function(){
 	    popWindowProcess();
 	
@@ -103,17 +135,61 @@ function popWindowProcess()
        back();
        sleep(500);
     }
-
+	adFlag=id("tv_close").findOnce();
+    if(adFlag){
+       back();
+       sleep(500);
+    }
+	adFlag=id("iv_close").findOnce();
+    if(adFlag){
+       back();
+       sleep(500);
+    }
+	
+    var knowText=text("禁止").findOnce(); 
+    if(knowText){
+		click("禁止");  
+	}
+	
 }
-
 
 
 function findIndex(){
-   var textW=text(indexBtn).findOnce(); 
-   if(!textW)textW=text(indexText).findOnce();
-   return textW;
-   
+    var textW=text(indexBtn).findOnce()||text(indexBtn1).findOnce(); 
+    var textW1=text(indexText).findOnce()||text(indexText1).findOnce();
+	var flag = textW && textW1;
+	if(flag==null)flag=false;
+    else flag = true;	
+	return flag;
+
 }
+
+function clickIndex(){
+	var flag=false;
+	var textW=text(indexBtn).findOnce();
+    if(textW)textW=textW.parent();
+    if(textW)
+	{  
+       flag=textW.click();
+	   if(!flag)
+		  flag=click(indexBtn);	
+	}
+	else{
+	   if(indexBtn1){	
+	      textW=text(indexBtn1).findOnce();
+          if(textW)textW=textW.parent();
+          if(textW)
+	      {  
+            flag=textW.click();
+	        if(!flag)
+		      flag=click(indexBtn1);	
+	      }
+	   }
+	}
+    return flag;	
+}
+
+
 
 function ucMobile(){
     var currentPkgName=currentPackage();
