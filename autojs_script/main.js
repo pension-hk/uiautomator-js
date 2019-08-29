@@ -27,7 +27,7 @@ function init(){
 	var configVersionRemote = getRemoteConfigVersion();
     var configVersionLocal  = getLocalConfigVersion(configPath)   
 	app.dlog("configVersionRemote="+configVersionRemote+" configVersionLocal="+configVersionLocal);
-	if(configVersionRemote>configVersionLocal){
+	if(configVersionRemote != configVersionLocal){
 	    toast("脚本版本升级了，处理中......");
         var config = getConfig();
         var appNum = 0;
