@@ -4,7 +4,7 @@ const runAppName ="想看";
 const runPkg      ="com.xiangkan.android";
 const indexBtn    ="首页"
 const indexBtn1    =null
-const indexText   ="深圳";
+const indexText   ="深圳"||"热点";
 const indexText1  ="情感";
 
 
@@ -43,32 +43,25 @@ templates.run({
 		app.dlog("找出新闻的条目");  //开福袋
 		var newsItem =null;
    	    var rootNode = className("androidx.recyclerview.widget.RecyclerView").findOnce();
-	    app.findNodeTest(rootNode,0,0);
-		if(app.compareVersion()>=0){
-		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,2);
-			 if(!newsItem)newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,4);
-			 if(!newsItem)newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,6);
-		
-		}
-		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
-		
+	    //app.findNodeTest(rootNode,0,3);
+		newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
 		if(newsItem){
-		   var count = newsItem.childCount();
+		   app.dlog("找到newsItem"); 	
+	       var count = newsItem.childCount();
 		   for(var i=0;i<count;i++){
 			   var child= newsItem.child(i);
 			   if(child.text())app.dlog("i="+i+" text="+child.text());
-			   
 		   }
-			
-			
 		}
-		
+        else
+		   app.dlog("没找到newsItem"); 	
+		sleep(5000);	
 		return newsItem;
 		
     },
 	getNewsTitle:function(newsItem){
 
-        return newsItem.child(newsItem.childCount()-1).text();
+        return newsItem.child(0).text();
 	},
 	/*
 	findVideoItem:function(){

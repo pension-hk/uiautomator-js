@@ -26,18 +26,20 @@ templates.run({
         return id("rl_bottom_1").findOnce();
     },
 
-    //签到
+    //签到  //cn.weli.story:id/iv_group_redPacket  ==要发红包的id
     signIn:function(){
         
 		app.dlog("签到");
 		if(!commons.idClick("rl_bottom_4"))
 		{
            app.dlog("点我的失败");
+		   getGroupRedPackage();
 		   return;
 		}			
         if(!commons.idClick("ll_not_sign"))//签到
 		{
            app.dlog("点签到失败");
+		   getGroupRedPackage();
 		   return;
 		}
         var waitCount = 0;
@@ -65,13 +67,10 @@ templates.run({
         back();
      	sleep(1000);
         //commons.idClick("rl_bottom_1");
+		
 		//领红包：
-		if(jumpToChat()){
-           app.dlog("点聊一聊界面成功");
-		   getOneGroup();
-		   getOneRedPack();
-		   backToChat();
-	    }
+		getGroupRedPackage();
+		
 		commons.idClick("rl_bottom_1");
 		
     },
@@ -226,6 +225,21 @@ function  findTextItem(textContent)
    	return  resultItem;
 }
 
+function getGroupRedPackage()
+{
+	if(jumpToChat()){
+       app.dlog("点聊一聊界面成功");
+	   getOneGroup();
+	   getOneRedPack();
+	   backToChat();
+	}
+}
+
+function publishRedPackage()
+{
+	
+	
+}
 
 
 function  jumpToChat(){
@@ -342,6 +356,13 @@ function  getOneGroup(){
 		else flag=false;
 	    if(flag){
 		  app.dlog("找到群，已点击进入");
+		  //cn.weli.story:id/iv_group_redPacket  ==要发红包的id
+		  var idRedP=id("iv_group_redPacket").findOnce();
+		  if(idRedP && idRedP.click()){
+		     app.dlog("找到群，进入发现可以发红包，发！");
+		     sleep(5000);
+		  }
+		  
         }
 		else{
 		  app.dlog("找到群，点击未进入");
