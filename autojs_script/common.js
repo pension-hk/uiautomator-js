@@ -106,7 +106,7 @@ util.clickWebViewText = function(classN,textContent){
 	var flag=click(textContent);
 	if(!flag){	
 	   var rootNode=className(classN).findOnce();
-       app.findNodeTest(rootNode,0,0);
+       //app.findNodeTest(rootNode,0,0);
 	   var newsItem=util.findNodeByClassByText(rootNode,"android.view.View",textContent,0,0,-1);
 	   if(newsItem){
 		   flag=newsItem.click();
