@@ -28,6 +28,10 @@
 		{
             "name":"玩赚星球",
 		    "version":1
+        },
+		{
+            "name":"想看",
+		    "version":1
         }
     ],
     "videoAppList":[
@@ -52,7 +56,7 @@
 	"version":[
 	    {
             "name":"config",
-		    "version":5
+		    "version":6
         }
     ]
 }

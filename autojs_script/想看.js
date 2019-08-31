@@ -40,21 +40,12 @@ templates.run({
     },
     //找出新闻的条目
     findNewsItem:function(){
-		app.dlog("找出新闻的条目");  //开福袋
 		var newsItem =null;
-   	    var rootNode = className("androidx.recyclerview.widget.RecyclerView").findOnce();
-	    app.findNodeTest(rootNode,0,0);
-		newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
-		if(newsItem){
-		   app.dlog("找到newsItem"); 	
-	       var count = newsItem.childCount();
-		   for(var i=0;i<count;i++){
-			   var child= newsItem.child(i);
-			   if(child.text())app.dlog("i="+i+" text="+child.text());
-		   }
-		}
-        else
-		   app.dlog("没找到newsItem"); 	
+	    var rootNode= className("android.widget.FrameLayout").findOnce();
+        //app.findNodeTest(rootNode,0,0);
+		newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tvTitle",0,0);
+		if(!newsItem)newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_text_image_title",0,0);
+		if(!newsItem)newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_sub_title",0,0);
 		sleep(5000);	
 		return newsItem;
 		

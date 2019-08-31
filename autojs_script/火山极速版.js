@@ -31,7 +31,8 @@ templates.run({
 		var rootNode= className("android.widget.FrameLayout").findOnce();
         //app.findNodeTest(rootNode,0,0);
 		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","x6",0,0);
-        if(videoItem){
+        /*
+		if(videoItem){
 		  app.dlog("有   videoItem");	
            var count  =  videoItem.childCount();
 		   for(var i=0;i<count;i++){
@@ -52,7 +53,8 @@ templates.run({
 			
 		  app.dlog("无 videoItem");	
         	
-		}		
+		}
+        */ 		
 		return videoItem;
         
 		/* 
