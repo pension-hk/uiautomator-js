@@ -68,7 +68,7 @@ template.run = function(fun){
 	/**
      * 自动更新
      */
-    template.autoUpdate(fun);
+    //template.autoUpdate(fun);
 	
     
 	/**
@@ -221,6 +221,7 @@ template.shortVideoLoop=function(fun)
 }
 
 
+/*
 template.autoUpdate = function(fun){
     var updateFlag = false;
     var updateBtn;
@@ -276,7 +277,7 @@ template.autoUpdate = function(fun){
     //重新运行
     template.run(fun);
 }
-
+*/
 
 template.launch=function(getAppName)
 {
@@ -723,16 +724,16 @@ template.readNews = function(seconds,fun/*isShouldBack*/){
 		      }
            }
 		   else{
-		      classN=className("android.webkit.WebView").findOnce();
-		      if(classN && classN.className().indexOf("android.webkit.WebView")>=0)
-			  {
-			     app.dlog("111 新闻资源,阅读中......");
+		      //classN=className("android.webkit.WebView").findOnce();
+		      //if(classN && classN.className().indexOf("android.webkit.WebView")>=0)
+			  //{
+			  //   app.dlog("111 新闻资源,阅读中......");
 				 utils.swapeToRead();
-		      }
-		      else{  
-		         app.dlog("111 新闻条目是视频资源,阅读中......");
-				 utils.swapeToReadVideo();
-			  }
+		      //}
+		      //else{  
+		      //   app.dlog("111 新闻条目是视频资源,阅读中......");
+			  //	 utils.swapeToReadVideo();
+			  //}
 		   }
 		   /*
 		   //if(className("com.tencent.tbs.core.webkit.WebView").findOnce()) 
@@ -888,9 +889,8 @@ template.findOneVideo = function(findVideoItem){
     initParam.loopTimeToFindNews = 0;//循环次数
     while((!isFindVideo)  && initParam.loopTimeToFindNews < 20){
         initParam.loopTimeToFindNews++;
-      
         videoItem = findVideoItem();
-        if(!videoItem){
+        if(videoItem){
 						
             isFindVideo = true;
         }

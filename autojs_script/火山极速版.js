@@ -1,11 +1,11 @@
 const commons    = require('common.js');
 const templates  = require('template.js');
-const runAppName = "快手极速版"; 
-const runPkg      ="com.kuaishou.nebula";
-const indexBtn    ="com.kuaishou.nebula:id/tabs"
+const runAppName = "火山极速版"; 
+const runPkg      ="com.ss.android.ugc.livelite";
+const indexBtn    ="视频"
 const indexBtn1    =null;
-const indexText   ="com.kuaishou.nebula:id/tabs";
-const indexText1  =null;
+const indexText   ="影视圈";
+const indexText1  ="红包";
 
 
 templates.init({
@@ -21,82 +21,53 @@ templates.init({
 templates.run({
     
  	//签到
-    signIn:function(){ 
-        /*
-		toast("进入任务签到");
-		//进入任务 
-        var taskFlag=text("任务").findOnce();
-        if(!taskFlag)return;
-        click("任务");
-        sleep(2000);
-        //去掉广告
-		var waitCunt=0;
-		var animationView=id("imgClose").findOnce();
-        while(!animationView && waitCunt<10){
-              waitCunt++;
-			  animationView=id("imgClose").findOnce();
-			  sleep(1000);
-        }
-        if(animationView)animationView.click();
-		sleep(5000);
-        
-		var rootNode= className("android.support.v4.view.ViewPager").findOnce();
-        app.findNodeTest(rootNode,0,0);
-		var waitCount=0;
-		while(commons.clickWebViewText("android.widget.FrameLayout","立即签到") && waitCount<15){
-             waitCount++;
-			 sleep(1000);
-		     app.dlog("点立即签到成功");
-				
-		
-		}
-		app.dlog("退出点立即签到，waitCount="+waitCount);
-		
-		
-		waitCount=0;
-		if(click("开箱领元宝"))
-		{
-			var idClose = id("tt_video_ad_close").findOnce();
-			while(!idClose && waitCount<30){
-				waitCount++;
-				idClose = id("tt_video_ad_close").findOnce();
-				sleep(1000);
-			}
-		         	
-		    if(idClose)idClose.click();
-		
-		}
-	     	
-	
-		
-	    //删除弹出界面
-        //寻找“恭喜您获得”
-		//var findWelcome=text("恭喜您获得").findOnce();
-		animationView=id("imgClose").findOnce();
-        if(animationView)animationView.click();
-        sleep(500);
-		
-		//com.jm.video:id/tt_video_reward_container
-		//com.jm.video:id/tt_video_ad_close
-		
-		//开箱领元宝
-		//commons.UITextClick("开箱领元宝");
-	    //sleep(1000);	
-        
-        //返回主页面
-        click("首页");
-        */
+    signIn:function(){
+
 		
     },
     //找出视频
     findVideoItem:function(){  
-        var videoItem= id("com.kuaishou.nebula:id/container").findOnce();
-    	//app.findNodeTest(videoItem,0,0);
+        var videoItem=null;
+		var rootNode= className("android.widget.FrameLayout").findOnce();
+        //app.findNodeTest(rootNode,0,0);
+		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","x6",0,0);
+        if(videoItem){
+		  app.dlog("有   videoItem");	
+           var count  =  videoItem.childCount();
+		   for(var i=0;i<count;i++){
+			  var childNode= videoItem.child(i);
+			  if(childNode==null)continue;  
+			  //var classN=childNode.className();
+			  //var idN =childNode.id();
+			  var textN= childNode.text();
+			  //app.dlog("index="+i+" classN="+classN+" idN="+idN+" textN="+textN); 
+              if(textN){
+                  commons.UITextBoundsClick(textN);
+			  }				  
+			  
+		   }
+
+		}
+        else{
+			
+		  app.dlog("无 videoItem");	
+        	
+		}		
+		return videoItem;
+        
+		/* 
+	     var videoItem= className("android.widget.FrameLayout").findOnce();
+    	app.findNodeTest(videoItem,0,0);
+		app.printCurrentViewPageInfo();
 		if(videoItem)videoItem.click();
 		return videoItem;
-     
+        */ 
     },
-	
+	getVideoTitle:function(videoItem){
+
+        return videoItem.child(3).text();
+	},
+
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
     
@@ -135,17 +106,20 @@ function popWindowProcess()
 
 
 function findIndex(){
-	return id("tabs").findOnce();
-
+	if(text("视频").findOnce()||text("影视圈").findOnce()||text("红包").findOnce())return true;
+    else
+         return false		
 }
 
 function clickIndex(){
 	
 	var flag=false;
-    back();
-	sleep(1000);
-	return true;
-    
+    var clickW=text("视频").findOnce();
+	if(clickW && clickW.parent()){ 
+	  flag=clickW.parent().click();
+	  if(!flag)flag=click("视频");
+	}
+ 	return flag;
  
 }
 

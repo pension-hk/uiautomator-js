@@ -2,10 +2,10 @@ const commons = require('common.js');
 const templates = require('template.js');
 const runAppName ="中青看点"; 
 const runPkg     ="cn.youth.news";
-const indexBtn    ="首页"
-const indexBtn1    ="刷新";
+const indexBtn    ="a3u";//"a0s","首页"
+const indexBtn1    =null;//"刷新"
 const indexText   ="美文";
-const indexText1  =null;
+const indexText1  ="娱乐";
 
 
 templates.init({
@@ -31,7 +31,7 @@ templates.run({
         //进入我的
         app.dlog("签到......");
 		popWindowProcess();
-		var myFlag=id("a4a").findOnce();
+		var myFlag=id("a7k"/*"a4a"*/).findOnce();
         if(myFlag)myFlag=myFlag.parent();
         if(!myFlag){
 		  app.dlog("找【我的】ID失败");
@@ -381,14 +381,16 @@ function popWindowProcess()
 }
 
 function findIndex(){
-	var indexW  = id("a0s").findOnce();
-	var indexW1 = text(indexBtn).findOnce()||text(indexBtn1).findOnce()||text(indexText).findOnce()||text(indexText1).findOnce();
-	return indexW && indexW1;
+	var indexW  = id(indexBtn).findOnce();
+	var indexW1 = text(indexText).findOnce()||text(indexText1).findOnce();
+	var flag=false;
+	if(indexW && indexW1)flag=true;
+	return flag;
 }
 
 function clickIndex(){
 	var flag=false;
-	var clickW=id("a0s").findOnce();
+	var clickW=id(indexBtn).findOnce();
     if(clickW)
 	{  
        flag=clickW.click();

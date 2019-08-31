@@ -97,7 +97,7 @@ templates.run({
 		   sleep(200);
 		}
      	var videoItem = text("空空如也").findOnce();
-	    return videoItem;
+	    return !videoItem;
     },
 	
 	//时段奖励之后执行
