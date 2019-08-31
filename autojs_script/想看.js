@@ -43,7 +43,7 @@ templates.run({
 		app.dlog("找出新闻的条目");  //开福袋
 		var newsItem =null;
    	    var rootNode = className("androidx.recyclerview.widget.RecyclerView").findOnce();
-	    //app.findNodeTest(rootNode,0,3);
+	    app.findNodeTest(rootNode,0,0);
 		newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
 		if(newsItem){
 		   app.dlog("找到newsItem"); 	
