@@ -256,7 +256,7 @@ templates.run({
 		//推送处理：
         var viewText=text("查看详情").findOnce(); 
         if(viewText){
-			click(立即查看); 
+			click("立即查看"); 
 		}
         return false;
     },

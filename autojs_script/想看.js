@@ -46,7 +46,7 @@ templates.run({
 		newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tvTitle",0,0);
 		if(!newsItem)newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_text_image_title",0,0);
 		if(!newsItem)newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_sub_title",0,0);
-		sleep(5000);	
+		//sleep(5000);	
 		return newsItem;
 		
     },

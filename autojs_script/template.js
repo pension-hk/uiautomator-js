@@ -625,7 +625,8 @@ template.getOneNews = function(fun){
 		{
 		 	if(isFindNews)isFindNews=false;
 			app.dlog("没找到新闻");  
-   	        if(!findIndex())template.jumpToIndex(fun);  //backToIndex();
+   	        if(!findIndex())template.jumpToIndex(fun);
+			sleep(3000);
 		}
     }
     
@@ -836,6 +837,8 @@ template.getOneVideo = function(fun){
                  sleep(1000);
 		       }		   
 	        }
+			sleep(3000);
+	
 		}
 		app.dlog("查找视频结果："+videoText+" isFindVideo="+isFindVideo);
     }
@@ -899,6 +902,8 @@ template.findOneVideo = function(findVideoItem){
           //进入关注页面：
           //utils.UITextClick("关注");
 		  //sleep(1000);
+		  sleep(3000);
+	
 		}
         
     }
@@ -951,25 +956,6 @@ template.viewVideo = function(seconds,isShouldBack){
 	
 }
 
-template.viewVideo1 = function(seconds,isShouldBack){
-    
-	app.dlog("viewVideo1");
-    for(var i = 0 ;i < seconds/5 ;i++){
-    	utils.swapeToReadVideo();
-	    sleep(20);
-		//判断是否直接返回
-        var shouldBack = false;
-        if(isShouldBack != null){
-            shouldBack = isShouldBack(); //处理弹窗之类的
-        }
-        if(shouldBack){
-            return;
-        }
-		
-		
-    }
-	
-}
 
 
 template.downloadApp=function(download){
