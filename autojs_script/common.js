@@ -81,27 +81,9 @@ util.textClick = function(textContent) {
 util.UITextBoundsClick = function(textContent) {
     var thisEle = text(textContent).findOnce();
     var flag = false;
-    if (thisEle) {
-        //if(app.compareVersion()>=0){
-		   util.boundsClick(thisEle);
-		   flag = true;
-		//}
-		/*
-		else
-		{
-		   var item = text(textContent).findOnce();
-           if(item)
-		   {
-			   var boubds=item.bounds();
-			   if(bounds && bounds.centerX()>=0 && bounds.centerY()>=0)
-			   {
-			      shell("input tap "+bounds.centerX()+" "+bounds.centerY(),true);
-			      flag = true;
-			   }
-		    }
-	    }
-        */		
-        
+    if (thisEle) 
+	{
+	   flag=util.boundsClick(thisEle);
     }
     sleep(1000);
     return flag;

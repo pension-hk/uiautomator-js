@@ -27,23 +27,31 @@ templates.run({
 	
     //签到
     signIn:function(){
-   	    commons.UITextClick("首页");
-        sleep(1000);
+   	    if(!click("首页") && !commons.UITextBoundsClick("首页")){
+           app.dlog("signIn:点【首页】失败");
+           return; 		        
+		}
+        
+		sleep(1000);
         var signText = text("签到").findOnce(); 
         if(signText)signText=signText.parent();
         if(signText){
-           if(!signText.click()){
-			   if(!click("签到"))
-				  commons.UIClick(home_sign_text);
+           if(!signText.click() && !click("签到")&& !commons.UITextBoundsClick("签到")){
+	          app.dlog("signIn:点【签到】失败");
+              return;    
            }
            popWindowProcess();		
         }			
 	    sleep(1000);
         //回到新闻
+		clickIndex();
+		/*
      	var textW=text(indexBtn).findOnce(); 
         if(textW)textW=textW.parent(); 
  		if(textW)textW.click();
-        
+        */
+		
+		
     },
     //找出新闻的条目
     findNewsItem:function(){
@@ -137,7 +145,8 @@ function findIndex(){
 function findIndex(){
 	var indexW  = text(indexBtn).findOnce()||text(indexBtn1).findOnce();
 	var indexW1 = text(indexText).findOnce()||text(indexText1).findOnce();
-	return indexW && indexW1;
+	if(indexW && indexW1)return true;
+	else return false;
 }
 
 function clickIndex(){
