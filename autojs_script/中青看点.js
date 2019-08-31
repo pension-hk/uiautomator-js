@@ -2,8 +2,8 @@ const commons = require('common.js');
 const templates = require('template.js');
 const runAppName ="中青看点"; 
 const runPkg     ="cn.youth.news";
-const indexBtn    ="a3u";//"a0s","首页"
-const indexBtn1    =null;//"刷新"
+const indexBtn    ="a0s";//"首页"
+const indexBtn1    ="a3u";//"刷新"
 const indexText   ="美文";
 const indexText1  ="娱乐";
 
@@ -23,7 +23,7 @@ templates.run({
     
     //获取首页按钮
     getIndexBtnItem:function(){
-        return id("a0s").findOnce();
+        return id("a3u").findOnce();
     },
 	
     //签到
@@ -31,7 +31,7 @@ templates.run({
         //进入我的
         app.dlog("签到......");
 		popWindowProcess();
-		var myFlag=id("a7k"/*"a4a"*/).findOnce();
+		var myFlag=id("a4a").findOnce()||id("a7k").findOnce();
         if(myFlag)myFlag=myFlag.parent();
         if(!myFlag){
 		  app.dlog("找【我的】ID失败");
@@ -204,7 +204,8 @@ templates.run({
       	app.dlog("找出新闻的条目");
 		var newsItem =null;
    	    var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
-	    //app.findNodeTest(rootNode,0,0);
+	    //var rootNode= className("android.widget.FrameLayout").findOnce();
+    	//app.findNodeTest(rootNode,0,0);
 		if(app.compareVersion()>=0)
 		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
 		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,-1);
@@ -381,16 +382,15 @@ function popWindowProcess()
 }
 
 function findIndex(){
-	var indexW  = id(indexBtn).findOnce();
+	var indexW  = id(indexBtn).findOnce()||id(indexBtn1).findOnce();
 	var indexW1 = text(indexText).findOnce()||text(indexText1).findOnce();
-	var flag=false;
-	if(indexW && indexW1)flag=true;
-	return flag;
+	if(indexW && indexW1)return true;
+	else return false;
 }
 
 function clickIndex(){
 	var flag=false;
-	var clickW=id(indexBtn).findOnce();
+	var clickW=id(indexBtn).findOnce()||id(indexBtn1).findOnce();
     if(clickW)
 	{  
        flag=clickW.click();
