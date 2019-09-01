@@ -30,31 +30,28 @@ templates.run({
         var videoItem=null;
 		var rootNode= className("android.widget.FrameLayout").findOnce();
         //app.findNodeTest(rootNode,0,0);
-		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","x6",0,0);
-        /*
-		if(videoItem){
-		  app.dlog("有   videoItem");	
-           var count  =  videoItem.childCount();
-		   for(var i=0;i<count;i++){
-			  var childNode= videoItem.child(i);
-			  if(childNode==null)continue;  
-			  //var classN=childNode.className();
-			  //var idN =childNode.id();
-			  var textN= childNode.text();
-			  //app.dlog("index="+i+" classN="+classN+" idN="+idN+" textN="+textN); 
-              if(textN){
-                  commons.UITextBoundsClick(textN);
-			  }				  
+		if(text(indexText).findOnce()){
+		  videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","x6",0,0);
+          if(videoItem){
+		      var count  =  videoItem.childCount();
+		      for(var i=0;i<count;i++){
+			    var childNode= videoItem.child(i);
+			    if(childNode==null)continue;  
+			    var textN= childNode.text();
+			    app.dlog("index="+i+" text="+textN);
+				if(textN){
+                   commons.UITextBoundsClick(textN);
+			    }				  
 			  
-		   }
+		      }
 
+		  }
 		}
-        else{
-			
-		  app.dlog("无 videoItem");	
-        	
+		else
+		{
+		   videoItem=text("说点什么...").findOnce();
+		
 		}
-        */ 		
 		return videoItem;
         
 		/* 
@@ -100,7 +97,7 @@ templates.run({
 
 function popWindowProcess()
 {
-	 var popW=text("我知道了").findOnce();
+	 var popW=desc("谢谢观看").findOnce();
 	 if(popW)click("我知道了");
 }
 

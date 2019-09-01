@@ -23,70 +23,83 @@ templates.run({
     
  	//签到
     signIn:function(){ //刷宝签到改版以后是用android.webkit.WebView，暂时不能签
-        /*
-		toast("进入任务签到");
+        app.dlog("进入任务,签到");
 		//进入任务 
         var taskFlag=text("任务").findOnce();
-        if(!taskFlag)return;
-        click("任务");
-        sleep(2000);
-        //去掉广告
-		var waitCunt=0;
-		var animationView=id("imgClose").findOnce();
-        while(!animationView && waitCunt<10){
-              waitCunt++;
-			  animationView=id("imgClose").findOnce();
-			  sleep(1000);
-        }
-        if(animationView)animationView.click();
-		sleep(5000);
-        
-		var rootNode= className("android.support.v4.view.ViewPager").findOnce();
-        app.findNodeTest(rootNode,0,0);
-		var waitCount=0;
-		while(commons.clickWebViewText("android.widget.FrameLayout","立即签到") && waitCount<15){
-             waitCount++;
-			 sleep(1000);
-		     app.dlog("点立即签到成功");
-				
-		
+        if(!taskFlag){
+		    app.dlog("无任务字样，退出");
+			return;
 		}
-		app.dlog("退出点立即签到，waitCount="+waitCount);
-		
+        taskFlag = taskFlag.parent();
+		if(taskFlag && !taskFlag.click() && !click("任务"))return;
+		sleep(3000);
+	    app.dlog("进入签到页");
+		var waitCunt=0;
+		var webViewW=className("com.tencent.tbs.core.webkit.WebView").findOnce();
+        while(!webViewW && waitCunt<15){
+              waitCunt++;
+			  webViewW=className("com.tencent.tbs.core.webkit.WebView").findOnce();
+			  if(!webViewW)sleep(1000);
+        }
+		waitCount=0;
+		var popW=text("去邀请").findOnce();
+		while(!popW && waitCunt<15){
+              waitCunt++;
+			  popW=text("去邀请").findOnce();
+			  if(!popW)sleep(1000);
+        }
+		if(popW  && !popW.click())
+		{
+			click("去邀请");
+		}
+		 
+        waitCount=0; 
+		popW=text("取消").findOnce();
+		while(!popW && waitCunt<15){
+              waitCunt++;
+     	      popW=text("取消").findOnce();
+			  if(!popW)sleep(1000);
+        }
+        if(popW)popW=popW.parent();
+		if(popW && !popW.click()){
+			click("取消"); 	
+		}
+		waitCount=0; 
+		popW=text("立即签到").findOnce();
+		while(!popW && waitCunt<15){
+            waitCunt++;
+			popW=text("立即签到").findOnce();
+			if(!popW){
+			   if(text("继续赚元宝").findOnce()){
+			      app.dlog("已签到！");
+				  clickIndex();
+                  return;  				  
+			   }
+			   else sleep(1000);
+			}
+        }
+		if(popW  && !popW.click())
+		{
+			click("立即签到");
+		}
 		
 		waitCount=0;
-		if(click("开箱领元宝"))
+		popW=text("看视频签到").findOnce();
+		while(!popW && waitCunt<15){
+            waitCunt++;
+			popW=text("看视频签到").findOnce();
+		    if(!popW)sleep(1000);
+        }
+		if(popW  && !popW.click())
 		{
-			var idClose = id("tt_video_ad_close").findOnce();
-			while(!idClose && waitCount<30){
-				waitCount++;
-				idClose = id("tt_video_ad_close").findOnce();
-				sleep(1000);
-			}
-		         	
-		    if(idClose)idClose.click();
-		
+			click("看视频签到");
 		}
-	     	
-	
 		
-	    //删除弹出界面
-        //寻找“恭喜您获得”
-		//var findWelcome=text("恭喜您获得").findOnce();
-		animationView=id("imgClose").findOnce();
-        if(animationView)animationView.click();
-        sleep(500);
+		waitPlayAd();
 		
-		//com.jm.video:id/tt_video_reward_container
-		//com.jm.video:id/tt_video_ad_close
-		
-		//开箱领元宝
-		//commons.UITextClick("开箱领元宝");
-	    //sleep(1000);	
-        
         //返回主页面
-        click("首页");
-        */
+        clickIndex();
+        
 		
     },
     //找出视频
@@ -179,7 +192,8 @@ function popWindowProcess()
 function findIndex(){
 	var indexW  = text(indexBtn).findOnce()||text(indexBtn1).findOnce();
 	var indexW1 = text(indexText).findOnce()||text(indexText1).findOnce();
-	return indexW && indexW1;
+	if(indexW && indexW1)return true;
+	else return false;
 }
 
 function clickIndex(){
@@ -195,6 +209,33 @@ function clickIndex(){
 	   
 	}
     return flag;	
+}
+
+function waitPlayAd()
+{   	 var  currentClass=className("android.webkit.WebView").findOnce();
+		 var waitCount = 0;
+		 while(!currentClass  && waitCount<30)
+		 {
+			waitCount++; 
+			currentClass=className("android.webkit.WebView").findOnce(); 
+			sleep(1000);
+		 }
+		 waitCount = 0;
+		 while(currentClass  && waitCount<30)
+		 {
+			waitCount++; 
+			var adClose = id("tt_video_ad_close").findOnce();
+			if(adClose)
+			{
+			   adClose.click();
+			   break;
+			}
+			currentClass=className("android.webkit.WebView").findOnce(); 
+			sleep(1000);
+		
+		 }
+	
+	
 }
 
 
