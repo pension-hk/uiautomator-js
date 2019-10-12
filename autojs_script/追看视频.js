@@ -137,8 +137,8 @@ function  waitAppSuccess()
 {
 	  toast("登陆:等待启动......");
 	  var waitCount=0;
-	  var waitFlag=true;
-	  while(waitFlag  && waitCount<20){
+	  while(!findIndex() && waitCount<20)
+	  {
 	     waitCount++;
   		 var uiele = text("允许").findOnce();
          if(uiele){
@@ -156,25 +156,20 @@ function  waitAppSuccess()
             uiele.click();
             sleep(2000);
          }
-		 
+		 /*
 		 uiele = text("马上开启").findOnce();
          if(uiele){
             uiele.click();
             sleep(1000);
 			continue;
          }
-		 
-		 if(findIndex())
-	     {
-			waitFlag=false;
-			break;
-			
-	     }
-	     else{ 	 
+		 */
+		 if(!findIndex())
+	     { 	 
             back();
             sleep(1000);			
 		 	var curPkg = currentPackage();
-			toast("curPkg="+curPkg);
+			app.dlog("curPkg="+curPkg);
 			if(curPkg != runPkg)
 			{
 				if(!app.launchApp(runAppName))
@@ -182,7 +177,7 @@ function  waitAppSuccess()
 			}
 		 }
 	  }	
-	  toast("登陆：app 启动成功");
+	  app.dlog("登陆：app 启动成功");
 }
 
 function loginDone()
@@ -313,17 +308,17 @@ function mobileLogin(){ //手动登陆
 
 function  fillInviteCode(inviteCode)
 {
-		 if(!inviteCode)return;
-	     //填邀请码：
-	     toast("填邀请码，先到我的");
-         waitIndex();
-		 //进我的：
-		 var indexBrn = text("我").findOnce();
-	     if(indexBrn)
-	     {
-	  	    click("我");
-	     }
-	     sleep(2000);
+	if(!inviteCode)return;
+	//填邀请码：
+	toast("填邀请码，先到我的");
+    waitIndex();
+	//进我的：
+	var indexBrn = text("我").findOnce();
+	if(indexBrn)
+	{
+	 click("我");
+	}
+	sleep(2000);
 
 		 
 		 

@@ -84,17 +84,12 @@ templates.run({
 
 		
     },
-	
+	/*
 	findVideoItem:function(){
 	    var videoItem=null;
-		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
-         //app.findNodeTest(rootNode,0,0);
-		if(app.compareVersion()>=0)
-		    videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,2);
-		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,2);
 	    return videoItem;
-         		
     },
+	*/
 	getVideoTitle:function(videoItem){
 
         return videoItem.child(0).text();
@@ -115,7 +110,10 @@ templates.run({
     },
   
     //阅读页面是否应该返回
-    isShouldBack:function(){
+    isShouldBack:function(viewMode){
+		if(viewMode=="video"){
+		   return false;
+		}
 		click("点击阅读全文");
         jumpProc();   //跳转页面
         return false;
@@ -124,10 +122,15 @@ templates.run({
 	{
 		return findIndex();
 	},
+	checkIsAppPage:function()
+	{
+		return isAppPage();  //如果是，不要back();
+	},
 	clickIndexPage:function()
 	{
 		return clickIndex();
 	},
+	
 	popWindow:function(){
 	  popWindowProcess();
     }
@@ -160,14 +163,27 @@ function popWindowProcess()
 }
 
 
+
 function findIndex(){
-    var textW=text(indexBtn).findOnce()||text(indexBtn1).findOnce(); 
-    var textW1=text(indexText).findOnce()||text(indexText1).findOnce();
-	var flag = textW && textW1;
-	if(flag==null)flag=false;
-    else flag = true;	
-	return flag;
+	var flag=false;
+    var indexBtNode    =text(indexBtn).findOnce();
+	var indexBtn1Node  =text(indexBtn1).findOnce();
+    var indexTextNode  =text(indexText).findOnce();
+	var indexText1Node =text(indexText1).findOnce();
+	if((indexBtNode || indexBtn1Node) && (indexTextNode||indexText1Node))flag=true;
+	else flag=false;
+    return flag;
 }
+
+function isAppPage(){
+    var flag=false;
+    var indexBtNode    =text(indexBtn).findOnce();
+	var indexBtn1Node  =text(indexBtn1).findOnce();
+	if(indexBtNode || indexBtn1Node)flag=true;
+	else flag=false;
+    return flag;
+}
+
 
 function clickIndex(){
 	var flag=false;

@@ -26,7 +26,7 @@
 		    "version":1
         },
 		{
-            "name":"玩赚星球",
+            "name":"快看点",
 		    "version":1
         },
 		{
@@ -48,15 +48,38 @@
 		    "version":1
         },
 		{
+            "name":"全民小视频",
+		    "version":1
+        },
+		{
             "name":"波波视频",
 		    "version":1
         }
 		
     ],
+	"resourceList":[
+    	{
+             "name":"番茄看看",
+	         "version":1
+        },
+		{
+             "name":"66阅读",
+	         "version":1
+        },
+		{
+             "name":"微客众智",
+	         "version":1
+        },
+		{
+             "name":"发发赚赚",
+	         "version":1
+			 
+        }
+    ],
 	"version":[
 	    {
             "name":"config",
-		    "version":7
+		    "version":8
         }
     ]
 }

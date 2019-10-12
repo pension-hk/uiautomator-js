@@ -1,7 +1,7 @@
 {
-  "versionCode": 102,
-  "versionName": "1.0.2 Beta",
-  "releaseNotes":"改进功能，请更新后，点脚本，点+，然后下载main.js并重新运行",
+  "versionCode": 103,
+  "versionName": "1.0.3",
+  "releaseNotes":"改进功能，更新后，可直接运行【编程测试】或【阅读任务】",
   "downloads" : [
 	{
 	  "name": "Github",

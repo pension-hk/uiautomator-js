@@ -1,16 +1,18 @@
 const commons = require('common.js');
 const templates = require('template.js');
 const runAppName ="中青看点"; 
+const videoMode   = 1;  //0=全民小视频（九宫格模式）,1=追看视频/波波视频（竖向列表模式ListView）；2 刷宝模式（单例）
 const runPkg     ="cn.youth.news";
-const indexBtn    ="a0s";//"首页"
-const indexBtn1    ="a3u";//"刷新"
+const indexBtn    ="a3u";//"首页"
+const indexBtn1    ="a0s";//"刷新"
 const indexText   ="美文";
-const indexText1  ="娱乐";
+const indexText1  ="要闻";
 
 
 templates.init({
     appName:runAppName,
 	packageName:runPkg,
+	runVideoMode:videoMode,
   	indexBtnText:indexBtn,
 	indexBtnText1:indexBtn1,
 	indexFlagText:indexText,
@@ -20,172 +22,53 @@ templates.init({
 
 
 templates.run({
-    
-    //获取首页按钮
-    getIndexBtnItem:function(){
-        return id("a3u").findOnce();
-    },
-	
+	checkLogin:function(){
+        return isLogin(); 
+	},   
+    login:function(){
+        app.dlog("login......");
+        var inviteCode  =  app.getPrefString(runAppName+"_inviteCode"); 
+        app.dlog("inviteCode="+inviteCode);
+        if(!inviteCode){
+           if(!confirm("请问朋友要邀请码，再点【确定】"))
+		   {
+              exit();
+		   }
+		   inviteCode = rawInput("请输入邀请码");
+		   if(inviteCode =="")
+		   {
+			  app.dlog("输入的邀请码为空");
+			  exit(); 
+		   }
+		   app.dlog("输入的邀请码="+inviteCode);
+		   app.setPrefString(runAppName+"_inviteCode",inviteCode);
+		  
+		}
+	    loginDone();
+	    fillInviteCode(inviteCode);
+	    app.dlog("登陆完成");
+
+	},
+   
     //签到
     signIn:function(){
-        //进入我的
-        app.dlog("签到......");
-		popWindowProcess();
-		var myFlag=id("a4a").findOnce()||id("a7k").findOnce();
-        if(myFlag)myFlag=myFlag.parent();
-        if(!myFlag){
-		  app.dlog("找【我的】ID失败");
-		  if(!click("我的"))
-		  {
-		     app.dlog("点[我的]失败");
-		     return;
-		  }
-		}
-		else
-		 if(!myFlag.click() && !click("我的")){
-		   app.dlog("点[我的id]与【我的】均失败");
-		   return;
-		 }
-        sleep(1000);
-        //去掉广告
-        var animationView=id("animationView").findOnce();
-        if(animationView)animationView.click();
-        
-        sleep(500);
-        //进入任务中心
-		app.dlog("进入任务中心......");
-	    var taskCenter = text("任务中心").findOnce();
-        if(taskCenter)taskCenter=taskCenter.parent();
-        else 
-		{
-			app.dlog("找不到文本任务中心，尝试id");
-		    taskCenter=id("iy").findOnce();
-			if(taskCenter)taskCenter=taskCenter.parent();
-		}
-		if(taskCenter){
-		  if(!taskCenter.click())
-			  click("任务中心");
-           sleep(5000);
-		   app.dlog("点了任务中心"); 
-        }
-		else{
-		   app.dlog("【任务中心】无可点的父节点，无法进入");
-		}
-		
-        //点击签到领红包
+        jumpToTaskCenter();
+		//点击签到领红包
 		app.dlog("点击签到领红包");
-		//等10秒:
-		var waitCount=0;
-		var classN=className("android.webkit.WebView").findOnce();
-		while(!classN  &&  waitCount<10){
-			waitCount++;
-			classN=className("android.webkit.WebView").findOnce();
-		    sleep(1000);
-		}
-		classN=className("android.webkit.WebView").findOnce();
-		if(classN){
-          
-		  /*
-          app.dlog("点击签到领红包,类="+classN.className());
-          //if(!click("立即签到")){
-		  if(!click("签到")){
-		      app.dlog("点立即签到失败，尝试点看视频得青豆");
-			   if(click("看视频得青豆")) 
-			   {
-		          app.dlog("等待看视频得青豆");
-			      //5秒判断是否进入了看青豆广告界面 	  
-				  waitCount=0;
-				  classN=className("android.webkit.WebView").findOnce();
-				  var flag=true;
-				  while(flag && waitCount<15){
-				     waitCount++;
-					 flag=click("看视频得青豆");
-					 sleep(1000);
-				  }
-				  waitPlayAd();
-				  popWindowProcess();
-			      
-			   }
-			   else
-               app.dlog("点看视频得青豆失败");
-			  				   
-		  }	
-		  else{
-			  app.dlog("点立即签到OK");
-		  }
-		  */
-		  if(!commons.clickWebViewText("android.widget.FrameLayout","签到")){
-		      app.dlog("点签到失败，尝试点看视频得青豆");
-			   if(click("看视频得青豆")) 
-			   {
-		          app.dlog("等待看视频得青豆");
-			      //5秒判断是否进入了看青豆广告界面 	  
-				  waitCount=0;
-				  classN=className("android.webkit.WebView").findOnce();
-				  var flag=true;
-				  while(flag && waitCount<15){
-				     waitCount++;
-					 flag=click("看视频得青豆");
-					 sleep(1000);
-				  }
-				  waitPlayAd();
-				  popWindowProcess();
-			      
-			   }
-			   else
-               app.dlog("点看视频得青豆失败");
-			  				   
-		  }	
-		  else{
-			  app.dlog("点立即签到OK");
-		  }
-		  
-		  
-		}
-        else  app.dlog("没有进入android.webkit.WebView");   		
-		
-		//累计阅读60分钟:
-		award60Minutes();
-		
-		app.dlog("返回主页面");
-	    //返回主页面
-        //back();
-		//sleep(1000);
-        //back();
-        //sleep(1000);
-	   
+		commons.clickText("签到");	   
+		popWindowProcess();
+		app.dlog("返回我的");
+        back();
+		sleep(1000);
 		//回到新闻
+		
 		/*
-        var indexId=id("a0s").findOnce();
+	    var indexId=findIndex();
 		while(!indexId){
 		   back();
 		   sleep(1000);
 		   popWindowProcess();
-       	   indexId=id("a0s").findOnce();
-		}
-		if(indexId){
-		   app.dlog("有首页ID a0s");
-	       if(!indexId.click()){
-			 app.dlog("点击ID失败");
-			 if(!click("首页")){
-			    app.dlog("点击首页失败,再点刷新");
-				click("刷新"); 
-			 }
-	       }
-		   
-		}
-		else{
-			 app.dlog("没有首页ID a0s");
-	      
-		}
-		*/
-
-        var indexId=findIndex();
-		while(!indexId){
-		   back();
-		   sleep(1000);
-		   popWindowProcess();
-       	   indexId=findIndex();//id("a0s").findOnce();
+       	   indexId=findIndex();
 		}
 		if(indexId){
 		   app.dlog("有首页ID a0s");
@@ -196,6 +79,8 @@ templates.run({
 			 app.dlog("没有首页ID a0s");
 	      
 		}
+		*/
+		clickIndex();
 		
 	        
     },
@@ -213,53 +98,67 @@ templates.run({
     },	
 	findVideoItem:function(){
 		var videoItem=null;
-		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
-         //app.findNodeTest(rootNode,0,0);
+		var rootNode= className("android.widget.FrameLayout").findOnce();
+        /*
+		app.findNodeTest(rootNode,0,0);
 		if(app.compareVersion()>=0)
 		    videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,2);
-		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,2);
+		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,2);
 	    return videoItem;
-             		
+        */
+	    //app.findNodeTest(rootNode,0,0);
+		//videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","a25",0,0); //广告
+		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","a7r",0,0);
+		return videoItem;
+    	
     },
     getVideoTitle:function(videoItem){
-
         return videoItem.child(1).text();
 	},		
 	//跳到视频页面：
 	jumpToVideo:function(){
-	   var videoId  = id("a4f").findOnce();
-	   if(!videoId)return false;
-	   if(!videoId.click())
-	      return click("视频");
-	   return true;
+	   app.dlog("jumpToVideo"); 
+	   return  clickVideoIndex();
     },
+	
 
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
-		//检查是否有弹窗：
-         var adFlag= text("青豆奖励").findOnce();
-         if(adFlag){
-		    adFlag=adFlag.parent();
-		    adFlag=findParentOfImagView(adFlag);
-		    if(adFlag){
-		         adFlag.click();
-		    }
-		   
-		 }
-  	
-    },
+	    pushNewsPop();
+	},
 	
     //阅读页面是否应该返回
-    isShouldBack:function(){
-		commons.clickWebViewText("android.widget.FrameLayout","查看全文，奖励更多")
-		if(text("搜索").findOnce())return true; //带有搜索字样的页面，直接退出
-		//推送处理：
-        var viewText=text("查看详情").findOnce(); 
-        if(viewText){
-			click("立即查看"); 
+    isShouldBack:function(viewMode){
+		if(viewMode=="video")
+		{
+		   return false;	
 		}
+		commons.clickText("查看全文，奖励更多");
+       
+		if(text("搜索").findOnce())return true; //带有搜索字样的页面，直接退出
+		
+		commons.clickText("查看详情");
         return false;
     },
+	doTask1:function(){
+        gotoTask1();		
+	},
+	doTask2:function(){
+        gotoTask2();		
+	},
+	doTask3:function(){
+        gotoTask3();		
+	},
+    doTask4:function(){
+        gotoTask4();		
+	},
+	doTask5:function(){
+        gotoTask5();		
+	},
+	checkIsAppPage:function()
+	{
+		return isAppPage();  //如果是，不要back();
+	},
 	findIndexPage:function()
 	{
 		return findIndex();
@@ -268,45 +167,30 @@ templates.run({
 	{
 		return clickIndex();
 	},
+	//news  video：
+	findVideoIndexPage:function()
+	{
+		return findVideoIndex();
+	},
+	checkIsAppVideoPage:function()
+	{
+		return isAppVideoPage();  //如果是，不要back();
+	},
+	clickVideoIndexPage:function()
+	{
+		return clickVideoIndex();
+	},
+	
 	popWindow:function(){
 		
 		popWindowProcess();
 	},
 	
-	download:function(appName){
-		
-		var appPackage=app.getPackageName(appName);
-        if(!app.isAppInstalled(appPackage)){
-            toast(appName+"没有安装");
-            downloadProcess(appName);
-			return true;
-        }
-        else{
-           //toast("appName="+appName+"已经安装");
-		   return false;	
-        }		
+	download:function(){
+	    commons.yingyongbao(runAppName);	
 	}
 });
 
-function award60Minutes(){
-	
-	swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 2000);
-	sleep(1000);
-	swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 2000);
-	sleep(1000);
-    swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 2000);
-	sleep(1000);
-	swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 2000);
-	sleep(1000);
-	
-    if(!commons.clickWebViewText("android.widget.FrameLayout","立即阅读"))return;
-	
-	var waitCount=0;
-	while(commons.clickWebViewText("android.widget.FrameLayout","点击领取")&& waitCount<3){
-       waitCount++;
-	   sleep(1000);
-	}
-}
 
 
 function popWindowProcess()
@@ -327,173 +211,267 @@ function popWindowProcess()
             adFlag.click();
 		}
 		
-		adFlag= text("点我继续赚青豆").findOnce();
-		if(adFlag){
-		   if(!adFlag.click() && !click("点我继续赚青豆")){
-               commons.UIClick("jp");
-		   }  		   
-		}
-    	else
+		if(pushNewsPop())
 		{
-		  adFlag= text("青豆奖励").findOnce();
-          if(adFlag){
-		     adFlag=adFlag.parent();
-		     //var count = adFlag.childCount();
-		     //toast("青豆奖励:"+" child count="+count);
-		     //for(var i=0;i<count;i++)
-		     //{
-		 	  //  var classN= adFlag.child(i);
-              //  toast("className="+classN+" i="+i);  			  
-			     
-		     //}
-		   
-		     adFlag=findParentOfImagView(adFlag);
-		     if(adFlag){
-		       adFlag.click();
-		     }
-	   
-		  }
-     	}
-		
-		adFlag= text("查看详情").findOnce();
-        if(adFlag){
-		   if(!adFlag.click())
-               click("查看详情"); 			   
-		   
-		   waitPlayAd();
-		   back();
+   	       back();
            sleep(1000);
-		   
-		}
-		adFlag= desc("off").findOnce();
+		
+		}		
+		
+		
+		/*
+        adFlag= desc("off").findOnce();
         if(adFlag){
 		   adFlag.click();  
 		   sleep(1000);
 		   
 		}
-       
-	    adFlag= text("青豆奖励").findOnce();
-        if(!adFlag && id("jp").findOnce()){
-		   commons.UIClick("jp");  //x
+       */
+	    commons.clickText("off"); 
+	   	
+		
+		var clickFlag=id("jp").findOnce();
+		if(clickFlag)clickFlag.click();
+		
+		if(commons.text("青豆奖励")&&commons.text("点我继续领青豆")){
+		   if(commons.clickText("点我继续领青豆")){
+			  commons.waitPlayVideoAd("android.webkit.WebView","tt_video_ad_close_layout");
+			  sleep(2000);
+		   }
 		}
 		
+		if(commons.text("青豆奖励")&&commons.text("点我下载")){
+		    app.dlog("青豆奖励"+"& 点我下载");
+            
+			if(!commons.clickClassName("android.widget.ImageView")){ //id="kn";
+			   clickFlag=id("kn").findOnce();
+	 	       if(clickFlag)clickFlag.click();
+			}
+		}
+		else
+		{
+		    app.dlog("没有：青豆奖励"+"& 点我下载");
+           	
+			
+		}
+		if(commons.text("青豆奖励")
+		    && commons.text("查看详情"))
+		{
+		    app.dlog("青豆奖励"+"& 查看详情");
+            if(!commons.clickClassName("android.widget.ImageView")){;//pop  id="kn"
+			   clickFlag=id("kn").findOnce();
+	 	       if(clickFlag)clickFlag.click();
+			}
+		}
+		else
+		{
+            app.dlog("没有：青豆奖励"+"& 查看详情");
+           
+		}			
+		
+		commons.clickText("我知道了");
+		
+		commons.clickText("不感兴趣");
 	
 		
 }
 
-function findIndex(){
-	var indexW  = id(indexBtn).findOnce()||id(indexBtn1).findOnce();
-	var indexW1 = text(indexText).findOnce()||text(indexText1).findOnce();
-	if(indexW && indexW1)return true;
-	else return false;
+function jumpToTaskCenter()
+{
+	popWindowProcess();
+	app.dlog("jumpToTaskCenter......");
+	if(/*!commons.clickText("我的") 
+		&& */!commons.jumpToById(id("a4a").findOnce()||id("a7k").findOnce())){
+	    app.dlog("进入【我的】失败");
+		return;
+	}
+	
+	app.dlog("已进入【我的】");
+	sleep(1000);
+	popWindowProcess();
+    app.dlog("进入任务中心......");
+    if(!commons.clickText("任务中心")){
+		app.dlog("进入任务中心失败");
+	}
+	else
+    {
+	   app.dlog("进入任务中心成功");
+	   sleep(5000);
+    }
+	
 }
+
+
+function findIndex(){
+	var flag=false;
+    var indexBtNode    =id(indexBtn).findOnce();
+	var indexBtn1Node  =id(indexBtn1).findOnce();
+    var indexTextNode  =text(indexText).findOnce();
+	var indexText1Node =text(indexText1).findOnce();
+	if((indexBtNode || indexBtn1Node || text("首页").findOnce()|| text("刷新").findOnce())
+		&& (indexTextNode||indexText1Node))flag=true;
+	else flag=false;
+    return flag;
+}
+
+function isAppPage(){
+    var flag=false;
+    var indexBtNode    =id(indexBtn).findOnce();
+	var indexBtn1Node  =id(indexBtn1).findOnce();
+	if(indexBtNode || indexBtn1Node) flag=true;
+    return flag;
+}
+
 
 function clickIndex(){
 	var flag=false;
-	var clickW=id(indexBtn).findOnce()||id(indexBtn1).findOnce();
-    if(clickW)
-	{  
-       flag=clickW.click();
-	   if(!flag && indexBtn)
-		  flag=click(indexBtn);	
-	   if(!flag && indexBtn1)
-		  flag=click(indexBtn1);	
-	   
-	}
-    return flag;	
+	if(commons.idClick(indexBtn) || commons.idClick(indexBtn1))return true 
+	else return false;
+}
+
+function findVideoIndex(){
+	var flag=false;
+    var indexBtNode    =id("a7p").findOnce();
+	var indexBtn1Node  =id("a4f").findOnce();
+    var indexTextNode  =text("搞笑").findOnce();
+	var indexText1Node =text("广场舞").findOnce();
+	if((indexBtNode || indexBtn1Node || text("视频").findOnce())
+		&& (indexTextNode||indexText1Node))flag=true;
+	else flag=false;
+    return flag;
+}
+
+function isAppVideoPage(){
+    var flag=false;
+    var indexBtNode    =id("a7p").findOnce()||id("a4f").findOnce();
+	var indexBtn1Node  =id("a4f").findOnce();
+	if(indexBtNode || indexBtn1Node || text("视频").findOnce())flag=true;
+	else flag=false;
+    return flag;
 }
 
 
-
-function ucMobile(){
-    var currentPkgName=currentPackage();
-    if(currentPkgName=="com.UCMobile")
-    {
-	   app.dlog("处理打开的："+currentPkgName);
-       while(currentPkgName=="com.UCMobile")
-	   {
-		   var  exitText =  text("退出").findOnce();
-           if(exitText){
-		        if(!exitText.click())click("退出");
-		   }
-           else
-		   {
-			     back();
-                 sleep(1000);
-		   }
-		   currentPkgName=currentPackage();
-	    }		   
-	}	
+function clickVideoIndex(){
+    if(!commons.clickText("视频") 
+	    && !commons.jumpToById(id("a7p").findOnce()||id("a4f").findOnce()))return false;
+	else  return true;
 	
 }
 
-
-function  backToIndex()
+function isLogin()
 {
-    /*
-	var currentPkgName=currentPackage();
-    if(currentPkgName=="com.UCMobile")
-	{
-	     toast("处理打开的："+currentPkgName);
-         var  exitText =  text("退出").findOnce();
-         if(exitText)exitText.click();
-         else
-		 {
-			back();
-            sleep(1000);
-		 }		   
-	}
-    */
-	ucMobile();
-    popWindowProcess();
-     	
-	if(!findIndex())
-	{
-	   //toast("发现webview界面，回退");
-       back();
-       sleep(1000);  	
-	}
-	
+   var flag=commons.text("未登录");
+   app.dlog("isLogin()="+!flag);
+   return !flag;	
 }
 
-function waitPlayAd()
+function loginDone()
 {   
-    app.dlog("检测是否广告界面");
- 	var waitCount = 0;
-	var  currentClass=className("android.webkit.WebView").findOnce();
-	while(!currentClass  && waitCount<30)
+	if(!commons.clickText("未登录"))return;
+    commons.waitText("登录领红包",0);
+	if(!commons.clickText("登录领红包"))
 	{
-		waitCount++; 
-		currentClass=className("android.webkit.WebView").findOnce(); 
-		sleep(1000);
+	   exit();
+	   return;
 	}
-	app.dlog("是广告界面");
- 	
-	waitCount = 0;
-	while(currentClass  && waitCount<30)
-    {
-	    waitCount++; 
-		var adClose = id("tt_video_ad_close").findOnce();
-		if(adClose)
-		{
-		   adClose.click();
-		   break;
+	//app.findNodeTest(className("android.widget.FrameLayout").findOnce(),0,0);
+	commons.waitText("微信一键登录",0);
+	if(!commons.clickText("微信一键登录")){
+	   exit();
+       return;	   
+	}
+    wechatLogin(); 	
+   
+}
+
+function wechatLogin(){
+	app.dlog("wechatLogin()......");
+	/*
+	commons.waitText("同意",0);
+	if(!commons.clickText("同意")){
+	   exit();
+       return;	   
+	}
+	*/
+}
+
+function  fillInviteCode(inviteCode)
+{
+	if(!inviteCode)return;
+	app.dlog("fillInviteCode：inviteCode="+inviteCode);
+	
+	
+
+}
+
+function gotoTask1(){
+   app.dlog("做任务1...");  
+   jumpToTaskCenter();
+   if(!commons.text("任务中心")){
+       app.dlog("做任务1，不在任务中心，返回");  
+       back();
+       clickIndex();
+	   return;	  
+   }
+   var rootNode=className("android.widget.FrameLayout").findOnce();
+   var coinItem =app.findNodeByText(rootNode,"看视频领青豆");
+   if(coinItem && !commons.text("剩0次"))
+   {
+	  app.dlog("做任务1，进入了【看视频领青豆】");  
+      for(var i=5;i>0;i--){
+        if(commons.clickText("剩"+i+"次")){
+		   commons.waitPlayVideoAd("android.webkit.WebView","tt_video_close"); 
+           popWindowProcess(); 		   
 		}
-		currentClass=className("android.webkit.WebView").findOnce(); 
-		sleep(1000);
-		
-	}
-	app.dlog("退出广告");
+		else
+		{
+		   sleep(2000);
+		   popWindowProcess(); 		   
+		}
+	       	
+      }	
+      
+   }
+   else
+      app.dlog("做任务1，无【看视频领青豆】任务");  
+    	   
+   back();
+   clickIndex();
+   app.dlog("退出做任务1");  
+}
+
+
+function gotoTask2(){
+   app.dlog("做任务2...");  
+}
+
+function gotoTask3(){
+   app.dlog("做任务3...");  
+	
+}
+function gotoTask4(){
+   app.dlog("做任务4...");  
+	
+}
+function gotoTask5(){
+   app.dlog("做任务5...");  
 	
 }
 
 
 
-function downloadProcess(appName)
-{  
-	commons.yingyongbao(appName);
-    
+
+//新闻弹窗处理：
+function pushNewsPop(){
+	app.dlog("要文推荐 弹窗");
+	if(commons.text("要文推荐") && commons.text("要文推荐")){
+	    if(!commons.clickText("查看详情"))return false;
+		commons.waitPlayVideoAd("android.webkit.WebView","tt_video_ad_close");
+	    return true
+	}
+	return false;	   
 }
+
 
 function findParentOfImagView(node)
 {

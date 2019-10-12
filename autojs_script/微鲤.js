@@ -21,92 +21,127 @@ templates.init({
 
 
 templates.run({
-    //获取首页按钮
-    getIndexBtnItem:function(){
-        return id("rl_bottom_1").findOnce();
-    },
+    checkLogin:function(){
+        return isLogin(); 
+	},   
+    login:function(){
+        app.dlog("login......");
+        var inviteCode  =  app.getPrefString(runAppName+"_inviteCode"); 
+        app.dlog("inviteCode="+inviteCode);
+        if(!inviteCode){
+           if(!confirm("请问朋友要邀请码，再点【确定】"))
+		   {
+              exit();
+		   }
+		   inviteCode = rawInput("请输入邀请码");
+		   if(inviteCode =="")
+		   {
+			  app.dlog("输入的邀请码为空");
+			  exit(); 
+		   }
+		   app.dlog("输入的邀请码="+inviteCode);
+		   app.setPrefString(runAppName+"_inviteCode",inviteCode);
+		  
+		}
+	    loginDone();
+	    fillInviteCode(inviteCode);
+	    app.dlog("登陆完成");
 
+	},
     //签到  //cn.weli.story:id/iv_group_redPacket  ==要发红包的id
     signIn:function(){
-        
-		app.dlog("签到");
+   	    app.dlog("签到");
 		if(!commons.idClick("rl_bottom_4"))
 		{
            app.dlog("点我的失败");
 		   getGroupRedPackage();
+		   clickIndex();
 		   return;
 		}			
         if(!commons.idClick("ll_not_sign"))//签到
 		{
            app.dlog("点签到失败");
+		   if(commons.clickTextNoTimeOut("领取时段奖励"))
+		   {
+		       back();
+			   sleep(1000);
+		   }
 		   getGroupRedPackage();
+		   clickIndex();
 		   return;
 		}
-        var waitCount = 0;
-		var classN=className("android.webkit.WebView").findOnce();
-        while(!classN && waitCount<15){
-           waitCount++;
-		   classN=className("android.webkit.WebView").findOnce();
-		   sleep(1000);
-		}			
         
-		app.dlog("签到界面waitCount="+waitCount);
-	    sleep(5000);
-		if(classN){
-           app.dlog("点立即签到");
-		   var flag=commons.clickWebViewElement("android.widget.FrameLayout","android.widget.Button","立即签到")
-   	       //desc("立即签到").findOnce();//click("立即签到");
-		   if(flag){
-			  app.dlog("立即签到id=true");
-		   }
-		   else
-			  app.dlog("立即签到id=false");
-			   
-		}
-	   
-        back();
+	    if(!commons.clickTextNoTimeOut("立即签到"))
+		   commons.clickTextNoTimeOut("领取时段奖励");
+	    
+		
+		
+		back();
      	sleep(1000);
-        //commons.idClick("rl_bottom_1");
+
 		
 		//领红包：
 		getGroupRedPackage();
 		
-		commons.idClick("rl_bottom_1");
+		clickIndex();
 		
     },
     //找出新闻的条目
     findNewsItem:function(){
         //领取宝藏
-        commons.UIClick("text_ok");
-        commons.UIClick("bt_ok");
-		app.dlog("找出新闻条目");
+        app.dlog("找出新闻条目......");
 		var newsItem =null;
-   	    var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
-	    //app.findNodeTest(rootNode,0,0);
-		if(app.compareVersion()>=0)
-		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
-		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,3);
+   	    var rootNode = className("android.support.v4.view.ViewPager").findOnce();
+	    app.findNodeTest(rootNode,0,0);
+		newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
+		if(newsItem){
+		   for(var i=0;i<newsItem.childCount();i++){ 
+               var childNode= newsItem.child(i);
+               if(!childNode)continue;
+               var childText=childNode.text();
+               var childId= childNode.id();
+               app.dlog("text="+childText+" childId="+childId);    			   
+		   }			   
+			
+		}
+		
 		return newsItem;
 
 	
 		
     },
-	
+	/*
+	getNewsTitle:function(newsItem){
+
+        return newsItem.child(1).text();
+	},
+	*/
 	findVideoItem:function(){
 		var videoItem=null;
-		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
-        app.findNodeTest(rootNode,0,0);
-		if(app.compareVersion()>=0)
-		    videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,2);
-		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,2);
-	    return videoItem;
-             		
+		var rootNode= className("android.widget.FrameLayout").findOnce();
+        //app.findNodeTest(rootNode,0,0);
+		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_title",0,0);
+		return videoItem;
+    	
+		     		
     },
 	
 	getVideoTitle:function(videoItem){
 
         return videoItem.child(2).text();
 	},		
+
+	//跳到视频页面：
+	jumpToVideo:function(){
+	   /*
+	   var videoId  = id("rl_bottom_2").findOnce();
+	   if(!videoId)return false;
+	   if(!videoId.click())
+	      return click("视频");
+	   return true;
+	   */
+	   return clickVideoIndex();
+    },
 
     //时段奖励之后执行
     doingAfterTimeAward:function(){
@@ -121,17 +156,12 @@ templates.run({
 		*/
     },
 	
-	//跳到视频页面：
-	jumpToVideo:function(){
-	   var videoId  = id("rl_bottom_2").findOnce();
-	   if(!videoId)return false;
-	   if(!videoId.click())
-	      return click("视频");
-	   return true;
-    },
     //阅读页面是否应该返回
-    isShouldBack:function(){
-	  
+    isShouldBack:function(viewMode){
+		if(viewMode=="video"){
+		   return false;		
+		}
+		
 		
 	    //领取宝藏
         commons.UIClick("text_ok");
@@ -139,13 +169,22 @@ templates.run({
 		commons.UIClick("bt_ok");      //如阅读奖励提醒，点知道了
 	    
 		//阅读中
-		click("展开查看全文");
-		//commons.clickWebViewText("android.widget.FrameLayout","展开查看全文")
+	    commons.clickTextNoTimeOut("展开查看全文");
 	
-		
+     	if(currentPackage()==="com.android.packageinstaller" 
+		   && commons.clickTextNoTimeOut("取消")){
+            return  true;
+    	}
 		
         return false;
     },
+	
+	checkIsAppPage:function()
+	{
+		return isAppPage();  //如果是，不要back();
+	},
+
+	
     findIndexPage:function()
 	{
 		return findIndex();
@@ -154,52 +193,54 @@ templates.run({
 	{
 		return clickIndex();
 	},
+    
+	checkIsAppVideoPage:function()
+	{
+		return isAppVideoPage();  //如果是，不要back();
+	},
 
+	
+    findVideoIndexPage:function()
+	{
+		return findVideoIndex();
+	},
+	clickVideoIndexPage:function()
+	{
+		return clickVideoIndex();
+	},
 	
 	popWindow:function(){
 	    popWindowProcess();
 	
 	  
     },
-	waitRefresh:function(){
-       var waitCount=0;
-       while(waitCount<10)
-	   {
-	 	   waitCount++;
-		   if(text("刷新中").findOnce())break;
-		   sleep(1000);
-	   }
-	   var textRef=text("刷新中").findOnce();
-	   waitCount=0;
-	   while(textRef && waitCount<10)
-	   {
-	       waitCount++;
-		   textRef=text("刷新中").findOnce();
-		   sleep(1000);
-	   }
-	    app.dlog("刷新中退出waitCount="+waitCount);
-	  
-    },
-	download:function(appName){
-		
-		var appPackage=app.getPackageName(appName);
-        if(!app.isAppInstalled(appPackage)){
-            toast(appName+"没有安装");
-            downloadProcess(appName);
-			return true;
-        }
-        else{
-           //toast("appName="+appName+"已经安装");
-		   return false;	
-        }		
+	
+	download:function(){
+		commons.yingyongbao(runAppName);
 	}
 });
 
 function findIndex(){
-	var indexW  = id("rl_bottom_1").findOnce();
-	var indexW1 = text(indexBtn).findOnce()||text(indexBtn1).findOnce()||text(indexText).findOnce()||text(indexText1).findOnce();
-	return indexW && indexW1;
+	var flag=false;
+    var indexBtNode    =id("rl_bottom_1").findOnce();
+	var indexBtn1Node  =null;
+    var indexTextNode  =text(indexText).findOnce();
+	var indexText1Node =text(indexText1).findOnce();
+	if((indexBtNode || indexBtn1Node) && (indexTextNode||indexText1Node))flag=true;
+	else flag=false;
+    return flag;
 }
+
+function isAppPage(){
+    var flag=false;
+    var indexBtNode    =id("rl_bottom_1").findOnce();
+	var indexBtn1Node  =null;
+	if(indexBtNode || indexBtn1Node)flag=true;
+	else flag=false;
+    return flag;
+   
+}
+
 
 function clickIndex(){
 	var flag=false;
@@ -213,15 +254,74 @@ function clickIndex(){
 		  flag=click(indexBtn1);	
 	   
 	}
+	if(flag)sleep(3000);
     return flag;	
 }
+
+function findVideoIndex(){
+	var flag=false;
+    var indexBtNode    =id("rl_bottom_2").findOnce();
+	var indexBtn1Node  =null;
+    var indexTextNode  =text("广场舞").findOnce();
+	var indexText1Node =text("小品").findOnce();
+	if((indexBtNode || indexBtn1Node) && (indexTextNode||indexText1Node))flag=true;
+	else flag=false;
+    return flag;
+}
+
+function isAppVideoPage(){
+    var flag=false;
+    var indexBtNode    =id("rl_bottom_1").findOnce();
+	var indexBtn1Node  =null;
+	if(indexBtNode || indexBtn1Node)flag=true;
+	else flag=false;
+    return flag;
+   
+}
+
+
+function clickVideoIndex(){
+	/*
+	var flag=false;
+	var clickW=id("rl_bottom_2").findOnce();
+    if(clickW)
+	{  
+       flag=clickW.click();
+	   if(!flag && indexBtn)
+		  flag=click(indexBtn);	
+	   if(!flag && indexBtn1)
+		  flag=click(indexBtn1);	
+	   
+	}
+    return flag;
+   */
+   var flag=commons.idClick("rl_bottom_2");
+   if(flag)sleep(3000);
+   return flag;
+  
+}
+
+
+function findChatIndex()
+{
+	var flag=false;
+    var indexBtNode    =id("rl_bottom_0").findOnce();
+	var indexBtn1Node  =null;
+    var indexTextNode  =text("聊一聊").findOnce();
+	var indexText1Node =null;
+	if((indexBtNode || indexBtn1Node) && (indexTextNode||indexText1Node))flag=true;
+	else flag=false;
+    return flag;
+	
+}
+
 
 
 function  findTextItem(textContent)
 {
 	var rootNode = className("android.widget.FrameLayout").findOnce();
 	//app.findNodeTest(rootNode,0,0);
- 	var resultItem =app.findNodeByClassByText(rootNode,"android.widget.TextView",textContent,0,0,-1);
+ 	var resultItem =app.findNodeByClassByText(rootNode,"android.widget.TextView",textContent,0);
    	return  resultItem;
 }
 
@@ -231,14 +331,23 @@ function getGroupRedPackage()
        app.dlog("点聊一聊界面成功");
 	   getOneGroup();
 	   getOneRedPack();
+	   publishRedPackage();
 	   backToChat();
 	}
 }
 
 function publishRedPackage()
 {
-	
-	
+	app.dlog("发红包检查...");
+	var idF=id("iv_group_redPacket").findOnce();
+	if(idF  && idF.click()){
+	    app.dlog("发红包成功");
+		sleep(3000);
+		getOneRedPack();
+	}
+	else{
+		app.dlog("发红包失败");
+	}	
 }
 
 
@@ -258,7 +367,7 @@ function  getOneGroup(){
     app.dlog("上滑找群...");
 	var isFindGroup = false;//是否找到群
     var groupTitle = "";//群名称
-    var groupItem;    //群条目
+    var groupItem=null;    //群条目
     var loopTimeToFind = 0;//循环次数
 	var lastGroupTitle=null;
     while((!isFindGroup || lastGroupTitle === groupTitle)  
@@ -492,65 +601,20 @@ function  getOneRedPack(){
 
 function backToChat(){
 	
-    back();
-	sleep(1000);
-	back();
-	sleep(5000);
-			
-	
-}
-
-function ucMobile(){
-    var currentPkgName=currentPackage();
-    if(currentPkgName=="com.UCMobile")
-    {
-	   app.dlog("处理打开的："+currentPkgName);
-       while(currentPkgName=="com.UCMobile")
-	   {
-		   var  exitText =  text("退出").findOnce();
-           if(exitText){
-		        if(!exitText.click())click("退出");
-		   }
-           else
-		   {
-			     back();
-                 sleep(1000);
-		   }
-		   currentPkgName=currentPackage();
-	    }		   
-	}	
-	
-}
-
-
-function  backToIndex()
-{
-    /*
-	var currentPkgName=currentPackage();
-    if(currentPkgName=="com.UCMobile")
-	{
-	     toast("处理打开的："+currentPkgName);
-         var  exitText =  text("退出").findOnce();
-         if(exitText)exitText.click();
-         else
-		 {
-			back();
-            sleep(1000);
-		 }		   
+	var waitCount=0;
+	var chatIndex=findChatIndex();
+	while(!chatIndex && waitCount<5){
+       waitCount++;
+	   chatIndex=findChatIndex();
+	   if(!chatIndex){
+	      back();
+	      sleep(1000);
+	   }
 	}
-    */
-	ucMobile();
-	popWindowProcess();
-     
-	
-	if(!findIndex())
-	{
-	   //toast("发现webview界面，回退");
-       back();
-       sleep(1000);  	
-	}
-	
 }
+
+
+
 
 function popWindowProcess()
 {
@@ -559,98 +623,94 @@ function popWindowProcess()
         back();
         sleep(500);
     }
+	if(commons.text("试试免费发")){
+	    back();
+        sleep(500);
+    }
+	if(commons.text("马上升级")){
+	    back();
+        sleep(500);
+    }
+	if(commons.text("继续阅读")){
+	    back();
+        sleep(500);
+    }
 }
 
-function  waitAppSuccess()
+
+function isLogin()
 {
-	  toast("登陆:等待启动......");
-	  var waitCount=0;
-	  var waitFlag=true;
-	  while(waitFlag  && waitCount<20){
-	     waitCount++;
-  		 if(findIndex())
-	     {
-			waitFlag=false;
-			break;
-			
-	     }
-		 var uiele = text("允许").findOnce();
-         if(uiele){
-            uiele.click();
-            sleep(2000);
-         }
-         uiele = text("始终允许").findOnce();
-         if(uiele){
-            uiele.click();
-            sleep(2000);
-         }
-		 //再次检查是否到首页
-		 if(findIndex())
-	     {
-			waitFlag=false;
-	     }
-		 else
-		 {
-	        back();   //条件是当前运行的是自己
-			sleep(1000);
-		 
-		 }
-	  }	
-	  toast("登陆：app 启动成功");
+	var myBtn = id("rl_bottom_4").findOnce();//我的
+	var flag=false;
+	if(myBtn){
+		 flag=myBtn.click();
+	}
+    if(!flag){
+	  exit();
+	  return; 
+	}
+	//app.findNodeTest(className("android.widget.FrameLayout").findOnce(),0,0);
+	sleep(2000);
+	flag=commons.text("立即赚钱");
+	app.dlog("isLogin()="+flag);
+	return !flag;	
 }
 
-function loginDone(){
+
+function loginDone()
+{
 	 var myBtn = id("rl_bottom_4").findOnce();//我的
-	  if(myBtn){
-		 myBtn.click();
-	     sleep(2000);
-	  }
-     
-	  toast("登陆领红包");       	  
-	  var loginBtn=loginBtn=id("et_login").findOnce();//("立即赚钱").findOnce();
-	  if(loginBtn)
-	  {
-		 loginBtn.click();
-		 sleep(2000);
-	  } 	 
-      wechatLogin();
+	 var flag=false;
+	 if(myBtn){
+		 flag=myBtn.click();
+	 }
+     if(!flag){
+		exit();
+		return; 
+	 }
+	 commons.waitText("立即赚钱",0);
+	 if(!commons.clickText("立即赚钱"))
+	 {
+        exit();
+        return;		
+	 }		 
+	 
+	 /* 	 
+     commons.waitText("微信一键登录",0);
+	 if(!commons.clickText("微信一键登录"))
+	 {
+        exit();
+        return;		
+	 }
+	 */
+	 var weLogin = id("login_0").findOnce();//text("微信一键登陆").findOnce();
+	 if(!weLogin){
+		exit(); 
+		return;
+	 }
+	 if(!weLogin.click())
+	 {
+		exit(); 
+		return;
+	 }
+	 
+	 wechatLogin();
 	  
 	
 }
 
 function wechatLogin(){
-	 //微信一键登陆：
-	 var wechatLogin = id("login_0").findOnce();//text("微信一键登陆").findOnce();
-	 if(!wechatLogin)return;
-	 wechatLogin.click();
-	 sleep(2000); 
-	 var currentClass=className("android.widget.ScrollView").findOnce();
-	 var waitCount = 0;
-	 while(!currentClass  && waitCount<20)
+	 commons.waitText("同意",1);
+	 if(!commons.clickText("同意"))
 	 {
-		waitCount++; 
-		currentClass=className("android.widget.ScrollView").findOnce(); 
-		sleep(1000);
+        exit();
+        return;		
 	 }
-		 
-	 var agreeBtn  =  text("同意").findOnce();
-	 if(!agreeBtn)agreeBtn=id("eb8").findOnce();
-	 if(agreeBtn)agreeBtn.click();
-		 
-	 waitCount = 0;		
-     while(currentClass && waitCount<30)
-	 {
-		 waitCount++; 
-		 currentClass=className("android.widget.ScrollView").findOnce(); 
-		 sleep(1000);
-	 }
-	 toast("登陆退出,waitCount="+waitCount);
 }
 
 
 function  fillInviteCode(inviteCode)
 {
-	
 	  if(!inviteCode)return;
 	  //填邀请码：
 	  var inviteBtn = id("et_input").findOnce();//输入邀请码
@@ -671,8 +731,3 @@ function  fillInviteCode(inviteCode)
 }	
 	  
 
-
-function downloadProcess(appName)
-{  
-	commons.yingyongbao(appName);	
-}

@@ -19,9 +19,15 @@ init();
 //shell("shell am instrument -w -r   -e debug false -e class 'com.breadwallet.uiautomator.AutoJsTests' com.pensionwallet.test/android.support.test.runner.AndroidJUnitRunner",true);
 
 function init(){
-    storages.remove("version");
+    toast("初始化......");
+	storages.remove("version");
 	var path=files.getSdcardPath()+"/脚本/";
-    var configPath=path+"仓库/"+"config.json";	
+    var configPath=path+"仓库/"+"config.json";
+    var config    = null;
+    var readNum    = 0;
+    var scriptName=null;	
+	var resourceList = null;
+	var currPath   = null;
 	var templatePath=path+"template.js";
 	var commonPath=path+"common.js";
 	var configVersionRemote = getRemoteConfigVersion();
@@ -38,7 +44,7 @@ function init(){
         appNum = newsList.length;
 		for(var i = 0;i< appNum;i++){
             scriptName=newsList[i].name;
-            var currPath=path+scriptName+".js";
+            currPath=path+scriptName+".js";
             if(files.exists(currPath))
 			   files.remove(currPath);
 	    }
@@ -47,10 +53,20 @@ function init(){
 	    appNum = videoList.length;
         for(var i = 0;i< appNum;i++){
             scriptName=videoList[i].name;
-            var currPath=path+scriptName+".js";
+            currPath=path+scriptName+".js";
             if(files.exists(currPath))
 		       files.remove(currPath);
         }
+		//删除资源类的列表
+        resourceList = config.resourceList;
+	    readNum = resourceList.length;
+        for(var i = 0;i< readNum;i++){
+            scriptName=resourceList[i].name;
+            currPath=path+scriptName+".js";
+            if(files.exists(currPath))
+		       files.remove(currPath);
+        }
+	
 	    if(files.exists(configPath))
 		  files.remove(configPath);	   
 	    if(files.exists(templatePath))
@@ -67,16 +83,16 @@ function init(){
 	   downlaodScript("common");
 	}
    
-    var config = getConfig();
-    var appNum = 0;
-    var scriptName=null;
+    config = getConfig();
+    appNum = 0;
+    scriptName=null;
         
 	//新闻类的列表
     var newsList = config.newsAppList;
     appNum = newsList.length;
     for(var i = 0;i< appNum;i++){
         scriptName=newsList[i].name;
-        var currPath=path+scriptName+".js";
+        currPath=path+scriptName+".js";
         if(!files.exists(currPath))
 			downlaodScript(scriptName);
 	}
@@ -85,57 +101,107 @@ function init(){
 	appNum = videoList.length;
     for(var i = 0;i< appNum;i++){
         scriptName=videoList[i].name;
-        var currPath=path+scriptName+".js";
+        currPath=path+scriptName+".js";
         if(!files.exists(currPath))
 		   downlaodScript(scriptName);
 	
     }  
-   
+	//资源类的列表
+    resourceList = config.resourceList;
+    readNum = resourceList.length;
+    for(var i = 0;i< readNum;i++){
+        scriptName=resourceList[i].name;
+        currPath=path+scriptName+".js";
+        if(!files.exists(currPath))
+			downlaodScript(scriptName);
+	}
+	
+	app.dlog("初始化完成，执行脚本");
+    app.dlog("wechat_read="+app.getPrefString("wechat_read"));
 	//每次阅读的时间
     var normalRumTime = 0.25*60*60;
-    
+    var supperMarket = 0;
 	while(true){
-       
-		
         /**
          * 0-7点阅读视频
          * 其他时间阅读新闻
          */
         if(new Date().getHours() >= 7){
-            appNum = newsList.length;
+          if("yes"  != app.getPrefString("wechat_read"))
+          {
+          			  
+			appNum = newsList.length;
         	//appNum = 1;
             for(var i = 0;i< appNum;i++){
                 scriptName=newsList[i].name;
-                var currPath=path+scriptName+".js";
+                currPath=path+scriptName+".js";
 			    if(files.exists(currPath) && app.getPackageName(scriptName))
 			       exec(scriptName,normalRumTime);
-			   
-			    
+			    supperMarket++;
+				if(supperMarket>=2)
+				{  
+			       supperMarket=0;
+				   currPath=path+"超级淘"+".js";
+                   if(files.exists(currPath) && app.getPackageName("超级淘"))
+			           exec("超级淘",120);
+			    }
             }
-			
+	        		
 			appNum = videoList.length;
             for(var i = 0;i< appNum;i++){
                 scriptName=videoList[i].name;
-                var currPath=path+scriptName+".js";
+                currPath=path+scriptName+".js";
             	if(files.exists(currPath) 
 					&& (app.getPackageName(scriptName)||app.getPackageName(scriptName+"短视频")))
 		           exec(scriptName,normalRumTime);
 				   
             }
-			sleep(5000);
+	  	  }
+		  else{
+			appNum = resourceList.length;
+			for(var i = 0;i< appNum;i++)
+	        {
+		       //i=1;
+               scriptName=resourceList[i].name;
+		       currPath=path+scriptName+".js";
+		       app.dlog("阅读：i="+i+" scriptName="+scriptName);
+	           if(files.exists(currPath)){
+	               exec(scriptName,normalRumTime);			
+		       }
+            }
+		  }
+		  sleep(5000);
         }else{
+		  if("yes" != app.getPrefString("wechat_read"))
+          {
+          	
 			appNum = videoList.length;
             for(var i = 0;i< appNum;i++){
                 scriptName=videoList[i].name;
-                var currPath=path+scriptName+".js";
+                currPath=path+scriptName+".js";
                 if(files.exists(currPath) 
 					&& (app.getPackageName(scriptName)||app.getPackageName(scriptName+"短视频")))
 		          exec(scriptName,normalRumTime);
 
             }
-	        sleep(5000);
-             
+		  }
+		  else{
+            appNum = resourceList.length;
+			for(var i = 0;i< appNum;i++)
+	        {
+		       //i=1;
+               scriptName=resourceList[i].name;
+		       currPath=path+scriptName+".js";
+		       app.dlog("阅读：i="+i+" scriptName="+scriptName);
+	           if(files.exists(currPath)){
+	               exec(scriptName,normalRumTime);			
+		       }
+            }
+		  }			
+	      sleep(5000);
         }
+		
+		
     }
 }
 
@@ -175,7 +241,7 @@ function exec(scriptName,seconds){
 
 //停止当前脚本
 function stopCurrent(exectuion){
-    toast("执行停止");
+    //toast("执行停止");
     exectuion.getEngine().forceStop();
     sleep(2000);	
 	back();
@@ -229,7 +295,7 @@ function updateScript(scriptName){
     toast("检测脚本更新");
     var storage = storages.create("version");
     var scriptVersion = storage.get(scriptName);
-
+          
     var config = getConfig();
     var newsAppList = config.newsAppList;
     for(var i = 0; i< newsAppList.length;i++){
@@ -262,7 +328,7 @@ function updateScript(scriptName){
 }
 
 function downlaodScript(scriptName){
-   //toast(scriptName+".js下载中");
+   toast(scriptName+".js下载中");
    var path = "/sdcard/脚本/"+scriptName+".js";
    var scriptContent =null;
    if(script_url){
@@ -273,13 +339,19 @@ function downlaodScript(scriptName){
 	  scriptContent = app.mailGet(emailAddr,imapPasswaord,scriptName);
    } 
    if(null == scriptContent)return false;
-   
+   app.dlog("downlaodScript:scriptContent="+scriptContent);
+   if(scriptContent.indexOf("404: Not Found")>=0)
+   {
+	    toast(scriptName+".js不存在，退出下载");
+        return false;	 
+   }
    if(!files.exists(path)){
 	 files.create(path);  
    }
 		     
    var b=files.write(path,scriptContent);
-   //toast(scriptName+".js下载完成");
+   toast(scriptName+".js下载完成");
+   return true;
 
 }
 

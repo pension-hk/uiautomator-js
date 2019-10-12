@@ -3,8 +3,8 @@ const templates  = require('template.js');
 const runAppName ="想看"; 
 const runPkg      ="com.xiangkan.android";
 const indexBtn    ="首页"
-const indexBtn1    =null
-const indexText   ="深圳"||"热点";
+const indexBtn1    ="刷新"
+const indexText   ="热点";
 const indexText1  ="情感";
 
 
@@ -20,23 +20,50 @@ templates.init({
 });
 
 templates.run({
-    
+ 	checkLogin:function(){
+        return isLogin(); 
+	},   
+    login:function(){
+        app.dlog("login......");
+        var inviteCode  =  app.getPrefString(runAppName+"_inviteCode"); 
+        app.dlog("inviteCode="+inviteCode);
+        if(!inviteCode){
+           if(!confirm("请问朋友要邀请码，再点【确定】"))
+		   {
+              exit();
+		   }
+		   inviteCode = rawInput("请输入邀请码");
+		   if(inviteCode =="")
+		   {
+			  app.dlog("输入的邀请码为空");
+			  exit(); 
+		   }
+		   app.dlog("输入的邀请码="+inviteCode);
+		   app.setPrefString(runAppName+"_inviteCode",inviteCode);
+		  
+		}
+	    loginDone();
+	    fillInviteCode(inviteCode);
+	    app.dlog("登陆完成");
+
+	},
     //签到
     signIn:function(){
-   	    var signText= text("签到").findOnce();
+   	    
+		commons.clickText("签到");
+		popWindowProcess();
+		sleep(1000);
+    
+		/*
+		var signText= text("签到").findOnce();
 	    if(signText)signText=signText.parent();
         if(signText){
             if(!signText.click())click("签到"); 
             popWindowProcess();
             sleep(1000);			
-        }			
+        }
+        */		
 
-            
- 	    //回到新闻
-     	//var textW=text("首页").findOnce(); 
-        //if(textW)textW=textW.parent(); 
- 		//if(textW)textW.click();
-        
     },
     //找出新闻的条目
     findNewsItem:function(){
@@ -46,7 +73,6 @@ templates.run({
 		newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tvTitle",0,0);
 		if(!newsItem)newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_text_image_title",0,0);
 		if(!newsItem)newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_sub_title",0,0);
-		//sleep(5000);	
 		return newsItem;
 		
     },
@@ -54,29 +80,26 @@ templates.run({
 
         return newsItem.child(0).text();
 	},
-	/*
+	
 	findVideoItem:function(){
 		var videoItem=null;
-		var rootNode= className("android.support.v7.widget.RecyclerView").findOnce();
-        app.findNodeTest(rootNode,0,0);
-		if(app.compareVersion()>=0)
-		    videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,2);
-		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,2);
-	    return videoItem;
-             		
+	    var rootNode= className("android.widget.FrameLayout").findOnce();
+        //app.findNodeTest(rootNode,0,0);
+		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","video_item_title",0,0);
+		return videoItem;
     },
-	*/
+	
     getVideoTitle:function(videoItem){
 
-        return videoItem.child(3).text();
+        return videoItem.child(2).text();
 	},
 	//跳到视频页面：
 	jumpToVideo:function(){
-	   var videoId  = text("视频").findOnce();
-	   if(!videoId)return false;
-	   if(!videoId.click())
-	      return click("视频");
-	   return true;
+	   if(clickVideoIndex()){
+		   sleep(3000);
+		   return true;
+	   }
+	   return false;
 	 
 	 	   
     },
@@ -92,8 +115,12 @@ templates.run({
 	},
   
     //阅读页面是否应该返回
-    isShouldBack:function(){
-		click("点击阅读全文");  
+    isShouldBack:function(viewMode){
+		if(viewMode=="video"){
+	       
+		   return false;		
+		}
+		commons.clickText("点击阅读全文");  
 		var meKnow  =  text("我知道了").findOnce();
 	    if(meKnow)meKnow.click();
 	    return false;
@@ -102,15 +129,35 @@ templates.run({
 	{
 		return findIndex();
 	},
+	checkIsAppPage:function()
+	{
+		return isAppPage();  //如果是，不要back();
+	},
 	clickIndexPage:function()
 	{
 		return clickIndex();
 	},
+	findVideoIndexPage:function()
+	{
+		return findVideoIndex();
+	},
+	checkIsAppVideoPage:function()
+	{
+		return isAppVideoPage();  //如果是，不要back();
+	},
+	clickVideoIndexPage:function()
+	{
+		return clickVideoIndex();
+	},
+	
 	popWindow:function(){
 	 
       popWindowProcess();
 	
-    }
+    },
+	download:function(){
+	  commons.yingyongbao(runAppName);
+	}
 });
 
 
@@ -123,19 +170,24 @@ function popWindowProcess()
 		
 }
 
-/*
 function findIndex(){
-
-    var textW=text(indexText).findOnce(); 
-    if(textW)textW=textW.parent();
-    return textW;	
+	var flag=false;
+    var indexBtNode    =text(indexBtn).findOnce();
+	var indexBtn1Node  =text(indexBtn1).findOnce();
+    var indexTextNode  =text(indexText).findOnce();
+	var indexText1Node =text(indexText1).findOnce();
+	if((indexBtNode || indexBtn1Node) && (indexTextNode||indexText1Node))flag=true;
+	else flag=false;
+    return flag;
 }
-*/
 
-function findIndex(){
-    var textW=text(indexBtn).findOnce()||text(indexBtn1).findOnce(); 
-    var textW1=text(indexText).findOnce()||text(indexText1).findOnce();
-	return textW && textW1;
+function isAppPage(){
+    var flag=false;
+    var indexBtNode    =text(indexBtn).findOnce();
+	var indexBtn1Node  =text(indexBtn1).findOnce();
+	if(indexBtNode || indexBtn1Node)flag=true;
+	else flag=false;
+    return flag;
 }
 
 function clickIndex(){
@@ -163,73 +215,108 @@ function clickIndex(){
     return flag;	
 }
 
-
-
-function ucMobile(){
-    var currentPkgName=currentPackage();
-    if(currentPkgName=="com.UCMobile")
-    {
-	   app.dlog("处理打开的："+currentPkgName);
-       while(currentPkgName=="com.UCMobile")
-	   {
-		   var  exitText =  text("退出").findOnce();
-           if(exitText){
-		        if(!exitText.click())click("退出");
-		   }
-           else
-		   {
-			     back();
-                 sleep(1000);
-		   }
-		   currentPkgName=currentPackage();
-	    }		   
-	}	
-	
+function findVideoIndex(){
+	var flag=false;
+    var indexBtNode    =text("视频").findOnce();
+	var indexBtn1Node  =null;//text(indexBtn1).findOnce();
+    var indexTextNode  =text("影视").findOnce();
+	var indexText1Node =null;
+	if((indexBtNode || indexBtn1Node) && (indexTextNode||indexText1Node))flag=true;
+	else flag=false;
+    return flag;
 }
-		
+
+function isAppVideoPage(){
+    var flag=false;
+    var indexBtNode    =text("视频").findOnce();
+	var indexBtn1Node  =null;//.findOnce();
+	if((indexBtNode || indexBtn1Node) && (text("影视").findOnce()))flag=true;
+	else flag=false;
+    return flag;
+}
 
 
-function  backToIndex()
+
+function clickVideoIndex(){
+	if(!commons.clickText("我的"))return false;
+	sleep(1000);
+	return commons.clickText("视频");
+}
+
+
+function isLogin()
 {
-	ucMobile();
-	popWindowProcess();
-	if(!findIndex())
+	var flag=false;
+	if((commons.text("首页")||commons.text("刷新"))
+	   &&commons.text("视频")
+       &&commons.text("围观")   
+	   &&commons.text("我的"))flag=true;
+	app.dlog("isLogin()="+flag);
+	return flag;	
+}
+
+
+function loginDone()
+{
+	if(!commons.clickText("围观")){
+       exit(); 
+    }
+ 	sleep(3000);
+	commons.waitText("热门",0);
+	commons.UIClick("publish");
+	sleep(2000);
+	if(!commons.waitText("微信一键登录",0))
 	{
-	   //toast("发现webview界面，回退");
-       back();
-       sleep(1000);  	
+		exit();
 	}
 	
+	commons.clickText("微信一键登录");
+	wechatLogin();
+	  
+	
+}
+
+function wechatLogin(){
+	sleep(5000);
+	commons.clickText("同意");
+    sleep(5000);
+	if(commons.text("稍后选图")){
+		back();
+		sleep(1000);
+	}
+	
+	if(!isAppPage()){
+	   back();
+	   sleep(1000);
+	}
+    clickIndex();	
 }
 
 
-function waitPlayAd()
-{         //com.songheng.eastnews:id/tt_video_reward_container
-		   //com.songheng.eastnews:id/tt_video_ad_close
-		 var  currentClass=className("android.webkit.WebView").findOnce();
-		 var waitCount = 0;
-		 while(!currentClass  && waitCount<30)
-		 {
-			waitCount++; 
-			currentClass=className("android.webkit.WebView").findOnce(); 
-			sleep(1000);
-		 }
-		 waitCount = 0;
-		 while(currentClass  && waitCount<30)
-		 {
-			waitCount++; 
-			var adClose = id("tt_video_ad_close").findOnce();
-			if(adClose)
-			{
-			   adClose.click();
-			   break;
-			}
-			currentClass=className("android.webkit.WebView").findOnce(); 
-			sleep(1000);
-		
-		 }
-	
-	
-}
+function  fillInviteCode(inviteCode)
+{
+	if(!inviteCode)return;
+	app.dlog("fillInviteCode():inviteCode="+inviteCode);
+	if(!commons.clickText("我的")){
+		exit();
+	}
+    sleep(1000);
+	if(!commons.waitText("填写邀请码",0)){
+		return;
+	}		
+	if(!commons.clickText("填写邀请码"))return;
+    if(!commons.waitText("请输入好友给的邀请码",0))return;	
+	var inviteEdit=text("请输入好友给的邀请码").findOnce(); 	
+	if(inviteEdit)inviteEdit.setText(inviteCode);
+	sleep(2000);
+	if(!commons.clickText("确认提交"))
+	{
+	  if(confirm("系统点击确认提交失败，请点【确定】后手动点【确认提交】")){
+	     sleep(5000); 
+	  }		  
+	}
+}	
+
+
 
 

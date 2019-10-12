@@ -19,80 +19,67 @@ templates.init({
 });
 
 templates.run({
-    
+    checkLogin:function(){
+        return isLogin(); 
+	},   
+    login:function(){
+        app.dlog("login......");
+        var inviteCode  =  app.getPrefString(runAppName+"_inviteCode"); 
+        app.dlog("inviteCode="+inviteCode);
+        if(!inviteCode){
+           if(!confirm("请问朋友要邀请码，再点【确定】"))
+		   {
+              exit();
+		   }
+		   inviteCode = rawInput("请输入邀请码");
+		   if(inviteCode =="")
+		   {
+			  app.dlog("输入的邀请码为空");
+			  exit(); 
+		   }
+		   app.dlog("输入的邀请码="+inviteCode);
+		   app.setPrefString(runAppName+"_inviteCode",inviteCode);
+		  
+		}
+	    loginDone();
+	    fillInviteCode(inviteCode);
+	    app.dlog("登陆完成");
+
+	},
  	//签到
     signIn:function(){ 
-        /*
-		toast("进入任务签到");
-		//进入任务 
-        var taskFlag=text("任务").findOnce();
-        if(!taskFlag)return;
-        click("任务");
-        sleep(2000);
-        //去掉广告
-		var waitCunt=0;
-		var animationView=id("imgClose").findOnce();
-        while(!animationView && waitCunt<10){
-              waitCunt++;
-			  animationView=id("imgClose").findOnce();
-			  sleep(1000);
-        }
-        if(animationView)animationView.click();
-		sleep(5000);
-        
-		var rootNode= className("android.support.v4.view.ViewPager").findOnce();
-        app.findNodeTest(rootNode,0,0);
-		var waitCount=0;
-		while(commons.clickWebViewText("android.widget.FrameLayout","立即签到") && waitCount<15){
-             waitCount++;
-			 sleep(1000);
-		     app.dlog("点立即签到成功");
-				
+       app.dlog("签到");
+	   if(!commons.idClick("left_btn"))return;
+	   app.dlog("进入主页后台");
+	   if(commons.clickText("去赚钱")){
+	       sleep(2000);
+		   if(commons.clickText("去签到"))
+		    {
+               app.dlog("点【去签到】成功");			
+			   sleep(3000);
+			   if(commons.text("好的"))
+			       commons.clickText("好的");
+			   if(commons.text("立即签到"))
+			       commons.clickText("立即签到");
 		
-		}
-		app.dlog("退出点立即签到，waitCount="+waitCount);
-		
-		
-		waitCount=0;
-		if(click("开箱领元宝"))
-		{
-			var idClose = id("tt_video_ad_close").findOnce();
-			while(!idClose && waitCount<30){
-				waitCount++;
-				idClose = id("tt_video_ad_close").findOnce();
-				sleep(1000);
 			}
-		         	
-		    if(idClose)idClose.click();
-		
-		}
-	     	
-	
-		
-	    //删除弹出界面
-        //寻找“恭喜您获得”
-		//var findWelcome=text("恭喜您获得").findOnce();
-		animationView=id("imgClose").findOnce();
-        if(animationView)animationView.click();
-        sleep(500);
-		
-		//com.jm.video:id/tt_video_reward_container
-		//com.jm.video:id/tt_video_ad_close
-		
-		//开箱领元宝
-		//commons.UITextClick("开箱领元宝");
-	    //sleep(1000);	
-        
-        //返回主页面
-        click("首页");
-        */
+	   
+	   }
+		   
+	   back();
+       sleep(1000);	
+       clickIndex(); 	   
+	   
 		
     },
     //找出视频
-    findVideoItem:function(){  
+    findVideoItem:function(){ 
         var videoItem= id("com.kuaishou.nebula:id/container").findOnce();
-    	//app.findNodeTest(videoItem,0,0);
-		if(videoItem)videoItem.click();
+    	if(videoItem)videoItem.click();
+		else{
+		  app.dlog("找红包圈或金蛋圈")	
+		  videoItem=id("cycle_progress").findOnce()||id("redFloat").findOnce();	
+		}
 		return videoItem;
      
     },
@@ -106,45 +93,114 @@ templates.run({
 
 	
     //阅读页面是否应该返回
-    isShouldBack:function(){
+    isShouldBack:function(viewMode){
+	   if(id("live_close").findOnce()){ //播放了“关注”的直播，没有奖励
+		  back();
+          sleep(1000);         
+          return true;		  
+	   }
        return false;
     },
 	findIndexPage:function()
 	{
 		return findIndex();
 	},
+	checkIsAppPage:function()
+	{
+		return isAppPage();  //如果是，不要back();
+	},
 	clickIndexPage:function()
 	{
 		return clickIndex();
 	},
-
+	checkIsAppVideoPage:function()
+	{
+		return isAppPage();  //如果是，不要back();
+	},
+	findVideoIndexPage:function()
+	{
+		return findIndex();
+	},
+	clickVideoIndexPage:function()
+	{
+		return clickIndex();
+	},
+	
 	popWindow:function(){
 	  popWindowProcess();
 	
+    },
+	download:function(){
+	   commons.yingyongbao(runAppName);
     }
 
 });
 
 function popWindowProcess()
 {
-	 var popW=text("我知道了").findOnce();
-	 if(popW)click("我知道了");
+	 app.dlog("popWindowProcess()......"); 
+	 if(commons.text("我知道了"))
+		 commons.clickText("我知道了");
+	
 }
 
 
 
 
 function findIndex(){
-	return id("tabs").findOnce();
+	
+	var flag=false;
+	if(id("login_text").findOnce())flag=true;
+	return (id("tabs").findOnce() && !id("live_close").findOnce())||flag||commons.text("微信登录");
 
 }
 
+
+function isAppPage(){
+    return findIndex();
+}
+
+
+
 function clickIndex(){
-	
+	app.dlog("clickIndex()......");
 	var flag=false;
-    back();
-	sleep(1000);
-	return true;
+	if(id("live_close").findOnce()){
+		back();
+		sleep(1000);
+	}
+	
+	//app.findNodeTest(className("android.widget.FrameLayout").findOnce(),0,0);
+	
+    var rootNode=id("tabs").findOnce(); 
+	if(!rootNode){
+	  app.dlog("clickIndex():没找到tabs组合");
+	  return false;	
+	}
+    rootNode = rootNode.child(0);
+	if(!rootNode){
+	  app.dlog("clickIndex():没找到tabs里面的元素");
+	  return false;	
+	}
+	var count= rootNode.childCount();
+	app.dlog("clickIndex():tabs组合count="+count);
+    /*
+	var childNode=rootNode.child(1);
+    if(childNode)flag=commons.boundsClick(childNode);
+	*/
+	for(var i=0;i<count;i++){
+	  var childNode=rootNode.child(1);
+      if(!childNode)continue;
+	  commons.boundsClick(childNode)
+	  sleep(3000);
+	  if(id("cycle_progress").findOnce()
+		 ||id("redFloat").findOnce()
+	  ) 
+	  flag=true;
+	}
+	
+	app.dlog("clickIndex():flag="+flag);
+	return flag;
     
  
 }
@@ -152,194 +208,63 @@ function clickIndex(){
 
 
 
-
-function waitIndex()
+function isLogin()
 {
-	var waitCount=0;
-	var waitFlag=true;
-	while(waitFlag  && waitCount<20){
-		 waitCount++;
-		 if(findIndex())
-		 {
-			waitFlag=false;
-			break;
-		 }
-		 else
-		 {
-			back();   
-			sleep(1000);
-			var curPkg = currentPackage();
-			toast("curPkg="+curPkg);
-			if(curPkg != runPkg)
-			{
-				if(!app.launchApp(runAppName))
-					app.launchApp(runAppName1);
-			}
-		 }
-	}	 
-  
-    toast("退出waitIndex()，waitCount="+waitCount+"  waitFlag="+waitFlag);
-	if(waitFlag||waitCount>=20)
-		return   false;
-	else
-		return true;
-	
+	var flag=false;
+	var loginId=id("login_text").findOnce();
+	if(loginId)flag=true;
+	flag=flag||commons.text("微信登录",0);
+    app.dlog("isLogin()="+!flag);
+	return !flag;	
 }
 
-function  waitAppSuccess()
-{
-	  toast("登陆:等待启动......");
-	  var waitCount=0;
-	  var waitFlag=true;
-	  while(waitFlag  && waitCount<20){
-	     waitCount++;
-  		 var uiele = text("允许").findOnce();
-         if(uiele){
-            uiele.click();
-            sleep(2000);
-         }
-         uiele = text("始终允许").findOnce();
-         if(uiele){
-            uiele.click();
-            sleep(2000);
-         }
-		 
-		 uiele = text("去授权").findOnce();
-         if(uiele){
-            uiele.click();
-            sleep(2000);
-         }
-		 if(findIndex())
-	     {
-			waitFlag=false;
-			break;
-			
-	     }
-	     else{ 	 
-            back();
-            sleep(1000);			
-		 	var curPkg = currentPackage();
-			toast("curPkg="+curPkg);
-			if(curPkg != runPkg)
-			{
-				if(!app.launchApp(runAppName))
-					app.launchApp(runAppName1);
-			}
-		 }
-	  }	
-	  toast("登陆：app 启动成功");
-}
 
 function loginDone()
 {
-	  var indexBrn = text("我").findOnce();
-	  if(indexBrn)
-	  {
-	  	click("我");
-	  }
-	  sleep(1000);
-	  
-	  var loginTip=text("请输入手机号").findOnce();
-	  var waitCount = 0;
-	  while(!loginTip  && waitCount<20)
-	  {
-		 waitCount++; 
-		 loginTip=text("请输入手机号").findOnce(); 
-		 sleep(1000);
-	  }
-	  var loginWechat=id("login_weixin").findOnce();
-	  if(!loginWechat)return;
-	  loginWechat.click();
-	  sleep(2000);
-	  wechatLogin();
-	  
+	commons.idClick("login_text");
+	sleep(3000);
+	if(commons.waitText("一键登录",0))
+	{
+	   commons.clickText("一键登录");	
+	}
+    else{
+       commons.waitText("微信登录",0);
+	   if(commons.text("微信登录")&&!commons.clickText("微信登录"))
+	   {
+	      exit();
+	      return;
+	    }
+        wechatLogin(); 	
+	}
 }
 
 function wechatLogin(){
-	 //微信一键登陆：
-	 var pkg="com.tencent.mm";
-	 var classTarget="android.widget.ScrollView";
-	 var currentPkg= currentPackage();
-	 if(currentPkg !=  pkg){
-	     toast("非微信登陆界面");
-		 return;
-	 }
-	 toast("点击微信登陆后,当前包名="+currentPkg);
-	 
-	 var rootNode = className("android.widget.LinearLayout").findOnce();
-	                      
-	 var classN=app.findSelfOfClass(rootNode,"android.widget.ScrollView");
-	 toast("点击微信登陆后,classN 0="+(classN==null)?"null":classN.className());
-	 var waitCount = 0;
-	 while(!classN  && waitCount<20)
-	 {
-		waitCount++; 
-		classN=app.findSelfOfClass(rootNode,"android.widget.ScrollView"); 
-		sleep(1000);
-	 }
-	 toast("点击微信登陆后,classN 1="+(classN==null)?"null":classN.className());
-	
-	 waitCount = 0;		
-	 while(classN && waitCount<20)
-	 {
-		 waitCount++; 
-		 var agreeBtn  =  text("同意").findOnce();
-	     if(!agreeBtn)agreeBtn=id("eb8").findOnce();
-	     if(!agreeBtn)agreeBtn=text("确认登陆").findOnce();
-	     if(!agreeBtn)agreeBtn=id("c1u").findOnce();
-	     if(agreeBtn)agreeBtn.click();
-		 classN=app.findSelfOfClass(rootNode,"android.widget.ScrollView"); 
-		 sleep(1000);
-	 }
-	 toast("点击微信登陆后,classN 2="+(classN==null)?"null":classN.className());
-	
-	 toast("登陆退出,waitCount="+waitCount);
+	app.dlog("wechatLogin()......");
+	if(!commons.text("同意"))
+	   commons.waitText("同意",0);
+	commons.clickText("同意");
+    if(commons.text("登陆微信")){
+	   app.dlog("微信没有登录，请登陆后再操作");
+	   exit();	
+	}
 }
-
-	  
-
 
 function  fillInviteCode(inviteCode)
 {
-		 
-	     //填邀请码：
-	     toast("填邀请码，先到我的");
-         waitIndex();
-		 //进我的：
-		 var indexBrn = text("我").findOnce();
-	     if(indexBrn)
-	     {
-	  	    click("我");
-	     }
-	     sleep(2000);
-
-		 
-		 
-		 var inviteBtn = text("填邀请码").findOnce();
-		 if(!inviteBtn)return;
-		 if(!inviteBtn.click())
-		 {
-            click("填邀请码");
-		 }
-         sleep(2000);
-		 //android.webkit.WebView
-		 currentClass=className("android.webkit.WebView").findOnce();
-		 var waitCount = 0;
-		 while(!currentClass  && waitCount<20)
-		 {
-			waitCount++; 
-			currentClass=className("android.webkit.WebView").findOnce(); 
-			sleep(5000);
-		 }
-	     waitCount = 0;		
-		 while(currentClass && waitCount<20)
-		 {
-			waitCount++; 
-			currentClass=className("android.webkit.WebView").findOnce(); 
-			sleep(5000);
-			toast("请手动填入邀请码：【 "+inviteCode+" 】，然后点提交");
-		 }
+	if(!inviteCode)return;
+	if(!commons.idClick("left_btn"))return;
+	sleep(3000);   
+	app.dlog("进入主页后台");
+	if(!commons.clickText("去赚钱"))return;
+	sleep(3000);
+    if(!commons.clickText("去填写")){
+		back();
+		return;
+	}
+	
+	
+    	   
+	
 	
 
 }	
-
