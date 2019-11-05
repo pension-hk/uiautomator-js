@@ -2,6 +2,8 @@ const commons    = require('common.js');
 const templates  = require('template.js');
 const runAppName ="想看"; 
 const runPkg      ="com.xiangkan.android";
+const videoMode   = 1;  //0=全民小视频（九宫格模式）,1=追看视频/波波视频（竖向列表模式ListView）；2 刷宝模式（单例）
+const smallVideoMode   = 2;  //0=全民小视频（九宫格模式）,1=追看视频/波波视频（竖向列表模式ListView）；2 刷宝模式（单例）
 const indexBtn    ="首页"
 const indexBtn1    ="刷新"
 const indexText   ="热点";
@@ -12,6 +14,8 @@ const indexText1  ="情感";
 templates.init({
     appName:runAppName,
 	packageName:runPkg,
+	runVideoMode:videoMode,
+	runSmallVideoMode:smallVideoMode,
 	indexBtnText:indexBtn,
 	indexBtnText1:indexBtn1,
 	indexFlagText:indexText,
@@ -25,54 +29,30 @@ templates.run({
 	},   
     login:function(){
         app.dlog("login......");
-        var inviteCode  =  app.getPrefString(runAppName+"_inviteCode"); 
-        app.dlog("inviteCode="+inviteCode);
-        if(!inviteCode){
-           if(!confirm("请问朋友要邀请码，再点【确定】"))
-		   {
-              exit();
-		   }
-		   inviteCode = rawInput("请输入邀请码");
-		   if(inviteCode =="")
-		   {
-			  app.dlog("输入的邀请码为空");
-			  exit(); 
-		   }
-		   app.dlog("输入的邀请码="+inviteCode);
-		   app.setPrefString(runAppName+"_inviteCode",inviteCode);
-		  
-		}
+        commons.waitInviteCode(runAppName);
 	    loginDone();
-	    fillInviteCode(inviteCode);
+	    fillInviteCode(app.getPrefString(runAppName));
 	    app.dlog("登陆完成");
 
 	},
     //签到
     signIn:function(){
    	    
-		commons.clickText("签到");
-		popWindowProcess();
-		sleep(1000);
-    
-		/*
-		var signText= text("签到").findOnce();
-	    if(signText)signText=signText.parent();
-        if(signText){
-            if(!signText.click())click("签到"); 
-            popWindowProcess();
-            sleep(1000);			
+		if(commons.clickText("签到")){
+		   popWindowProcess();
+		   sleep(1000);
         }
-        */		
-
+        clickIndex();		
+ 
     },
     //找出新闻的条目
     findNewsItem:function(){
 		var newsItem =null;
 	    var rootNode= className("android.widget.FrameLayout").findOnce();
         //app.findNodeTest(rootNode,0,0);
-		newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tvTitle",0,0);
-		if(!newsItem)newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_text_image_title",0,0);
-		if(!newsItem)newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_sub_title",0,0);
+		newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tvTitle");
+		if(!newsItem)newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_text_image_title");
+		if(!newsItem)newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_sub_title");
 		return newsItem;
 		
     },
@@ -85,7 +65,7 @@ templates.run({
 		var videoItem=null;
 	    var rootNode= className("android.widget.FrameLayout").findOnce();
         //app.findNodeTest(rootNode,0,0);
-		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","video_item_title",0,0);
+		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","video_item_title");
 		return videoItem;
     },
 	
@@ -159,6 +139,7 @@ templates.run({
 	  commons.yingyongbao(runAppName);
 	}
 });
+
 
 
 function popWindowProcess()

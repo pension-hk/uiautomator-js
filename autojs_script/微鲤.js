@@ -1,17 +1,23 @@
 const commons = require('common.js');
 const templates = require('template.js');
 const runAppName ="微鲤"; 
+const runAppName1 ="微鲤看看"; 
 const runPkg     ="cn.weli.story";
+const videoMode   = 1;  //0=全民小视频（九宫格模式）,1=追看视频/波波视频（竖向列表模式ListView）；2 刷宝模式（单例）
+const smallVideoMode   = 2;  //0=全民小视频（九宫格模式）,1=追看视频/波波视频（竖向列表模式ListView）；2 刷宝模式（单例）
 
-const indexBtn    ="头条"
-const indexBtn1    =null;
-const indexText   ="美食";
-const indexText1  =null;
+const indexBtn    ="首页"
+const indexBtn1    ="头条";
+const indexText   ="问答";
+const indexText1  ="搜八卦趣事";
 
 
 templates.init({
     appName:runAppName,
+    appAlias:runAppName1,
 	packageName:runPkg,
+    runVideoMode:videoMode,
+	runSmallVideoMode:smallVideoMode,
 	indexBtnText:indexBtn,
 	indexBtnText1:indexBtn1,
 	indexFlagText:indexText,
@@ -26,75 +32,49 @@ templates.run({
 	},   
     login:function(){
         app.dlog("login......");
-        var inviteCode  =  app.getPrefString(runAppName+"_inviteCode"); 
-        app.dlog("inviteCode="+inviteCode);
-        if(!inviteCode){
-           if(!confirm("请问朋友要邀请码，再点【确定】"))
-		   {
-              exit();
-		   }
-		   inviteCode = rawInput("请输入邀请码");
-		   if(inviteCode =="")
-		   {
-			  app.dlog("输入的邀请码为空");
-			  exit(); 
-		   }
-		   app.dlog("输入的邀请码="+inviteCode);
-		   app.setPrefString(runAppName+"_inviteCode",inviteCode);
-		  
-		}
+        commons.waitInviteCode(runAppName);
 	    loginDone();
-	    fillInviteCode(inviteCode);
+	    fillInviteCode(app.getPrefString(runAppName));
 	    app.dlog("登陆完成");
+
 
 	},
     //签到  //cn.weli.story:id/iv_group_redPacket  ==要发红包的id
     signIn:function(){
    	    app.dlog("签到");
-		if(!commons.idClick("rl_bottom_4"))
-		{
-           app.dlog("点我的失败");
-		   getGroupRedPackage();
-		   clickIndex();
-		   return;
-		}			
-        if(!commons.idClick("ll_not_sign"))//签到
-		{
-           app.dlog("点签到失败");
-		   if(commons.clickTextNoTimeOut("领取时段奖励"))
-		   {
-		       back();
-			   sleep(1000);
-		   }
-		   getGroupRedPackage();
-		   clickIndex();
-		   return;
-		}
-        
-	    if(!commons.clickTextNoTimeOut("立即签到"))
-		   commons.clickTextNoTimeOut("领取时段奖励");
-	    
-		
-		
-		back();
-     	sleep(1000);
-
-		
-		//领红包：
+		if(commons.idClick("rl_bottom_4")//我的
+		   && commons.waitText("提现兑换",0))
+	    {
+	      if(commons.idClick("ll_not_sign"))//签到
+		  {
+	   	    back();
+     	    sleep(1000);
+		  }
+		  else
+          if(commons.waitText("领取时段奖励",0)&&commons.clickText("领取时段奖励"))
+		  {
+		     sleep(5000);
+	         back();
+     	     sleep(1000);
+		  }
+		}		
+	    //领红包：
 		getGroupRedPackage();
-		
 		clickIndex();
 		
     },
     //找出新闻的条目
     findNewsItem:function(){
-        //领取宝藏
         app.dlog("找出新闻条目......");
 		var newsItem =null;
-   	    var rootNode = className("android.support.v4.view.ViewPager").findOnce();
-	    app.findNodeTest(rootNode,0,0);
-		newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
-		if(newsItem){
+   	    //var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
+		var rootNode=id("layout").findOnce();
+		//var rootNode = className("android.widget.RelativeLayout").findOnce();
+		//app.findNodeTest(rootNode,0,0);
+		//newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
+		//var rootNode= className("android.widget.FrameLayout").findOnce();
+    	newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_title");
+	 	if(newsItem){
 		   for(var i=0;i<newsItem.childCount();i++){ 
                var childNode= newsItem.child(i);
                if(!childNode)continue;
@@ -104,6 +84,7 @@ templates.run({
 		   }			   
 			
 		}
+		//else app.findNodeTest(rootNode,0,0); 
 		
 		return newsItem;
 
@@ -119,27 +100,24 @@ templates.run({
 	findVideoItem:function(){
 		var videoItem=null;
 		var rootNode= className("android.widget.FrameLayout").findOnce();
-        //app.findNodeTest(rootNode,0,0);
-		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_title",0,0);
+        videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","tv_title");
+	    if(!videoItem)app.findNodeTest(rootNode,0,0);  	
 		return videoItem;
     	
 		     		
     },
 	
 	getVideoTitle:function(videoItem){
-
-        return videoItem.child(2).text();
+	    if(videoItem&&videoItem.childCount()>1){
+		   if(videoItem.child(2))
+              return videoItem.child(2).text();
+	       else return null;
+		}
+		else return null;
 	},		
 
 	//跳到视频页面：
 	jumpToVideo:function(){
-	   /*
-	   var videoId  = id("rl_bottom_2").findOnce();
-	   if(!videoId)return false;
-	   if(!videoId.click())
-	      return click("视频");
-	   return true;
-	   */
 	   return clickVideoIndex();
     },
 
@@ -162,18 +140,30 @@ templates.run({
 		   return false;		
 		}
 		
+		if(commons.text("按住说话"))
+			commons.clickText("看一看")
 		
 	    //领取宝藏
         commons.UIClick("text_ok");
         
 		commons.UIClick("bt_ok");      //如阅读奖励提醒，点知道了
+	    commons.clickText("知道了");
+	    commons.clickText("收下啦");
+	    if(commons.text("继续阅读"))commons.clickText("继续阅读"); 
+	    if(commons.text("继续观看"))commons.clickText("继续观看"); 
 	    
+		if(commons.text("领红包")&&commons.clickText("领红包"))
+               back(); 			
+	
+	
 		//阅读中
-	    commons.clickTextNoTimeOut("展开查看全文");
+	    commons.clickText("展开查看全文");
+		
+		
 	
      	if(currentPackage()==="com.android.packageinstaller" 
-		   && commons.clickTextNoTimeOut("取消")){
-            return  true;
+		   && commons.clickText("取消")){
+        	return  true;
     	}
 		
         return false;
@@ -222,7 +212,7 @@ templates.run({
 
 function findIndex(){
 	var flag=false;
-    var indexBtNode    =id("rl_bottom_1").findOnce();
+    var indexBtNode    =id("rl_bottom_0").findOnce(); //首页
 	var indexBtn1Node  =null;
     var indexTextNode  =text(indexText).findOnce();
 	var indexText1Node =text(indexText1).findOnce();
@@ -233,9 +223,9 @@ function findIndex(){
 
 function isAppPage(){
     var flag=false;
-    var indexBtNode    =id("rl_bottom_1").findOnce();
+    var indexBtNode    =id("rl_bottom_0").findOnce();
 	var indexBtn1Node  =null;
-	if(indexBtNode || indexBtn1Node)flag=true;
+	if(indexBtNode)flag=true;
 	else flag=false;
     return flag;
    
@@ -244,25 +234,16 @@ function isAppPage(){
 
 function clickIndex(){
 	var flag=false;
-	var clickW=id("rl_bottom_1").findOnce();
-    if(clickW)
-	{  
-       flag=clickW.click();
-	   if(!flag && indexBtn)
-		  flag=click(indexBtn);	
-	   if(!flag && indexBtn1)
-		  flag=click(indexBtn1);	
-	   
-	}
-	if(flag)sleep(3000);
+    var flag=commons.idClick("rl_bottom_0");
+    if(flag)commons.waitText(indexText1,0);
     return flag;	
 }
 
 function findVideoIndex(){
 	var flag=false;
-    var indexBtNode    =id("rl_bottom_2").findOnce();
+    var indexBtNode    =id("rl_bottom_1").findOnce();
 	var indexBtn1Node  =null;
-    var indexTextNode  =text("广场舞").findOnce();
+    var indexTextNode  =text("新鲜事").findOnce();
 	var indexText1Node =text("小品").findOnce();
 	if((indexBtNode || indexBtn1Node) && (indexTextNode||indexText1Node))flag=true;
 	else flag=false;
@@ -271,8 +252,8 @@ function findVideoIndex(){
 
 function isAppVideoPage(){
     var flag=false;
-    var indexBtNode    =id("rl_bottom_1").findOnce();
-	var indexBtn1Node  =null;
+    var indexBtNode    =id("rl_bottom_0").findOnce();
+	var indexBtn1Node  =id("rl_bottom_1").findOnce();
 	if(indexBtNode || indexBtn1Node)flag=true;
 	else flag=false;
     return flag;
@@ -281,21 +262,8 @@ function isAppVideoPage(){
 
 
 function clickVideoIndex(){
-	/*
-	var flag=false;
-	var clickW=id("rl_bottom_2").findOnce();
-    if(clickW)
-	{  
-       flag=clickW.click();
-	   if(!flag && indexBtn)
-		  flag=click(indexBtn);	
-	   if(!flag && indexBtn1)
-		  flag=click(indexBtn1);	
-	   
-	}
-    return flag;
-   */
-   var flag=commons.idClick("rl_bottom_2");
+   app.dlog("clickVideoIndex()......"); 
+   var flag=commons.idClick("rl_bottom_1");
    if(flag)sleep(3000);
    return flag;
   
@@ -305,7 +273,7 @@ function clickVideoIndex(){
 function findChatIndex()
 {
 	var flag=false;
-    var indexBtNode    =id("rl_bottom_0").findOnce();
+    var indexBtNode    =id("rl_bottom_2").findOnce();
 	var indexBtn1Node  =null;
     var indexTextNode  =text("聊一聊").findOnce();
 	var indexText1Node =null;
@@ -352,7 +320,7 @@ function publishRedPackage()
 
 
 function  jumpToChat(){
-	if(commons.idClick("rl_bottom_0"))
+	if(commons.idClick("rl_bottom_2"))
 	{
        sleep(3000);
 	   return true;
@@ -384,7 +352,7 @@ function  getOneGroup(){
 		   jumpToChat();	
 	    }
         //群条目
-        groupItem = findTextItem("红包");
+	    groupItem = findTextItem("红包");
         if(groupItem){
 			var groupTitle =null;
 			var count =groupItem.childCount();
@@ -394,7 +362,7 @@ function  getOneGroup(){
 			  if(childItem)childItem=childItem.child(0);
 			  if(childItem)
 			  {
-				//app.dlog("i="+i+" text="+child.text());
+				//app.dlog("i="+i+" text="+childItem.text());
 			    groupTitle=childItem.text();
 			  }
 			}
@@ -612,8 +580,6 @@ function backToChat(){
 	   }
 	}
 }
-
-
 
 
 function popWindowProcess()

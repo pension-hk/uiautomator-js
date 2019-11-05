@@ -2,42 +2,37 @@ const script_url   ="https://raw.githubusercontent.com/pension-hk/uiautomator-js
 const config_url   ="https://raw.githubusercontent.com/pension-hk/uiautomator-js/master/java/config.json";
 
 
+
 const emailAddr    =null;
 const imapPasswaord="ggocbroaluisbfgd"; //此为QQ邮箱SMTP/IMAP的登陆密码，不是QQ邮箱登陆密码
- 	      
-/**
- * 执行规则
- * 1、顺序执行
- * 2、0-7点不执行
- * 3、每次阅读10篇文章
- * 4、阅读时候，需要有一定的停顿
- */
  
- 
-init();
-
 //shell("shell am instrument -w -r   -e debug false -e class 'com.breadwallet.uiautomator.AutoJsTests' com.pensionwallet.test/android.support.test.runner.AndroidJUnitRunner",true);
+
+init();
 
 function init(){
     toast("初始化......");
-	storages.remove("version");
-	var path=files.getSdcardPath()+"/脚本/";
-    var configPath=path+"仓库/"+"config.json";
-    var config    = null;
-    var readNum    = 0;
-    var scriptName=null;	
-	var resourceList = null;
-	var currPath   = null;
-	var templatePath=path+"template.js";
-	var commonPath=path+"common.js";
+	//storages.remove("version");
+ 	
+	var path         =files.getSdcardPath()+"/脚本/";
+    var configPath   =path+"仓库/"+"config.json";
+	var templatePath =path+"template.js";
+	var commonPath   =path+"common.js";
+    var config       =null;
+    var readNum      =0;
+    var scriptName   =null;	
+	var resourceList =null;
+	var currPath     =null;
+	
 	var configVersionRemote = getRemoteConfigVersion();
     var configVersionLocal  = getLocalConfigVersion(configPath)   
 	app.dlog("configVersionRemote="+configVersionRemote+" configVersionLocal="+configVersionLocal);
-	if(configVersionRemote != configVersionLocal){
+	if(configVersionRemote != configVersionLocal  && configVersionRemote !=0)
+	{
 	    toast("脚本版本升级了，处理中......");
-        var config = getConfig();
-        var appNum = 0;
-        var scriptName=null;
+        config = getConfig();
+        appNum = 0;
+        scriptName=null;
         
 		//删除新闻类的列表
         var newsList = config.newsAppList;
@@ -116,17 +111,20 @@ function init(){
 			downlaodScript(scriptName);
 	}
 	
+	
+	
 	app.dlog("初始化完成，执行脚本");
     app.dlog("wechat_read="+app.getPrefString("wechat_read"));
 	//每次阅读的时间
-    var normalRumTime = 0.25*60*60;
+    var normalRumTime = 0.3*60*60;
     var supperMarket = 0;
 	while(true){
         /**
          * 0-7点阅读视频
          * 其他时间阅读新闻
          */
-        if(new Date().getHours() >= 7){
+		var hours= new Date().getHours();
+    	if(hours >= 7){
           if("yes"  != app.getPrefString("wechat_read"))
           {
           			  
@@ -138,14 +136,14 @@ function init(){
 			    if(files.exists(currPath) && app.getPackageName(scriptName))
 			       exec(scriptName,normalRumTime);
 			    supperMarket++;
-				if(supperMarket>=2)
+				if(supperMarket>=4)
 				{  
 			       supperMarket=0;
 				   currPath=path+"超级淘"+".js";
                    if(files.exists(currPath) && app.getPackageName("超级淘"))
 			           exec("超级淘",120);
 			    }
-            }
+	        }
 	        		
 			appNum = videoList.length;
             for(var i = 0;i< appNum;i++){
@@ -171,7 +169,9 @@ function init(){
             }
 		  }
 		  sleep(5000);
-        }else{
+        }
+		else
+		{
 		  if("yes" != app.getPrefString("wechat_read"))
           {
           	
@@ -214,7 +214,10 @@ function exec(scriptName,seconds){
 
     //开始执行
     var startDate = new Date();//开始时间
-    var exectuion = engines.execScriptFile("/sdcard/脚本/"+scriptName+".js");
+	var execPath = files.getSdcardPath()+"/脚本/";
+    //var exectuion = engines.execScriptFile("/sdcard/脚本/"+scriptName+".js");
+    app.dlog("执行的脚本路径="+execPath+scriptName+".js");
+	var exectuion = engines.execScriptFile(execPath+scriptName+".js");
 
     //计时器，检测时间
     var isIExec = true;
@@ -237,11 +240,11 @@ function exec(scriptName,seconds){
     }
     //停止脚本
     stopCurrent(exectuion);
+	
 }
 
 //停止当前脚本
 function stopCurrent(exectuion){
-    //toast("执行停止");
     exectuion.getEngine().forceStop();
     sleep(2000);	
 	back();
@@ -290,6 +293,7 @@ function stopCurrent(exectuion){
 
 }
 
+/*
 //更新脚本
 function updateScript(scriptName){
     toast("检测脚本更新");
@@ -308,7 +312,7 @@ function updateScript(scriptName){
             var path = "/sdcard/脚本/"+scriptName+".js";
             var scriptContent =null;
 		    if(script_url){
-	           scriptContent = http.get(script_url+scriptName+".js").body.string();
+	           scriptContent = app.getUrl(script_url+scriptName+".js");//http.get(script_url+scriptName+".js").body.string();
             }
             else
             {
@@ -326,13 +330,14 @@ function updateScript(scriptName){
         return false;
     }
 }
+*/
 
 function downlaodScript(scriptName){
    toast(scriptName+".js下载中");
-   var path = "/sdcard/脚本/"+scriptName+".js";
+   var path = files.getSdcardPath()+"/脚本/"+scriptName+".js";
    var scriptContent =null;
    if(script_url){
-	  scriptContent = http.get(script_url+scriptName+".js").body.string();
+	  scriptContent =app.getUrl(script_url+scriptName+".js");// http.get(script_url+scriptName+".js").body.string();
    }
    else
    {
@@ -362,68 +367,52 @@ function getConfig(){
 	var configPath=files.getSdcardPath()+"/脚本/仓库/"+"config.json";
     if(!files.exists(configPath)){
 	   if(null != config_url){
-         //toast("开始远程获取配置");
-	     configContent = http.get(config_url).body.string();
-         //var objConfig = JSON.parse(configContent);
-         //toast("配置="+objConfig);
-          //return objConfig;
+	     configContent = app.getUrl(config_url);//http.get(config_url).body.string();
 	     if(configContent){
-		     //files.write(configPath,configContent);
 		     if(!files.exists(configPath)){
-		        //toast("配置文件不存在，创建");
                 files.create(configPath)
 		     }
-			 //else
-			 // 	 toast("配置文件存在");
 			 files.write(configPath,configContent);
 		 }
-	     //toast("远程配置获取完成");
          return JSON.parse(configContent);   	   
 	   }
 	   else
 	   {
-		  //toast("开始获取近程配置");
 		  configContent=app.mailGet(emailAddr,imapPasswaord,"config");
 		  if(configContent){
 		     
 			 if(!files.exists(configPath)){
-		        //toast("配置文件不存在，创建");
                 files.create(configPath)
 		     }
-			 //else
-			 // toast("配置文件存在");
 			 files.write(configPath,configContent);
 		  }
-		  //toast("近程配置获取完成");
           return JSON.parse(configContent);   	   
 	   
 	   }
 	}
 	else{
-	   //toast("开始获取配置");
 	   var file = open(configPath);
        configContent=file.read();
 	}
-    //解析json：
     objConfig = JSON.parse(configContent);
-    //toast("配置获取完成");
     return objConfig;
 		
 }
+
 function getRemoteConfigVersion(){
-	//toast("获取远程配置版本");
     var configContent=null;
 	if(null != config_url){
-       configContent = http.get(config_url).body.string();
-    }
+       configContent = app.getUrl(config_url);//http.get(config_url).body.string();
+	   
+	}
 	else
 	   configContent=app.mailGet(emailAddr,imapPasswaord,"config");
-    if(null==configContent)return 0;
+    
+	if(null==configContent)return 0;
 	var config= JSON.parse(configContent);   	   
     var configList = config.version;
 	if(null==configList)return 0;
     var thisConfig = configList[0];
-	//toast("远程配置版本="+thisConfig.version);
     return thisConfig.version;
 }
 

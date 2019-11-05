@@ -1,7 +1,7 @@
 {
-  "versionCode": 103,
-  "versionName": "1.0.3",
-  "releaseNotes":"改进功能，更新后，可直接运行【编程测试】或【阅读任务】",
+  "versionCode": 104,
+  "versionName": "1.0.4",
+  "releaseNotes":"改进功能，添加资产-钱包项目",
   "downloads" : [
 	{
 	  "name": "倍薪.apk",

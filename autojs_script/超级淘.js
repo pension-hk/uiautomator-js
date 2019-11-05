@@ -42,14 +42,20 @@ var   loopTimeToFindNews=20;
 	     sleep(1000);
     }	
 	app.dlog(appName+"启动成功");
+	var pkg=app.getPrefString("currentPackage");
+	if(pkg && pkg != runPkg){
+	  commons.clearMem(pkg);
+	}
+    app.setPrefString("currentPackage",runPkg);
+
+	
+	
     //app.findNodeTest(className("android.widget.FrameLayout").findOnce(),0,0);
     jumpToIndex();
     commons.clickTextById("生钱","icon_txt");	
 	sleep(1000);
-
 	app.dlog("点抢红包");
-	
-	if(commons.clickText("抢红包"))
+	if(commons.waitText("抢红包",1)&& commons.clickText("抢红包"))
 	{
       app.dlog("点抢红包成功");
 	  sleep(5000);

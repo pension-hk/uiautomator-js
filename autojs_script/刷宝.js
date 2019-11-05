@@ -3,18 +3,20 @@ const templates  = require('template.js');
 const runAppName = "刷宝"; 
 const runAppName1= "刷宝短视频"; 
 const runPkg      ="com.jm.video";
+const videoMode   = 2;  //0=全民小视频（九宫格模式）,1=追看视频/波波视频（竖向列表模式ListView）；2 刷宝模式（单例）
 
 const indexBtn    ="首页"
 const indexBtn1    =null;
-const indexText   ="首页";
+const indexText   ="任务";
 const indexText1  =null;
 
 
 templates.init({
     appName:runAppName,
 	appAlias:runAppName1,
-	packageName:runPkg,
+	packageName:runPkg,	
 	runMode:"视频",
+	runVideoMode:videoMode,
 	indexBtnText:indexBtn,
     indexFlagText:indexText,
 });
@@ -25,26 +27,11 @@ templates.run({
 	},   
     login:function(){
         app.dlog("login......");
-        var inviteCode  =  app.getPrefString(runAppName+"_inviteCode"); 
-        app.dlog("inviteCode="+inviteCode);
-        if(!inviteCode){
-           if(!confirm("请问朋友要邀请码，再点【确定】"))
-		   {
-              exit();
-		   }
-		   inviteCode = rawInput("请输入邀请码");
-		   if(inviteCode =="")
-		   {
-			  app.dlog("输入的邀请码为空");
-			  exit(); 
-		   }
-		   app.dlog("输入的邀请码="+inviteCode);
-		   app.setPrefString(runAppName+"_inviteCode",inviteCode);
-		  
-		}
+        commons.waitInviteCode(runAppName);
 	    loginDone();
-	    fillInviteCode(inviteCode);
+	    fillInviteCode(app.getPrefString(runAppName));
 	    app.dlog("登陆完成");
+
 
 	},
  	//签到
@@ -54,37 +41,37 @@ templates.run({
         if(!commons.clickText("任务"))return;
 		popWindowProcess();  							   
 		sleep(3000);
-		if(commons.waitText("立即签到",1)){
-		   if(commons.clickText("立即签到"))
-		   {
-              if(commons.waitText("看视频签到",1) && commons.clickText("看视频签到"))
-				  commons.waitPlayVideoAd("android.webkit.WebView","tt_video_ad_close"); 
+		if(commons.waitText("立即签到",1)&&commons.clickText("立即签到")){
+		   if(commons.waitText("看视频签到",1) && commons.clickText("看视频签到"))
+		      commons.waitPlayVideoAd("android.webkit.WebView","tt_video_ad_close"); 
 
-		   }			   
 			
 		}
 		else{
 		   if(commons.clickText("开箱领元宝"))
 		   {
-               if(commons.waitText("翻倍领取",1) && commons.clickText("翻倍领取"))
-				  commons.waitPlayVideoAd("android.webkit.WebView","tt_video_ad_close"); 
+               if(commons.waitText("翻倍领取",1) && commons.clickText("翻倍领取")){
+				  commons.waitPlayVideoAd("android.webkit.WebView","tt_video_ad_close");
+				  if(commons.text("恭喜您获得翻倍奖励"))back();
+			   }				  
 		   }			   
 			
 		}	
-		
-		//返回主页面
+		if(!isAppPage())back();
+	    //返回主页面
         clickIndex();
    	
     },
     //找出视频
     findVideoItem:function(){  
         //检查首页是否注焦：
-		if(!text("首页").findOnce()){  
+		if(!commons.text("首页"))
+		{  
 		   back();
 		   sleep(200);
 		}
-     	var videoItem = text("空空如也").findOnce();
-	    return !videoItem;
+     	var videoItem = id("layProgress").findOnce()||id("share").findOnce();
+	    return videoItem;
     },
 	
 	//时段奖励之后执行
@@ -167,24 +154,23 @@ templates.run({
 	popWindow:function(){
 	  popWindowProcess();
 	
+    },
+	download:function(){
+	   commons.yingyongbao(runAppName);
     }
-	/*,
-	getAppName:function(appName){
-       return appName+"短视频";
-    }
-	*/
+
 });
+
+
 
 function popWindowProcess()
 {
-	var popFlag = text("知道了").findOnce(); 
-    if(popFlag)click("知道了");
-	popFlag=id("btn_view").findOnce(); //知道了 id
+	var popFlag=id("btn_view").findOnce(); //知道了 id
 	if(popFlag)popFlag.click();
-	
+    if(commons.text("知道了"))
+		commons.clickText("知道了");	
 	popFlag=id("tt_video_ad_close").findOnce();
 	if(popFlag)popFlag.click();
-	
 	popFlag=id("imgClose").findOnce();
 	if(popFlag)popFlag.click();
 	
@@ -208,7 +194,7 @@ function findIndex(){
 function isAppPage(){
     var flag=false;
     var indexBtNode    =text(indexBtn).findOnce();
-	var indexBtn1Node  =text(indexBtn1).findOnce();
+	var indexBtn1Node  =text(indexText).findOnce();
 	if(indexBtNode || indexBtn1Node)flag=true;
 	else flag=false;
     return flag;
@@ -217,17 +203,8 @@ function isAppPage(){
 
 
 function clickIndex(){
-	var flag=false;
-	var clickW=text(indexBtn).findOnce();
-    if(clickW)
-	{  
-       flag=clickW.click();
-	   if(!flag && indexBtn)
-		  flag=click(indexBtn);	
-	   if(!flag && indexBtn1)
-		  flag=click(indexBtn1);	
-	   
-	}
+	var flag=commons.clickText(indexBtn);
+
     return flag;	
 }
 

@@ -2,6 +2,7 @@ const commons    = require('common.js');
 const templates  = require('template.js');
 const runAppName = "波波视频"; 
 const runPkg      ="tv.yixia.bobo";
+const videoMode   = 1;  //0=全民小视频（九宫格模式）,1=追看视频/波波视频（竖向列表模式ListView）；2 刷宝模式（单例）
 const indexBtn    ="首页";
 const indexBtn1    ="刷新";
 const indexText   ="搞笑";
@@ -12,6 +13,7 @@ templates.init({
     appName:runAppName,
 	packageName:runPkg,
 	runMode:"视频",
+	runVideoMode:videoMode,
     indexBtnText:indexBtn,
 	indexBtnText1:indexBtn1,
 	indexFlagText:indexText,
@@ -28,26 +30,11 @@ templates.run({
 	},
 	login:function(){
         app.dlog("login......");
-        var inviteCode  =  app.getPrefString(runAppName+"_inviteCode"); 
-        app.dlog("inviteCode="+inviteCode);
-        if(!inviteCode){
-           if(!confirm("请问朋友要邀请码，再点【确定】"))
-		   {
-              exit();
-		   }
-		   inviteCode = rawInput("请输入邀请码");
-		   if(inviteCode =="")
-		   {
-			  app.dlog("输入的邀请码为空");
-			  exit(); 
-		   }
-		   app.dlog("输入的邀请码="+inviteCode);
-		   app.setPrefString(runAppName+"_inviteCode",inviteCode);
-		  
-		}
+        commons.waitInviteCode(runAppName);
 	    loginDone();
-	    fillInviteCode(inviteCode);
+	    fillInviteCode(app.getPrefString(runAppName));
 	    app.dlog("登陆完成");
+
        	  
     
 	},
@@ -63,6 +50,7 @@ templates.run({
 	    if(!isAppPage()) 	
 		    back();
 		sleep(1000);
+		
 		clickIndex();
         
     },
@@ -71,13 +59,35 @@ templates.run({
      	app.dlog("找出视频条目");
 		var videoItem =null;
    	 	var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
-        app.findNodeTest(rootNode,0,0);
+        //app.findNodeTest(rootNode,0,0);
 		videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,1,2);
-		return videoItem;
+		//atr
+		if(videoItem){
+		    var childNode= videoItem.child(0);
+			if(childNode){  
+			    var  textN=childNode.text();
+				var  idN  =childNode.id();
+			    app.dlog("text="+textN+" id="+idN);
+				if(!textN || idN.indexOf("atr")<0){
+                   videoItem=null;
+			    }				  
+			  
+		    }
+			else videoItem=null;
+
+		}
+		
+		
+			
+    	return videoItem;
 		
 	},
 	
-	
+	//跳到视频页面：
+	jumpToVideo:function(){
+	   return clickIndex();
+    },
+
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
 	   if(commons.clickText("观看视频 金币翻倍"))  	
@@ -153,6 +163,7 @@ templates.run({
        commons.yingyongbao(runAppName);		
 	}
 });
+
 
 function popWindowProcess()
 {
@@ -316,7 +327,18 @@ function gotoTask1(){
    sleep(1000);
    clickIndex();
    sleep(1000);
- 
+   if(commons.clickText("走路赚")
+      && commons.waitText("走路赚钱",0)
+      && commons.clickText("领取金币")  
+   )
+   {
+      back();
+      sleep(1000);
+      clickIndex();
+      sleep(1000);
+   }	   
+   
+  
 }
 
 

@@ -2,16 +2,18 @@ const commons    = require('common.js');
 const templates  = require('template.js');
 const runAppName = "火山极速版"; 
 const runPkg      ="com.ss.android.ugc.livelite";
+const videoMode   = 2;  //0=全民小视频（九宫格模式）,1=追看视频/波波视频（竖向列表模式ListView）；2 刷宝模式（单例）
 const indexBtn    ="视频"
 const indexBtn1    =null;
-const indexText   ="影视圈";
-const indexText1  ="红包";
+const indexText   ="红包";
+const indexText1  =null;
 
 
 templates.init({
     appName:runAppName,
 	packageName:runPkg,
 	runMode:"视频",
+	runVideoMode:videoMode,
 	indexBtnText:indexBtn,
     indexBtnText:indexBtn1,
     indexFlagText:indexText,
@@ -24,27 +26,12 @@ templates.run({
         return isLogin(); 
 	},   
     login:function(){
-     app.dlog("login......");
-        var inviteCode  =  app.getPrefString(runAppName+"_inviteCode"); 
-        app.dlog("inviteCode="+inviteCode);
-        if(!inviteCode){
-           if(!confirm("请问朋友要邀请码，再点【确定】"))
-		   {
-              exit();
-		   }
-		   inviteCode = rawInput("请输入邀请码");
-		   if(inviteCode =="")
-		   {
-			  app.dlog("输入的邀请码为空");
-			  exit(); 
-		   }
-		   app.dlog("输入的邀请码="+inviteCode);
-		   app.setPrefString(runAppName+"_inviteCode",inviteCode);
-		  
-		}
+        app.dlog("login......");
+        commons.waitInviteCode(runAppName);
 	    loginDone();
-	    fillInviteCode(inviteCode);
+	    fillInviteCode(app.getPrefString(runAppName));
 	    app.dlog("登陆完成");
+
 
 	},
  	//签到
@@ -52,8 +39,7 @@ templates.run({
 	   app.dlog("签到......");	
        if(!commons.clickText("红包"))return;
        sleep(5000); 
-	   //app.findNodeTest(className("android.widget.FrameLayout").findOnce(),0,0);
-       popWindowProcess();
+	   popWindowProcess();
 	   commons.clickClassName("android.view.View");	
        if(commons.clickText("签到")){
 		  app.dlog("签到成功");  
@@ -72,8 +58,9 @@ templates.run({
        popWindowProcess();
    
 	   if(commons.clickText("看视频 领100金币")
-		  ||commons.clickText("看视频 领双倍金币") 
-		 )
+		  ||commons.clickText("看视频 领取双倍金币") 
+	      ||commons.clickText("看视频 领双倍金币") 
+	 	 )
 	   {
 		  
 		  app.dlog("进入看视频 领......");  
@@ -82,8 +69,7 @@ templates.run({
 	   }
 	   else app.dlog("签到：没有进入看视频 领100金币");
 	   
-	   
-	   clickIndex();
+       clickIndex();
 		
     },
     //找出视频
@@ -91,20 +77,20 @@ templates.run({
         var videoItem=null;
 		var rootNode= className("android.widget.FrameLayout").findOnce();
 		//app.findNodeTest(rootNode,0,0);
-		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","yc",0,0);
-    	if(!videoItem)videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","x6",0,0);
-        if(!videoItem)videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","o4",0,0);
-        if(videoItem){
-			  //var classBar=className("android.widget.ProgressBar").findOnce();
-              //if(classBar)classBar.scrollDown();
-              var count  =  videoItem.childCount();
+		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","y3");
+    	if(!videoItem)videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","yc");
+        if(!videoItem)videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","x6");
+        if(!videoItem)videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","o4");
+        
+		if(videoItem){
+		      var count  =  videoItem.childCount();
 		      for(var i=0;i<count;i++){
 			    var childNode= videoItem.child(i);
 			    if(childNode==null)continue;  
 			    var textN= childNode.text();
 				var idN=childNode.id();
 			    app.dlog("index="+i+" text="+textN+" id="+idN);
-				if(textN && (idN.indexOf("x6")>=0||idN.indexOf("o4")>=0||idN.indexOf("yc")>=0)){
+				if(textN && (idN.indexOf("x6")>=0||idN.indexOf("o4")>=0||idN.indexOf("yc")>=0||idN.indexOf("y3")>=0)){
                     app.dlog("查看是否有弹窗");
 					if(commons.findText("看视频赚钱技巧")){
 		                back();
@@ -119,12 +105,20 @@ templates.run({
 		      }
 
 		}
+		
+		//else
+		//	app.findNodeTest(rootNode,0,0);
 		return videoItem;
     },
 	getVideoTitle:function(videoItem){
-
-        return videoItem.child(3).text();
+        if(videoItem && videoItem.childCount()>=3 && videoItem.child(3))  		
+           return videoItem.child(3).text();
+        else return null;
 	},
+    //跳到视频页面：
+	jumpToVideo:function(){
+	   return clickIndex();
+    },
 
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
@@ -135,7 +129,10 @@ templates.run({
     //阅读页面是否应该返回
     isShouldBack:function(viewMode){
 	   if(findIndex())return true;	
-	   commons.clickText("点击领取");	
+	   if(!className("android.widget.ProgressBar").findOnce())return true;
+		   
+	   commons.clickText("点击领取");
+	   
        return false;
     },
 	doTask1:function(){
@@ -193,9 +190,8 @@ templates.run({
 function gotoTask1(){
    app.dlog("做任务1...");  
    if(!commons.clickText("红包")){
-       popWindowProcess();
- 	   clickIndex();
-       return;
+ 	  popWindowProcess();
+      commons.clickText("红包");
    }
    sleep(2000);
    popWindowProcess();
@@ -213,9 +209,24 @@ function gotoTask1(){
  		//app.findNodeTest(className("android.widget.FrameLayout").findOnce(),0,0);
 	    if(commons.clickText("领100金币"))
 	    {
-		    app.dlog("进入领100金币");  
-            commons.waitPlayVideoAdByText("关闭广告");
-	        sleep(5000);       		
+		    app.dlog("进入领100金币"); 
+            var timeOut=0;
+			var flag=true;
+			while(flag&&timeOut<60)
+			{
+				timeOut++;
+				if(commons.text("关闭广告")){
+				   commons.clickText("关闭广告");
+				   flag=false;
+				}
+				
+				if(commons.text("继续退出")){
+				   commons.clickText("继续退出");
+				   flag=false;
+				}
+           	    sleep(1000);
+			}				
+            sleep(5000);       		
 	    }
         else break;
 			
@@ -261,9 +272,10 @@ function gotoTask5(){
 function popWindowProcess()
 {
 	 //app.findNodeTest(className("android.widget.FrameLayout").findOnce(),0,0);
-	 
-	 var popW=desc("谢谢观看").findOnce();
-	 if(popW)commons.clickText("我知道了");
+	 if(commons.text("谢谢观看"))
+		commons.clickText("我知道了");
+	 //var popW=desc("谢谢观看").findOnce();
+	 //if(popW)commons.clickText("我知道了");
 	
      if(commons.clickText("打开推送")){
 		 
@@ -276,7 +288,9 @@ function popWindowProcess()
 	 }
 	 
      commons.clickText("好的");
-	 commons.clickText("以后再说");
+	 if(commons.clickText("以后再说")){     //火山又更新啦
+	    sleep(3000);
+	 }
 	 commons.clickText("javascript:;"); //立即领取的X //text=图片，可点
 	 if(commons.text("今日看视频总收益:")){
 		 back();
@@ -288,14 +302,17 @@ function popWindowProcess()
 
 function findIndex(){
 	//app.findNodeTest(className("android.widget.FrameLayout").findOnce(),0,0);
-	var flag=false;
-    var indexBtNode    =text(indexBtn).findOnce();
+	var flag=commons.text(indexBtn) && commons.text(indexText);
+    /*
+	var indexBtNode    =text(indexBtn).findOnce();
 	var indexBtn1Node  =text(indexBtn1).findOnce();
     var indexTextNode  =text(indexText).findOnce();
 	var indexText1Node =text(indexText1).findOnce();
 	if(indexBtNode || indexBtn1Node || indexTextNode||indexText1Node)flag=true;
 	else flag=false;
-    return flag;
+    */
+	app.dlog("findIndex()="+flag);
+	return flag;
 }
 
 function isAppPage(){

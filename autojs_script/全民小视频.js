@@ -2,6 +2,7 @@ const commons    = require('common.js');
 const templates  = require('template.js');
 const runAppName = "全民小视频"; 
 const runPkg      ="com.baidu.minivideo";
+const videoMode   = 0;  //0=全民小视频（九宫格模式）,1=追看视频/波波视频（竖向列表模式ListView）；2 刷宝模式（单例）
 const indexBtn    ="首页"
 const indexBtn1    =null;
 const indexText   ="直播";
@@ -12,6 +13,7 @@ templates.init({
     appName:runAppName,
 	packageName:runPkg,
 	runMode:"视频",
+	runVideoMode:videoMode,
 	indexBtnText:indexBtn,
     indexBtnText:indexBtn1,
     indexFlagText:indexText,
@@ -19,7 +21,17 @@ templates.init({
 });
 
 templates.run({
-    
+    checkLogin:function(){
+        return isLogin(); 
+	},
+    login:function(){
+        app.dlog("login......");
+        commons.waitInviteCode(runAppName);
+	    loginDone();
+	    fillInviteCode(app.getPrefString(runAppName));
+	    app.dlog("登陆完成");
+
+	},
  	//签到
     signIn:function(){
 		
@@ -70,8 +82,9 @@ templates.run({
         var videoItem=null;
 		var rootNode= className("android.widget.FrameLayout").findOnce();
         //app.findNodeTest(rootNode,0,0);
-		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","index_text_title",0,0);
-        if(videoItem)
+		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","index_text_title");
+        /*
+		if(videoItem)
 		{
 		   var childNode= videoItem.child(0);
 		    if(childNode){  
@@ -82,13 +95,10 @@ templates.run({
 			   }				  
 			}
 		}
+		*/
 		return videoItem;
       
     },
-	getVideoTitle:function(videoItem){
-
-        return videoItem.child(3).text();
-	},
 
 	//时段奖励之后执行
     doingAfterTimeAward:function(){
@@ -139,15 +149,6 @@ function popWindowProcess()
 	 if(popW)click("我知道了");
 }
 
-
-
-/*
-function findIndex(){
-	if(text(indexBtn).findOnce() && (text(indexText).findOnce()||text(indexText1).findOnce()))return true;
-    else
-         return false		
-}
-*/
 
 function findIndex(){
 	var flag=false;
@@ -202,151 +203,17 @@ function clickIndex(){
 
 
 
-function waitIndex()
+function isLogin()
 {
-	var waitCount=0;
-	var waitFlag=true;
-	while(waitFlag  && waitCount<20){
-		 waitCount++;
-		 if(findIndex())
-		 {
-			waitFlag=false;
-			break;
-		 }
-		 else
-		 {
-			back();   
-			sleep(1000);
-			var curPkg = currentPackage();
-			toast("curPkg="+curPkg);
-			if(curPkg != runPkg)
-			{
-				if(!app.launchApp(runAppName))
-					app.launchApp(runAppName1);
-			}
-		 }
-	}	 
-  
-    toast("退出waitIndex()，waitCount="+waitCount+"  waitFlag="+waitFlag);
-	if(waitFlag||waitCount>=20)
-		return   false;
-	else
-		return true;
-	
+	return true;    	
 }
 
-function  waitAppSuccess()
-{
-	  toast("登陆:等待启动......");
-	  var waitCount=0;
-	  var waitFlag=true;
-	  while(waitFlag  && waitCount<20){
-	     waitCount++;
-  		 var uiele = text("允许").findOnce();
-         if(uiele){
-            uiele.click();
-            sleep(2000);
-         }
-         uiele = text("始终允许").findOnce();
-         if(uiele){
-            uiele.click();
-            sleep(2000);
-         }
-		 
-		 uiele = text("去授权").findOnce();
-         if(uiele){
-            uiele.click();
-            sleep(2000);
-         }
-		 if(findIndex())
-	     {
-			waitFlag=false;
-			break;
-			
-	     }
-	     else{ 	 
-            back();
-            sleep(1000);			
-		 	var curPkg = currentPackage();
-			toast("curPkg="+curPkg);
-			if(curPkg != runPkg)
-			{
-				if(!app.launchApp(runAppName))
-					app.launchApp(runAppName1);
-			}
-		 }
-	  }	
-	  toast("登陆：app 启动成功");
-}
 
 function loginDone()
 {
-	  var indexBrn = text("我").findOnce();
-	  if(indexBrn)
-	  {
-	  	click("我");
-	  }
-	  sleep(1000);
-	  
-	  var loginTip=text("请输入手机号").findOnce();
-	  var waitCount = 0;
-	  while(!loginTip  && waitCount<20)
-	  {
-		 waitCount++; 
-		 loginTip=text("请输入手机号").findOnce(); 
-		 sleep(1000);
-	  }
-	  var loginWechat=id("login_weixin").findOnce();
-	  if(!loginWechat)return;
-	  loginWechat.click();
-	  sleep(2000);
-	  wechatLogin();
-	  
+     	
+
 }
-
-function wechatLogin(){
-	 //微信一键登陆：
-	 var pkg="com.tencent.mm";
-	 var classTarget="android.widget.ScrollView";
-	 var currentPkg= currentPackage();
-	 if(currentPkg !=  pkg){
-	     toast("非微信登陆界面");
-		 return;
-	 }
-	 toast("点击微信登陆后,当前包名="+currentPkg);
-	 
-	 var rootNode = className("android.widget.LinearLayout").findOnce();
-	                      
-	 var classN=app.findSelfOfClass(rootNode,"android.widget.ScrollView");
-	 toast("点击微信登陆后,classN 0="+(classN==null)?"null":classN.className());
-	 var waitCount = 0;
-	 while(!classN  && waitCount<20)
-	 {
-		waitCount++; 
-		classN=app.findSelfOfClass(rootNode,"android.widget.ScrollView"); 
-		sleep(1000);
-	 }
-	 toast("点击微信登陆后,classN 1="+(classN==null)?"null":classN.className());
-	
-	 waitCount = 0;		
-	 while(classN && waitCount<20)
-	 {
-		 waitCount++; 
-		 var agreeBtn  =  text("同意").findOnce();
-	     if(!agreeBtn)agreeBtn=id("eb8").findOnce();
-	     if(!agreeBtn)agreeBtn=text("确认登陆").findOnce();
-	     if(!agreeBtn)agreeBtn=id("c1u").findOnce();
-	     if(agreeBtn)agreeBtn.click();
-		 classN=app.findSelfOfClass(rootNode,"android.widget.ScrollView"); 
-		 sleep(1000);
-	 }
-	 toast("点击微信登陆后,classN 2="+(classN==null)?"null":classN.className());
-	
-	 toast("登陆退出,waitCount="+waitCount);
-}
-
-	  
-
 
 function  fillInviteCode(inviteCode)
 {

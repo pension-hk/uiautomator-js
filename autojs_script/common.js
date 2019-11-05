@@ -41,7 +41,6 @@ util.boundsClick = function(item) {
 		return flag;
 	}		
 	var bounds = item.bounds();
-	//app.dlog("boundsClick():bounds="+bounds);
 	if(bounds && bounds.centerX()>=0 && bounds.centerY()>=0)
 	{
 	  flag=click(bounds.centerX(),bounds.centerY());
@@ -260,39 +259,15 @@ util.getText=function(testTextName)
 util.clickText=function(testTextName)
 {   
 	app.dlog("util.clickText()，搜索并点击：【"+testTextName+"】");
- 	
-	var flag=false;
-	var rootNode=className("android.widget.FrameLayout").findOnce();
+ 	var rootNode=className("android.widget.FrameLayout").findOnce();
 	var textNode=app.findTextNode(rootNode,testTextName);
     if(!textNode){
 	    app.dlog("util.clickText():没找到"+testTextName+"的节点");
 		return false;
 	}
-	
-	return util.clickTextDone(rootNode,textNode);
-  /*
-	var childBounds=textNode.bounds();
-	if(!childBounds)return false;	
-	app.dlog(testTextName+"的坐标="+childBounds+" rootNode.bounds()="+rootNode.bounds());
-    if(!rootNode.bounds().contains(childBounds)){
-		app.dlog("util.clickText():查到"+testTextName+"的坐标="+childBounds+"超出当前界面");
-		return false;
-    }
-	flag=util.boundsClick(textNode); 
-	if(!flag)
-	{
-	   flag=util.clickTextNode(textNode);
-	   app.dlog("6.0不能点坐标，或者坐标可能有负数,对节点遍历点击，flag="+flag);
-       if(!flag &&textNode.text())
-	   {
-		   flag=click(textNode.text());  
-	       app.dlog("节点遍历点击失败，强点【"+testTextName+"】flag="+flag);
-       }
-	}
-	sleep(1000);	
-    app.dlog("util.clickText退出：flag="+flag);
+	var flag=util.clickTextDone(rootNode,textNode);
+	app.dlog("util.clickText()退出搜索并点击文本：【"+testTextName+"】flag="+flag);
 	return flag;
- */
 }
 
 //点击部分文本，无论webview，无论text/desc，无论textview/view/button
@@ -305,14 +280,17 @@ util.clickTextOf=function(textNameOf)
 	    app.dlog("util.clickText():没找到"+textNameOf+"的节点");
 		return false;
 	}
-	
-	return util.clickTextDone(rootNode,textNode);
+	var flag=util.clickTextDone(rootNode,textNode);
+	app.dlog("util.clickText()退出搜索并点击部分文本：【"+textNameOf+"】flag="+flag);
+	return flag;
+
 }
 
 util.clickTextDone=function(rootNode,textNode)
 {
-	
+    	
     app.dlog("util.clickTextDone......");
+	var  flag=false;
 	var childBounds=textNode.bounds();
 	if(!childBounds)return false;	
 	app.dlog("textNode的坐标="+childBounds+" rootNode.bounds()="+rootNode.bounds());
@@ -321,6 +299,7 @@ util.clickTextDone=function(rootNode,textNode)
 		return false;
     }
 	flag=util.boundsClick(textNode); 
+	app.dlog("点textNode的坐标="+childBounds+" flag="+flag);
 	if(!flag)
 	{
 	   flag=util.clickTextNode(textNode);
@@ -333,10 +312,7 @@ util.clickTextDone=function(rootNode,textNode)
 	}
 	sleep(1000);	
     app.dlog("util.clickTextDone退出：flag="+flag);
-	
 	return flag;
-	
-	
 }
 	
 
@@ -427,25 +403,32 @@ util.waitPlayVideoAdByText = function(testTextName)
 
 util.clickClassName = function(testClassName){
 	//"android.widget.ImageView"/"android.view.View"
-    app.dlog("处理图片类X......"); 
+    app.dlog("clickClassName()处理图片类X......"); 
+	
+	
+	var flag=false;
+    var clickNode=null; 	//GWM
+	app.findNodeTest(className("android.widget.FrameLayout").findOnce(),0,0);
 	var imgNode=className(testClassName).findOnce();
-    var flag=false;
-    var clickNode=null; 	
-	var parentNode=imgNode?imgNode.parent():null;
+    var parentNode=imgNode?imgNode.parent():null;
 	var count = parentNode?parentNode.childCount():0;
-    //if(parentNode && parentNode.childCount()>1)
     if(count>1)
 	{   
-       app.dlog("图片类X是有多个，选最小的可以点击的X图片点击"); 
+       app.dlog("parentNode.class="+parentNode.className());
+	   app.dlog("图片类X是有多个，选最小的可以点击的X图片点击,count="+count); 
        for(var i=0;i<count;i++)
 	   {
            var childNode=parentNode.child(i);
 		   if(!childNode)
 		   {
+			   app.dlog("i="+i+" childNode=null");
 			   continue;
 		   }
 		   var childClass=childNode.className();
-		   if(childClass != testClassName)continue;
+		   if(childClass != testClassName){
+			   app.dlog("i="+i+" childClass="+childClass);
+			   continue;
+		   }
 		   var childBounds=childNode.bounds();
 		   app.dlog("i="+i+" img bounds="+childBounds);
 		   if(childBounds){
@@ -461,7 +444,12 @@ util.clickClassName = function(testClassName){
 				 break;
 			  }
 		   }
-	   }				  
+	   }
+	   if(clickNode)
+	      app.dlog("所有图片搜索完，clickNode=非空，class="+clickNode.className());
+       else
+	     app.dlog("所有图片搜索完，clickNode=null");
+     	   
     }
 	else{
 	   clickNode=imgNode;	
@@ -561,7 +549,30 @@ util.clickLeftXByWebView=function()
    
 }
 
-
+util.waitInviteCode=function(runAppName){
+    var inviteCode  =  app.getPrefString(runAppName+"_inviteCode"); 
+    //app.dlog("inviteCode="+inviteCode);
+    if(!inviteCode)
+	{
+		app.dlog("没有邀请码，请输入！");
+   
+        if(!confirm("请问朋友要【"+runAppName+"】的邀请码，再点【确定】"))
+		{
+           app.dlog("没有输入邀请码，请输入！");
+            
+		   exit();
+		}
+		
+		inviteCode = rawInput("请输入【"+runAppName+"】邀请码");
+		if(inviteCode =="")
+	    {
+			  //app.dlog("输入的邀请码为空");
+			  exit(); 
+	    }
+		//app.dlog("输入的邀请码="+inviteCode);
+		app.setPrefString(runAppName+"_inviteCode",inviteCode);
+    }	
+}
 
 
 //text:这个好像不行哦
@@ -616,7 +627,10 @@ util.clickWebViewElement = function(classRoot,classN,descContent){
 //
 util.jumpToById=function(testIdNode)
 {
-	if(!testIdNode) return false;
+	if(!testIdNode){
+		app.dlog("jumpToById()：testIdNode=null");
+		return false;
+	}
 	app.dlog("跳到由id节点="+testIdNode.id()+"指定的页面......")
 	if(testIdNode.clickable()){
 	   return testIdNode.click();
@@ -833,6 +847,8 @@ util.waitText= function(testTextName,type)//type=0,text;type=1,webview
     return flag 
 }
 
+
+
 //检测chlidNode是否包括在rootNode里
 util.findNodeOfValid=function(rootNode,chilNode)
 {
@@ -856,39 +872,137 @@ util.findNodeOfValid=function(rootNode,chilNode)
 
 
 //跳到页面的指定条目，如火山极速版:jumpToEarnCoinByViewVideo
-util.jumpToItemByText=function(rootClass,testText,count){
+util.jumpToItemByText=function(rootClass,testText,searchCount){
     var waitCount=0;                  	
 	var rootNode=className(rootClass).findOnce();
 	var childNode =app.findNodeByText(rootNode,testText);
   	childNode=util.findNodeOfValid(rootNode,childNode);
-	while(!childNode && waitCount<count){
+	while(!childNode && waitCount<searchCount){
         waitCount++;
         if(!childNode)
 		{
-		   swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
+		   swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000); //up swipe
 		   sleep(1000);
 		   //app.findNodeTest(className("android.widget.FrameLayout").findOnce(),0,0);
 		   childNode =app.findNodeByText(rootNode,testText);
   	       childNode=util.findNodeOfValid(rootNode,childNode);
     	}
 	}		
-    if(waitCount>=count)
+    if(waitCount>=searchCount)
 	   return false;
     else
        return true;
 }
 
+util.findClickText=function(testText,searchCount,searchDir){//searchDir=true,up swipe
+    var waitCount=0;                  	
+	while(waitCount<searchCount){
+        waitCount++;
+        if(util.text(testText))  //虽然已经找到，但有可能坐标点不到，所以由searchCount调试决定是否退出
+		{
+		   var rootNode=className("android.widget.FrameLayout").findOnce();
+	       var rootBounds=rootNode?rootNode.bounds():null;
+		   var textNode=app.findTextNode(rootNode,testText);
+		   var childBounds=textNode?textNode.bounds():null;    
+    	   app.dlog(testText+"的坐标："+childBounds+",Y中心坐标="+childBounds.centerY()+" 屏幕Y坐标="+rootBounds.centerY()); 
+	       
+		   if(rootNode && textNode && rootBounds && childBounds 
+		      && rootBounds.contains(childBounds)
+			  && childBounds.centerY() <= rootBounds.centerY()
+		   ){
+			   app.dlog(testText+"的坐标："+childBounds+"处于界面坐标里"); 
+			   break;
+		   }
+		}
+		if(searchDir){
+	 	   swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000); //up swipe
+		}
+		else{
+	 	   swipe(device.width / 2, device.height / 4,  device.width / 2, device.height / 4*2, 1000); //down swipe
+	    }
+		sleep(1000);
+	}		
+    return util.clickText(testText);
+}
 
 
+util.ucMobile=function()
+{
+	var currentPkgName=currentPackage();
+    if(currentPkgName=="com.UCMobile")
+    {
+	   app.dlog("处理打开的："+currentPkgName);
+       while(currentPkgName=="com.UCMobile")
+	   {
+		   if(!util.clickText("退出"))
+		   {
+			     back();
+                 sleep(1000);
+		   }
+		   currentPkgName=currentPackage();
+		   sleep(1000);
+				   
+	   	
+	
+	   }
+	}
+	
+}
+
+util.clearMem=function(packageName)
+{	
+    openAppSetting(packageName);
+	sleep(5000);
+	if
+	(
+	  (util.text("存储")      //华为手机
+	   ||util.text("存储空间") //美图手机	
+	   ||util.text("清除数据")//小米手机
+	  )
+	  &&  
+	  (
+	     (util.clickText("存储")          //华为手机
+		  &&util.waitText("清空缓存",0)
+	      &&util.clickText("清空缓存"))
+		 ||(util.clickText("存储空间")   //美图手机
+		  &&util.waitText("清除缓存",0)
+	      &&util.clickText("清除缓存"))
+		 ||(util.clickText("清除数据")   //小米手机 
+		  &&util.waitText("清除缓存",0)
+	      &&util.clickText("清除缓存")
+		  &&util.waitText("确定",0)
+	      &&util.clickText("确定"))
+	  )      	 
+    )	
+	{
+		sleep(2000);
+		back();
+		sleep(1000);
+	}
+	else
+	{
+	  back();
+	  sleep(1000);
+	}
+	
+	util.clickText("关闭应用");
+	
+	if(util.text("强行停止")){
+	   back();
+	   sleep(1000);
+	}
+	
+	
+}
 
 util.getResourceItem=function (resourceName){
   
 	app.dlog("开始获取资源......");
-    if(!util.text("我的收藏")){
-	    app.dlog("开始获取资源,没有我的收藏，退出");
+    if(!util.text("我的收藏") &&  !util.text("小程序")){
+	    app.dlog("开始获取资源,没有我的收藏或小程序，退出");
 		return;
 	}
-	app.dlog("开始在【我的收藏】获取【"+resourceName+"】......");
+	app.dlog("开始在【我的收藏】/【小程序】获取【"+resourceName+"】......");
 	//上滑找资源
 	var flag=false;
     var isFindItem = false;//是否找到资源
@@ -927,8 +1041,8 @@ util.getResourceItem=function (resourceName){
 		      app.dlog("6.0不能下翻，手动翻吧!");
     		  sleep(5000);
 		  }
-		  if(!util.text("我的收藏")){
-	          app.dlog("获取资源时,没有【我的收藏】，怎么办？");
+		  if(!util.text("我的收藏")&& !util.text("小程序")){
+	          app.dlog("获取资源时,没有【我的收藏】，也没有【小程序】，怎么办？");
 		      return;
 	      }
         }
@@ -986,13 +1100,17 @@ util.wechatLogin=function(){
 util.jumpToWechatMyCllection=function(){
 	
 	app.dlog("jumpToWechatMyCllection......");
-  	if(util.text("我的收藏")){
-	    app.dlog("当前是【我的收藏】");
-		return;
-	}
-	if(util.text("登录")){
+  	if(util.text("登录")){
 	   app.dlog("没有登录微信");
        exit();
+	}
+	
+	if(util.text("微信登录")&&util.text("允许") && util.clickText("允许")){
+	   app.dlog("第三方登录微信");
+    }
+	if(util.text("我的收藏")){
+	    app.dlog("当前是【我的收藏】");
+		return;
 	}
 	
 	
@@ -1034,6 +1152,34 @@ util.backtoWechatMyCollection=function()
 		if(!flag)sleep(1000);
 	}
 	
+}
+
+
+util.jumpToAppletIndex=function()
+{
+	if(util.text("登录")){
+	   app.dlog("没有登录微信");
+       exit();
+	}
+	
+	if(util.text("小程序"))return;
+	
+	if(util.text("微信") && util.text("更多功能按钮") && util.text("我"))
+	{
+	   app.dlog("现在处于【微信】主页面......");
+	   if(app.compareVersion()>=0)
+	     swipe(device.width / 2, device.height * 0.5 ,
+                           device.width / 2, device.height * 0.8, 1000);
+	   else{
+         if(confirm("请手动下滑显示【小程序】，点【确定】后实行")){
+			sleep(5000); 
+		 }
+	   }		   
+						   
+	}
+	
+	
+
 }
 
 
@@ -1517,7 +1663,7 @@ util.install=function(appName)
           installFlag = true;
 		  continue;
        }
-	   if(util.clickText("继续安装")){
+	   if(util.clickText("继续安装")||util.clickText("同意并继续")){
           installFlag = true;
 		  continue;
 	   }
@@ -1547,7 +1693,10 @@ util.install=function(appName)
 		   util.clickText("允许");
 	    if(util.text("继续安装"))
 		   util.clickText("继续安装");
-	    if(util.text("下一步"))
+	    if(util.text("同意并继续"))
+		   util.clickText("同意并继续");
+	  
+		if(util.text("下一步"))
 	       util.clickText("下一步");
 	    if(util.text("打开"))
 	       util.clickText("打开");

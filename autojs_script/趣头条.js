@@ -2,6 +2,8 @@ const commons = require('common.js');
 const templates = require('template.js');
 const runAppName = "趣头条";
 const runPkg     ="com.jifen.qukan";
+const videoMode   = 1;  //0=全民小视频（九宫格模式）,1=追看视频/波波视频（竖向列表模式ListView）；2 刷宝模式（单例）
+const smallVideoMode   = 2;  //0=全民小视频（九宫格模式）,1=追看视频/波波视频（竖向列表模式ListView）；2 刷宝模式（单例）
 const indexBtn    ="头条"
 const indexBtn1    ="刷新";
 const indexText   ="热点";
@@ -11,6 +13,8 @@ const indexText1  ="美食";
 templates.init({
     appName:runAppName,
 	packageName:runPkg,
+	runVideoMode:videoMode,
+	runSmallVideoMode:smallVideoMode,
 	indexBtnText:indexBtn,
 	indexBtnText1:indexBtn1,
 	indexFlagText:indexText,
@@ -24,45 +28,30 @@ templates.run({
 	},   
     login:function(){
         app.dlog("login......");
-        var inviteCode  =  app.getPrefString(runAppName+"_inviteCode"); 
-        app.dlog("inviteCode="+inviteCode);
-        if(!inviteCode){
-           if(!confirm("请问朋友要邀请码，再点【确定】"))
-		   {
-              exit();
-		   }
-		   inviteCode = rawInput("请输入邀请码");
-		   if(inviteCode =="")
-		   {
-			  app.dlog("输入的邀请码为空");
-			  exit(); 
-		   }
-		   app.dlog("输入的邀请码="+inviteCode);
-		   app.setPrefString(runAppName+"_inviteCode",inviteCode);
-		  
-		}
+        commons.waitInviteCode(runAppName);
 	    loginDone();
-	    fillInviteCode(inviteCode);
+	    fillInviteCode(app.getPrefString(runAppName));
 	    app.dlog("登陆完成");
+
 	},
 	
     //签到
     signIn:function(){
-		if(commons.text("任务")){
-		  sleep(3000); 	
-		  if(commons.text("去签到")){
+		commons.text("任务");
+		sleep(3000); 	
+		if(commons.text("去签到")){
 			commons.clickText("去签到"); 
 		    sleep(2000);
-		  }
-		  if(commons.text("开启提醒")){
+		}
+		if(commons.text("开启提醒")){
 			commons.clickText("开启提醒"); 
 		    sleep(2000);
-		  }
-		  if(commons.text("始终允许")){
-			commons.clickText("始终允许"); 
-		  }
-		  clickIndex();
 		}
+	    if(commons.text("始终允许")){
+			commons.clickText("始终允许"); 
+		}
+		//clearMem();
+		clickIndex();
 		
     },
 	
@@ -77,8 +66,8 @@ templates.run({
 		if(!newsItem){
 		   rootNode = className("android.widget.FrameLayout").findOnce();
 	       //app.findNodeTest(rootNode,0,0);
-		   newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","agi",0,0);
-	 	   if(!newsItem)newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","ag8",0,0);
+		   newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","agi");
+	 	   if(!newsItem)newsItem=app.findNodeByClassById(rootNode,"android.widget.TextView","ag8");
 		}
 		else{
 		  var count = newsItem.childCount();
@@ -101,8 +90,8 @@ templates.run({
 		var videoItem=null;
 		rootNode = className("android.widget.FrameLayout").findOnce();
 	    app.findNodeTest(rootNode,0,0);
-		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","ai_",0,0);
-		if(!videoItem)videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","nq",0,0);
+		videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","ai_");
+		if(!videoItem)videoItem=app.findNodeByClassById(rootNode,"android.widget.TextView","nq");
 		
 		return videoItem;
              		
@@ -116,7 +105,10 @@ templates.run({
 	jumpToVideo:function(){
 	   return clickVideoIndex();
     },
-	
+	//跳到小视频页面：
+	jumpToSmallVideo:function(){
+	   return clickSmallVideoIndex();
+    },
     //阅读页面是否应该返回
     isShouldBack:function(viewMode){
 	    if(viewMode=="video"){
@@ -128,7 +120,7 @@ templates.run({
            return true;
         }
           	
-	    ucMobile();
+	 	commons.ucMobile();
 		
 		var idTg = id("tg").findOnce();
 		if(idTg)idTg.click();
@@ -194,6 +186,8 @@ templates.run({
     }
 	
 });
+
+
 
 function popWindowProcess()
 {
@@ -312,7 +306,11 @@ function clickVideoIndex(){
       )return false;
 	else
 		return true;
-		
+}
+
+function clickSmallVideoIndex(){
+	if(commons.text("小视频") && commons.text("分享"))return true;
+	else return commons.clickText("小视频");
 }
 
 
@@ -503,7 +501,26 @@ function  fillInviteCode(inviteCode)
 }	
 */
 function gotoTask1(){
-   app.dlog("做任务1...");  
+   app.dlog("做任务1，摇钱树...");  
+   if(commons.clickText("任务")
+      &&commons.waitText("现金余额",0) 
+		&& commons.findClickText("摇钱树领金币",6,true)
+	    && commons.waitText("摇钱树",0)
+		
+   )	
+   {    
+       if(!commons.text("机会用完，明日再来！"))
+	   while(!commons.text("机会用完，明日再来！"))
+	   {	   
+          if(commons.clickText("看视频领100金币")) //end:"机会用完，明日再来！"
+	      {
+		     //commons.waitPlayVideoAd("",""); 
+			 
+		      
+	      }
+		  sleep(3000);
+	   }
+   }
 
 }
 

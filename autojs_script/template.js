@@ -11,6 +11,7 @@ var initParam = {
 	packageName:null,
 	runMode:"新闻", //运行模式：新闻,全民小视频（九宫格模式），追看视频（竖向列表模式），刷宝（单列模式）
  	runVideoMode:0, //0=全民小视频（九宫格模式）,1=追看视频（竖向列表模式）/波波视频；2 刷宝模式
+	runSmallVideoMode:0, //0=全民小视频（九宫格模式）,1=追看视频（竖向列表模式）/波波视频；2 刷宝模式
 	taskMode:    0, //0==新闻,1==视频,2==小视频
 	lastNewsText:"",//上一次新闻标题
     totalNewsReaded : 0,//已经阅读的新闻条数
@@ -28,21 +29,20 @@ template.init = function(param){
    Object.assign(initParam, param);
 	
 }
-/**
- * 运行
- * 需要的方法
- * 1、签到：signIn
- * 2、寻找一条新闻条目：findNewsItem
- */
+
 template.run = function(fun){
     androidVersion=app.compareVersion();
-	app.dlog("androidVersion="+androidVersion);
-	
 	/**
      * 启动
      */
     utils.wakeUp(); 
 	toast(initParam.appName+"等待启动......");
+	var pkg=app.getPrefString("currentPackage");
+	if(pkg)
+	{
+	  utils.clearMem(pkg);
+	}
+  
 	var launched=app.launchApp(initParam.appName);
  	if(!launched && initParam.appAlias)launched=app.launchApp(initParam.appAlias);
     if(!launched)
@@ -51,19 +51,30 @@ template.run = function(fun){
         var appPackage=app.getPackageName(initParam.appName);
 		if(!appPackage  && initParam.appAlias)appPackage=app.getPackageName(initParam.appAlias);			
         if(!appPackage)appPackage=initParam.packageName;
+		app.dlog(initParam.appName+"包名="+appPackage);
+    	
 		if(app.isAppInstalled(appPackage)){
-		    app.dlog(initParam.appName+"有安装,但启动失败");
-    		exit();
-			return;
+			if(!app.launchPackage(initParam.packageName)){
+    	       app.dlog(initParam.appName+"有安装,但启动失败");
+				exit();
+			    return;
+			}
+			else
+			    app.dlog(initParam.appName+"有安装,但启动失败，重新启动成功");
+		
 		}
-		app.dlog(initParam.appName+"没有安装");
-    	if(fun.download){
-		   fun.download();
-		   template.login(fun);
-		}
-		else{
-		   app.dlog(initParam.appName+"缺少downlaod()");
-    	   exit();
+		else
+		{
+		   app.dlog(initParam.appName+"没有安装");
+    	   if(fun.download){
+		     fun.download();
+		     template.procPopWindow(fun);
+		     template.login(fun);
+		   }
+ 		   else{
+		     app.dlog(initParam.appName+"缺少downlaod()");
+    	     exit();
+		  }
 		}
     }
     app.dlog(initParam.appName+"启动中......");
@@ -71,7 +82,8 @@ template.run = function(fun){
 	   waitForPackage(initParam.packageName);
 	
 	app.dlog("【"+initParam.appName+"】启动成功!");
-	
+	app.setPrefString("currentPackage",initParam.packageName);
+
 	if(!fun.findIndexPage() && !fun.checkIsAppPage())
 	       sleep(5000);
 	
@@ -97,18 +109,20 @@ template.run = function(fun){
      * 回归首页的位置
      */
     template.jumpToIndex(fun);
-  	
-    /**
+   		
+	
+	/**
      * 签到
      */
     
     if(fun.signIn)fun.signIn();
     if(fun.doTask1)fun.doTask1();
+    if(fun.doTask5)fun.doTask5();
   
 	if(initParam.runMode=="新闻")
     {   
    	    var run_task_mode=random(1,4);
-		//run_task_mode=4;
+		//run_task_mode=2;
 	    switch(run_task_mode)
 		{
 			case 1:
@@ -117,8 +131,8 @@ template.run = function(fun){
 				 break;
 			case 2:
 				 app.dlog("任务模式：2,看新闻");
-				 //if(fun.findVideoItem  != null)template.newsVideoLoop(fun); 
-    	         //else
+				 if(fun.findVideoItem)template.newsVideoLoop(fun); 
+    	         else
 		         template.newsLoop(fun); 
     			 break;
 		    case 3:
@@ -126,8 +140,8 @@ template.run = function(fun){
 		         template.newsLoop(fun); 
     			 break;
 			case 4:
-				 app.dlog("任务模式：4,看新闻里的视频");
-				 if(fun.findVideoItem  != null)template.newsVideoLoop(fun); 
+				 app.dlog("任务模式：4,看新闻里的小视频");
+				 if(fun.jumpToSmallVideo)template.smallVideoLoop(fun); 
       	         else
 		         template.newsLoop(fun); 
     			 break;
@@ -149,6 +163,13 @@ template.run = function(fun){
 
 template.newsLoop=function(fun)
 {
+	
+	if(fun.getNovel)
+	{
+	   template.novelLoop(fun);
+	   return;
+	}
+	
 	/**
     * 新闻阅读流程
     */
@@ -159,51 +180,77 @@ template.newsLoop=function(fun)
 	       break;
 	   }
 	   template.getTimeAward(fun);
-	   
-   	   if(androidVersion>=0)
-	   {
-	      template.getOneNews(fun);
-          template.readNews(60,fun);
-	   }
-	   else sleep(15000);
+	   template.getOneNews(fun);
+       template.readNews(60,fun);
 	   template.backToIndex(fun);	
 	}
 	exit();
 }
 
 
+template.novelLoop=function(fun)
+{
+    app.dlog("小说阅读流程");    
+	fun.getNovel();
+ 	while(true)
+	{
+	   template.readNovel(fun);
+	}
+}
+
+
+
 template.newsVideoLoop=function(fun)
 {
 	app.dlog("阅读类看视频");
+	var seconds=30; 
+	switch(initParam.runVideoMode)
+	{
+		 case  0://九宫格模式 （全民视频）
+        	   template.jumpToVideoIndex(fun);
+	           seconds=30; 
+		       if(initParam.appName=="趣头条"){
+		          seconds=60;		
+	           }
+			  break;
+          case  1://横排单列模式（追看视频/波波视频）
+                template.jumpToVideoIndex(fun);
+	            seconds=30; 
+		        if(initParam.appName=="趣头条")
+				{
+		            seconds=60;		
+	            }
+		      break;
+          case	2: //刷宝模式
+		      seconds=30;
+              fun.jumpToVideo();
+	       	  break;
+          default:
+			  break;
+	}
 	while(true)
 	{
-	   template.getTimeAward(fun);
-    
-	   if(  androidVersion>=0 &&
-	        template.jumpToVideoIndex(fun))
-	   {
-		  //找到一条视频：
-    	  template.getOneVideo(fun);
-          var seconds=30; 
-		  if(initParam.appName=="趣头条"){
-		    seconds=60;		
-	      }
-		  //app.dlog("阅读类看视频:app="+initParam.appName+" 看秒数="+seconds);
-	      template.viewVideo(seconds,fun);
-    	  template.backToVideoIndex(fun);  
-	   
-	   }
-	   else
-	   {
-          fun.jumpToVideo();
-		  template.getOneVideo(fun);
-          //看视频30s
-          var seconds=30; 
-	      template.viewVideo(seconds,fun);
-    	  template.backToVideoIndex(fun);  
-		  
-	   }		   
-	
+	   //template.getTimeAward(fun);
+       switch(initParam.runVideoMode){
+		  case  0://九宫格模式 （全民视频）
+		       //找到一条视频：
+    	      template.getOneVideo(fun);
+			  break;
+          case  1://横排单列模式（追看视频/波波视频）
+    	      template.getOneVideo(fun);
+       	      break;
+          case	2: //刷宝模式
+		      seconds=30;
+           	  break;
+          default:
+			  break;
+			  
+ 		  
+	    }
+	    //app.dlog("阅读类看视频:app="+initParam.appName+" 看秒数="+seconds);
+	    template.viewVideo(seconds,fun);
+    	template.backToVideoIndex(fun);  
+	  
 	}
 }
 
@@ -213,9 +260,11 @@ template.newsVideoLoop=function(fun)
 template.videoLoop=function(fun)
 {
 	app.dlog("看视频");
+	var seconds=60;
 	while(true)
 	{
-	    template.getTimeAward(fun);
+	    /*
+		template.getTimeAward(fun);
 		
    	    if(initParam.appName=="波波视频"||initParam.appName=="追看视频"){
 		   template.getOneVideo(fun);
@@ -231,6 +280,7 @@ template.videoLoop=function(fun)
         
         else
 		*/
+		/*
 		{
             //刷宝模式：
             template.findOneVideo(fun);
@@ -239,21 +289,54 @@ template.videoLoop=function(fun)
 	    } 
 		app.dlog("视频看完了，返回主页");
 		template.jumpToIndex(fun);
+		*/
+		//template.getTimeAward(fun);
+		switch(initParam.runVideoMode){
+		     case 0://九宫格模式 （全民视频）
+        	    template.getOneVideo(fun);
+				seconds=150;
+	            break;
+             case  1://横排单列模式（追看视频/波波视频）
+    	        template.getOneVideo(fun);
+		        seconds=60;
+	    		break;  			 
+			 case 2://刷宝模式：
+                template.findOneVideo(fun);
+                //看视频 15 x20 = 300
+      	        seconds=150;
+				break;
+			 default:
+                template.findOneVideo(fun);
+				seconds=150;
+				break;			 
+		}
+		
+      	template.viewVideo(seconds,fun);
+		app.dlog("视频看完了，返回主页");
+		template.jumpToIndex(fun);
+		
  	}
 }
 
 
-template.shortVideoLoop=function(fun)
+template.smallVideoLoop=function(fun)
 {
-	toast("阅读新闻：看小视频");
+	toast("阅读类看小视频");
 	while(true)
 	{
-	   //领取时段奖励
-       template.getTimeAward(fun/*.doingAfterTimeAward*/);
-	   exit();
+    
+	    if(!template.jumpToSmallVideoIndex(fun))
+		{
+		   exit();
+		}
+	    //找到一条视频：
+    	//template.getOneVideo(fun);
+        var seconds=150; 
+		template.viewSmallVideo(seconds,fun);
+    	//template.backToVideoIndex(fun);  
 	}
-
 }
+
 
 template.login=function(fun)
 {
@@ -262,7 +345,6 @@ template.login=function(fun)
 	while(!fun.findIndexPage() && waitCount<20)
     {
 	     waitCount++;
-		 
   		 var uiele = text("允许").findOnce();
          if(uiele){
             uiele.click();
@@ -279,19 +361,24 @@ template.login=function(fun)
             uiele.click();
             sleep(2000);
          }
-		 
-		 if(!fun.findIndexPage())
+ 		 if(!fun.findIndexPage())
 	     { 	 
-            back();
-            sleep(1000);			
-		 	var curPkg = currentPackage();
-			app.dlog("curPkg="+curPkg);
-			if(curPkg != runPkg)
-			{
-				var launched=app.launchApp(initParam.appName);
- 	            if(!launched && initParam.appAlias)launched=app.launchApp(initParam.appAlias);
-   			    if(launched  && initParam.packageName)
-	               waitForPackage(initParam.packageName);
+            var flag=fun.clickIndexPage();            	
+   	        if(!flag)
+			{ 
+         	  var curPkg = currentPackage();
+			  if(curPkg ==runPkg || curPkg == "com.android.packageinstaller"){
+			      app.dlog("curPkg="+curPkg+" back()");
+			      back();
+         	  }
+			  else
+			  {  
+			       app.dlog("curPkg="+curPkg+" lunch()");
+	        	   var launched=app.launchApp(initParam.appName);
+ 	               if(!launched && initParam.appAlias)launched=app.launchApp(initParam.appAlias);
+   			       if(launched  && initParam.packageName)
+	                    waitForPackage(initParam.packageName);
+			  }
 			}
 		 }
 		 sleep(1000);
@@ -308,25 +395,7 @@ template.clickIndexPage = function(fun){
 
 template.ucMobile=function()
 {
-    var currentPkgName=currentPackage();
-    if(currentPkgName=="com.UCMobile")
-    {
-	   app.dlog("处理打开的："+currentPkgName);
-       while(currentPkgName=="com.UCMobile")
-	   {
-		   var  exitText =  text("退出").findOnce();
-           if(exitText){
-		        if(!exitText.click())click("退出");
-		   }
-           else
-		   {
-			     back();
-                 sleep(1000);
-		   }
-		   currentPkgName=currentPackage();
-	    }		   
-	}	
-		
+  utils.ucMobile();	
 	
 }
 
@@ -347,10 +416,9 @@ template.backProcess=function(fun,flag){
     var currentPkg=currentPackage();
     app.dlog("backProcess,当前页面="+currentPkg+" 是否当前App主页："+flag);
 	if(flag)return;
-    if(currentPkg==="org.yuyang.automake"||currentPkg.indexOf("launcher")>=0)
+    if(currentPkg==="org.yuyang.automake"||currentPkg.indexOf("launcher")>=0||currentPkg.indexOf("home")>=0)
     {
-	   var launched=app.launchApp(initParam.appName);
-	   if(!launched && initParam.appAlias !=null)launched=app.launchApp(initParam.appAlias);
+	   var launched=app.launchPackage(initParam.packageName);
        if(!launched)
 	   {
            exit();
@@ -373,7 +441,8 @@ template.backProcess=function(fun,flag){
 	    app.dlog("当前页面="+currentPkg+",回退1次");
 		back();
 		sleep(100);
-		if(commons.isWebViewPage())
+		//这里有问题
+		if(utils.isWebViewPage()&&initParam.runMode=="新闻")
 		{
 	      app.dlog("当前页是Webview网页，点左边的X或返回");
 	 	  utils.clickLeftXByWebView();
@@ -401,13 +470,7 @@ template.jumpToIndex = function(fun){
 		waitCount++;
 		template.ucMobile();
 		template.procPopWindow(fun);
-		/*
-		if(!fun.checkLogin()){
-	        app.dlog("尚未登陆，break");  
-	     	break;
-		}
-		*/
-        var flag = fun.clickIndexPage();
+	    var flag = fun.clickIndexPage();
 	    if(!flag)template.backProcess(fun,fun.checkIsAppPage());
 	    indexFlag = fun.findIndexPage();
 		if(!indexFlag)sleep(1000);
@@ -475,13 +538,24 @@ template.backToVideoIndex = function(fun) {
 
 template.jumpToVideoIndex=function(fun)
 {
-	app.dlog("阅读类看视频：jumpToVideoIndex");
-    if(fun.jumpToVideo != null){
+	app.dlog("jumpToVideoIndex");
+    if(fun.jumpToVideo){
         return fun.jumpToVideo();
     }
 	return  false;
 
 }
+
+template.jumpToSmallVideoIndex=function(fun)
+{
+	app.dlog("阅读类看小视频：jumpToSmallVideoIndex");
+    if(fun.jumpToSmallVideo){
+        return fun.jumpToSmallVideo();
+    }
+	return  false;
+
+}
+
 		
 
 
@@ -535,19 +609,9 @@ template.getOneNews = function(fun){
     {
    	    initParam.loopTimeToFindNews++;
      	//进行下翻
-        if(androidVersion>=0)
-		{
-		   swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
-		   sleep(3000);
-		}
-    	else{
-	      app.dlog("点击刷新......");
-		  if(template.clickIndexPage(fun)){
-		     if(fun.waitRefresh)fun.waitRefresh();
-		  }
-		  
-	    }
-        //新闻条目
+    	swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
+		sleep(3000);
+	    //新闻条目
         newsItem = fun.findNewsItem();
         if(newsItem){
 			var newsText =null;
@@ -592,54 +656,59 @@ template.getOneNews = function(fun){
         initParam.lastNewsText = newsText;
         app.dlog("找到新闻，请阅读："+newsText);
     	initParam.totalNewsReaded++;
-		
 		var flag=true;
+		if(!newsItem)flag=false;
+        else
+        if(!newsItem.click())
+		{
+             app.dlog("点击条目失败");
+		     if(click(newsText))
+			 {
+                app.dlog("点击条目失败,改点条目文本：【"+newsText+"】成功");
+		 	 }				 
+             else			
+		     if(utils.boundsClick(newsItem))
+			 {
+			     app.dlog("点击条目失败,改点条目文本：【"+newsText+"】失败，改点条目坐标成功");
+		 	 
+			 }
+             else			 
+		     {
+			 	flag=false;
+			    app.dlog("click item bounds fail");
+		     }
+		}
+		/*
 		if(newsItem){
 	       if(!newsItem.click())
 		   {
-		     app.dlog("click play item fail");
-		     if(!click(newsText))
+		     app.dlog("点击条目失败");
+		     if(click(newsText))
+			 {
+                app.dlog("点击条目失败,改点条目文本：【"+newsText+"】成功");
+		 	 }				 
+             else			
+		     if(utils.boundsClick(newsItem))
+			 {
+			     app.dlog("点击条目失败,改点条目文本：【"+newsText+"】失败，改点条目坐标成功");
+		 	 
+			 }
+             else			 
 		     {
-			    app.dlog("click play text fail");
-		        if(androidVersion>=0){
-                  var bounds = newsItem.bounds();
-                  if(bounds && bounds.centerX()>=0 && bounds.centerY()>=0){
-			        if(click(bounds.centerX(),bounds.centerY())){
-                   	   app.dlog("click play text bounds success:x="+bounds.centerX()+" y="+bounds.centerY());
-		    		   sleep(1000);
-				    }
-				    else
-				    {
-			            app.dlog("click play text bounds fail");
-		    		    flag=false;
-				    }
-			      }
-			      else{
-				        app.dlog("click play bounds fail");
-		    	        flag=false;
-			      }
-			    }
-			    else 
-			    {
-				   flag=false; //6.0
-				   app.dlog("6.0以下不能点坐标");
-		       
-			    }
-		     }
-			 else
-			 { 
-			   app.dlog("click play text success");
+			 	flag=false;
+			    app.dlog("click item bounds fail");
 		     }
 		   }
 		   else{
-			  app.dlog("click play item success");
+			  app.dlog("点击新闻条目成功");
 		   }
 		   
 		}
 		else flag=false;
-	    if(flag){
+		*/
+		
+		if(flag){
 		  app.dlog("找到新闻，已点击进入");
-      	  if(fun.preProcess)fun.preProcess(newsText);//阅读前预处理，如查看详细
    	    }
 		else{
 		  app.dlog("找到新闻，点击未进入");
@@ -665,9 +734,7 @@ template.readNews = function(seconds,fun){
 	app.dlog("滑动阅读新闻");
     for(var i = 0 ;i < seconds/10 ;i++)
 	{
-        if(androidVersion>=0)
-	    {
-		   app.dlog("检测新闻/视频");
+     	   app.dlog("检测新闻/视频");
 		   //是否腾讯微视：
 		   var classN=className("android.support.v7.widget.RecyclerView").findOnce();
 		   if(classN && classN.className().indexOf("android.support.v7.widget.RecyclerView")>=0){
@@ -693,36 +760,7 @@ template.readNews = function(seconds,fun){
 			  //	 utils.swapeToReadVideo();
 			  //}
 		   }
-	    }
-		else  
-		{
-			sleep(10000);
-		
-		}
-        
-		var	curPkg = currentPackage();
-		if(curPkg==="com.android.packageinstaller")
-		{
-			if(commons.text("禁止"))
-			     back();
-	        commons.clickText("取消");		 
-		 	return;
-		}
-		else
-		if(curPkg.indexOf("launcher")>=0)
-		{
-			return; 
-		}
-        //APP无响应。。。。。。
-		if(commons.clickText("确定"))
-			return;
-    
-	    var adFlag=id("tt_video_ad_close").findOnce();
-		if(adFlag){
-            adFlag.click();
-			return;
-        }
-		
+	 	
 		//判断是否直接返回
     	var shouldBack = false;
         if(fun.isShouldBack != null){
@@ -738,6 +776,46 @@ template.readNews = function(seconds,fun){
 
 }
 
+
+template.readNovel = function(fun){
+  
+    var viewMode="news";
+	//滑动阅读新闻
+	app.dlog("滑动阅读小说");
+    for(var i = 0 ;i < 10 ;i++)
+	{
+      	utils.swapeToRead();
+		sleep(10000);
+		var	curPkg = currentPackage();
+		if(curPkg==="com.android.packageinstaller")
+		{
+			if(utils.text("禁止"))
+			     back();
+	        utils.clickText("取消");		 
+		 	return;
+		}
+		else
+		if(curPkg.indexOf("launcher")>=0)
+		{
+			return; 
+		}
+      
+		//判断是否直接返回
+    	var shouldBack = false;
+        if(fun.isShouldBack != null){
+            shouldBack = fun.isShouldBack(viewMode);
+        }
+	    app.dlog("是否直接返回：shouldBack="+shouldBack);
+  	 	if(shouldBack)return;
+		
+	
+		
+    }
+    app.dlog("已完成阅读新闻");
+
+}
+
+
 /**
  * 获取一个视频
  */
@@ -751,17 +829,9 @@ template.getOneVideo = function(fun){
     while((!isFindVideo || initParam.lastNewsText === videoText)  && initParam.loopTimeToFindNews < 20){
         //app.dlog("swipe get video:isFindVideo="+isFindVideo + " lastNewsText="+initParam.lastNewsText+" videoText="+videoText);
 		initParam.loopTimeToFindNews++;
-        if(androidVersion>=0){
-            app.dlog("swipe......");  //波波视频有时滑不动？
-		    swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
- 		    sleep(1000);
-		}
-		else
-		{
-		  app.dlog("刷新......");
-		  if(fun.jumpToVideo)
-		      fun.jumpToVideo();
-		}
+        app.dlog("swipe......");  //波波视频有时滑不动？
+		swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
+ 		sleep(1000);
 	    //视频条目
         videoItem = fun.findVideoItem();
         if(videoItem){
@@ -780,7 +850,7 @@ template.getOneVideo = function(fun){
 			var currentPkgName=currentPackage();
             if(currentPkgName=="com.UCMobile")
 	        {
-			   toast("处理打开的："+currentPkgName);
+			   //toast("处理打开的："+currentPkgName);
                var  exitText =  text("退出").findOnce();
                if(exitText)exitText.click();
                else
@@ -813,33 +883,37 @@ template.getOneVideo = function(fun){
 		app.dlog("找到视频，点击阅读");
 	    initParam.lastNewsText = videoText;
       	initParam.totalNewsReaded++;
+		/*
 		if(videoItem && !videoItem.click())
 		{
-		  app.dlog("click play fail");
-		  if(!click(videoText))
-		  {
-			 app.dlog("click play text fail");
-		     if(androidVersion>=0){
-               var bounds = videoItem.bounds();
-               if(bounds && bounds.centerX()>=0 && bounds.centerY()>=0){
-			     if(click(bounds.centerX(),bounds.centerY())){
-                	app.dlog("click play text bounds success:x="+bounds.centerX()+" y="+bounds.centerY());
-		    		sleep(1000);
-				 }
-				 else
-				 {
-			         app.dlog("click play text bounds fail");
-		    		 
-				 }
-			   }
-			   else{
-				     app.dlog("click play bounds fail");
-		    	   
-			   }
+		  utils.clickText(videoText);
+    	}
+		*/
+		var flag=true;
+		if(!videoItem)flag=false;
+        else
+        if(!videoItem.click())
+		{
+             app.dlog("点击视频条目失败");
+		     if(click(videoText))
+			 {
+                app.dlog("点击视频条目失败,改点视频条目文本：【"+videoText+"】成功");
+		 	 }				 
+             else			
+		     if(utils.boundsClick(videoItem))
+			 {
+			     app.dlog("点击视频条目失败,改点视频条目文本：【"+videoText+"】失败，改点视频条目坐标成功");
+		 	 
 			 }
-		 
-		  }
+             else			 
+		     {
+			 	flag=false;
+			    app.dlog("点击视频条目坐标失败");
+		     }
 		}
+	
+		
+		
     }else{
         app.dlog("20次滑动没有找到视频，请检查视频ID");
 	    exit();
@@ -857,26 +931,25 @@ template.findOneVideo = function(fun){
     initParam.loopTimeToFindNews = 0;//循环次数
     while((!isFindVideo)  && initParam.loopTimeToFindNews < 20){
         initParam.loopTimeToFindNews++;
-        videoItem = fun.findVideoItem();
+		if(fun.swipeFindVideo){
+		  swipe(device.width / 2, device.height / 4 * 2,  device.width / 2, device.height / 4, 1000);
+ 		  sleep(1000);
+        }
+		videoItem = fun.findVideoItem();
         if(videoItem){
-						
-            isFindVideo = true;
+	        isFindVideo = true;
         }
 		else
-		{ //主页视频空空如也
-          //进入关注页面：
-          //utils.UITextClick("关注");
-		  //sleep(1000);
+		{ 
 		  sleep(3000);
-	
 		}
         
     }
 
     //找到视频，点击阅读
     if(isFindVideo){
-        toast("找到视频，点击阅读");
-		click("首页");
+        //toast("找到视频，点击阅读");
+		//click("首页");
        
     }else{
         toast("20次滑动没有找到视频，请检查ID");
@@ -889,34 +962,38 @@ template.findOneVideo = function(fun){
 template.viewVideo = function(seconds,fun){
     var viewMode="video";
  	app.dlog("viewVideo");
-	if(androidVersion<0)
-	   seconds=30;      //6.0每个视频主题看30秒
-	
     for(var i = 0 ;i < seconds/10 ;i++){
-       	
-		if(androidVersion>=0){
-		  if(initParam.appName != "波波视频"  
-		     && initParam.appName != "趣头条"
-			 && initParam.appName != "今日头条极速版"
-			 ){ //刷宝,快手极速版
-	         sleep(18000);
-			 utils.swapeToReadVideo();
-		  }
-		  else
-		  {
-              app.dlog("view video i="+i);	
-              if(!fun.findVideoIndexPage()){
-                 sleep(8000);
-				 utils.swapeToReadVideo();
-              }				  
-			  else
-			    sleep(10000);
-		  }		  
+    	if(initParam.runVideoMode==2)
+		{  //刷宝,快手极速版
+	        sleep(18000);
+			utils.swapeToReadVideo();
 		}
-        else  
+		else
 		{
+            app.dlog("view video i="+i);	
+            if(!fun.findVideoIndexPage()){
+               sleep(8000);
+			   utils.swapeToReadVideo();
+            }				  
+			else
 			sleep(10000);
+		}	
+		
+	    /*
+		switch(initParam.runVideoMode){
+		     case 0://九宫格模式 （全民视频）
+                break;
+             case  1://横排单列模式（追看视频/波波视频）
+    			break;  			 
+			 case 2://刷宝模式：
+        		sleep(18000);
+			    utils.swapeToReadVideo();
+				break;
+			 default:
+        		break;			 
 		}
+		*/		
+		
         //判断是否直接返回
 	    var shouldBack = false;
         if(fun.isShouldBack != null){
@@ -930,6 +1007,40 @@ template.viewVideo = function(seconds,fun){
 		
     }
 	app.dlog("viewVideo exit");
+	
+	
+}
+
+
+template.viewSmallVideo = function(seconds,fun){
+    var viewMode="video";
+ 	app.dlog("viewSmallVideo");
+    for(var i = 0 ;i < seconds/10 ;i++){
+		if(initParam.runSmallVideoMode==2){
+		   sleep(18000);
+		   utils.swapeToReadVideo(); 
+		}
+		else
+	    {
+           app.dlog("view video i="+i);	
+           if(!fun.findVideoIndexPage()){
+              sleep(8000);
+			  utils.swapeToReadVideo();
+           }				  
+		   else
+			 sleep(10000);
+		}		  
+        //判断是否直接返回
+	    var shouldBack = false;
+        if(fun.isShouldBack != null){
+            shouldBack = fun.isShouldBack(viewMode); //处理弹窗之类的
+        }
+        if(shouldBack){
+       	     return;
+        }
+		
+    }
+	app.dlog("viewSmallVideo exit");
 	
 	
 }

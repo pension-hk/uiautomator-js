@@ -32,6 +32,14 @@
 		{
             "name":"想看",
 		    "version":1
+        },
+		{
+            "name":"百度极速版",
+		    "version":1
+        },
+		{
+            "name":"米读极速版",
+		    "version":1
         }
     ],
     "videoAppList":[
@@ -72,6 +80,16 @@
         },
 		{
              "name":"发发赚赚",
+	         "version":1
+			 
+        },
+		{
+             "name":"爱阅读",
+	         "version":1
+			 
+        },
+		{
+             "name":"一点英语",
 	         "version":1
 			 
         }

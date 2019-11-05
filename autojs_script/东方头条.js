@@ -4,16 +4,19 @@ const runAppName  ="东方头条";
 const runAppName1 =null; 
 const runPkg      ="com.songheng.eastnews";
 const videoMode   = 1;  //0=全民小视频（九宫格模式）,1=追看视频/波波视频（竖向列表模式ListView）；2 刷宝模式（单例）
+const smallVideoMode   = 2;  //0=全民小视频（九宫格模式）,1=追看视频/波波视频（竖向列表模式ListView）；2 刷宝模式（单例）
 
 const indexBtn    ="新闻";
 const indexBtn1    ="刷新";
 const indexText   ="发布";
 const indexText1  ="扫一扫";
+const SETUP       ="z0"; 
 
 templates.init({
     appName:runAppName,
 	packageName:runPkg,
 	runVideoMode:videoMode,
+	runSmallVideoMode:smallVideoMode,
 	indexBtnText:indexBtn,
 	indexBtnText1:indexBtn1,
 	indexFlagText:indexText,
@@ -28,34 +31,17 @@ templates.run({
 	},
     login:function(){
         app.dlog("login......");
-        var inviteCode  =  app.getPrefString(runAppName+"_inviteCode"); 
-        app.dlog("inviteCode="+inviteCode);
-        if(!inviteCode){
-           if(!confirm("请问朋友要邀请码，再点【确定】"))
-		   {
-              exit();
-		   }
-		   inviteCode = rawInput("请输入邀请码");
-		   if(inviteCode =="")
-		   {
-			  app.dlog("输入的邀请码为空");
-			  exit(); 
-		   }
-		   app.dlog("输入的邀请码="+inviteCode);
-		   app.setPrefString(runAppName+"_inviteCode",inviteCode);
-		  
-		}
+        commons.waitInviteCode(runAppName);
 	    loginDone();
-	    fillInviteCode(inviteCode);
+	    fillInviteCode(app.getPrefString(runAppName));
 	    app.dlog("登陆完成");
 
 	},		
     //签到
     signIn:function(){
-		if(!commons.clickText("去签到")){
-		  return;
-		}
-		sleep(5000);
+		if(commons.clickText("去签到")){
+		   sleep(5000);
+		}	
 		clickIndex();
         sleep(1000);
     },
@@ -64,10 +50,8 @@ templates.run({
 		app.dlog("找出新闻的条目");
 		var newsItem =null;
    	    var rootNode = className("android.support.v7.widget.RecyclerView").findOnce();
-	    //app.findNodeTest(rootNode,0,0);
-		if(app.compareVersion()>=0)
-		     newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
-		else newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,2,1);
+	    app.findNodeTest(rootNode,0,0);
+		newsItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,-1);
 		return newsItem;
 		
     },
@@ -77,16 +61,32 @@ templates.run({
 	    var videoItem=null;
 		var rootNode= className("android.widget.FrameLayout").findOnce();
         //app.findNodeTest(rootNode,0,0);
-		if(app.compareVersion()>=0)
-		    videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,15);
-		else videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,15);
-	    return videoItem;
+		videoItem=app.findNodeByClassByFilt(rootNode,"android.widget.TextView","下拉刷新",0,0,15);
+	    if(videoItem){
+			var count=videoItem.childCount();
+			app.dlog("findVideoItem:count="+count);
+			if(count>0)
+			for(var i=0;i<count;i++){
+				var child=videoItem.child(i);
+				if(!child)continue;
+				var textStr=child.text();
+			    app.dlog("findVideoItem:text="+textStr)
+				if(textStr && textStr.indexOf("广告")>=0){
+					videoItem=null;
+				}
+			}
+		}
+		else app.findNodeTest(rootNode,0,0); 
+		
+		return videoItem;
              
 		 
     },
 	
 	getVideoTitle:function(videoItem){
-        return videoItem.child(1).text();
+		if(videoItem.child(1))
+          return videoItem.child(1).text();
+	    else return null;
 	},
 	
 	 //跳到视频页面：
@@ -133,7 +133,9 @@ templates.run({
 	    if(adFlag){
        	   return  true;
         }
-	
+	    if(commons.text("继续安装")&&commons.text("取消"))
+			    commons.clickText("取消");
+	 
 		if(commons.clickText("金币翻倍x2倍")){
 		   commons.waitPlayVideoAd("android.webkit.WebView","tt_video_ad_close");	
 		   
@@ -378,7 +380,7 @@ function clickIndex(){
 function findVideoIndex(){
 	var flag=false;
     var indexBtNode    =text("视频").findOnce()
-	var indexBtn1Node  =null;//text("").findOnce();
+	var indexBtn1Node  =null;
     var indexTextNode  =text("小视频").findOnce();
 	var indexText1Node =text("影视").findOnce();
 	if((indexBtNode || indexBtn1Node) && (indexTextNode||indexText1Node))flag=true;
@@ -395,8 +397,8 @@ function isAppVideoPage(){
 function clickVideoIndex(){
 	if(isAppVideoPage())return true;
 	if(!commons.clickText("我的"))return false;
-	sleep(3000);
-	if(!isAppVideoPage()){
+	if(!commons.waitText("立即提现",0))
+	{
 	   popWindowProcess();	
 	}
 	return commons.clickText("视频");
@@ -495,15 +497,26 @@ function gotoTask1(){
 	   popWindowProcess();	
 	}
 		  
-	if(findIndex())return;
-    sleep(1000);
-    //回到新闻
-    clickIndex();
+	if(!findIndex()){
+      sleep(1000);
+      //回到新闻
+      clickIndex();
+	}
+	
+	
 }
 
 
 function gotoTask2(){
-   app.dlog("做任务2...");  
+   app.dlog("做任务2,幸运大转盘");  
+   if(!findIndex())clickIndex();
+    
+	
+}
+
+function gotoTask3(){
+   app.dlog("做任务3...");  
+  app.dlog("做任务2...");  
    if(!findIndex())clickIndex();
 	//签到领金币|走路赚金币
    if(!commons.clickText("任务"))return;
@@ -528,18 +541,13 @@ function gotoTask2(){
    app.dlog("已进入"+taskName);
 	
 }
-
-function gotoTask3(){
-   app.dlog("做任务3...");  
-	
-}
 function gotoTask4(){
    app.dlog("做任务4...");  
 	
 }
 function gotoTask5(){
-   app.dlog("做任务5...");  
-	
+   app.dlog("做任务5,清理内存");  
+     
 }
 
 function walkMoney()

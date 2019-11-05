@@ -37,6 +37,7 @@ var   currentIndexPage = indexText;
 	{   
     	app.dlog(appName+"/"+readName+"......");
 	 	//app.findNodeTest(className("android.widget.FrameLayout").findOnce(),0,0);
+		
 		commons.jumpToWechatMyCllection();
 		commons.getResourceItem(readName);
 	    if(commons.text(currentIndexPage) && commons.findText("马上阅读赚钱"))
@@ -80,6 +81,16 @@ var   currentIndexPage = indexText;
 		   sleep(1000);
 		   break; 
 		}
+		if(commons.text(currentIndexPage) && commons.findTextOf("服务器升级维护"))
+		{
+		   app.dlog(readName+"位于："+currentIndexPage+"&服务器升级维护");
+		   commons.backtoWechatMyCollection();
+		   app.dlog("返回微信界面");
+		   back();
+		   sleep(1000);
+		   break; 
+		   
+	 	}
 	    if((commons.text("返回")  && commons.text("更多") && commons.isWebViewPage())
 				   && !commons.findText("马上阅读赚钱")
 			       && !commons.findText("开始阅读")
@@ -90,6 +101,16 @@ var   currentIndexPage = indexText;
 		    readNews();			
   	        back();
 		}
+		if(commons.text("微信登陆")
+			&&commons.text("拒绝")
+		    && commons.text("允许")
+		    && commons.clickText("允许")
+		){
+			
+			sleep(3000);
+			
+		}
+		
 		//else
 		//	app.findNodeTest(className("android.widget.FrameLayout").findOnce(),0,0);
 	
